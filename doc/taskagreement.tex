@@ -1,0 +1,31 @@
+\documentclass[a4paper,10pt]{scrreprt}
+\usepackage[utf8x]{inputenc}
+
+% Title Page
+\title{Projectplan}
+\author{Martin Schwab, Thomas Kallenberg}
+
+
+\begin{document}
+\maketitle
+
+\section{Current situation}
+
+In contrast to Java Refactoring, the number of CDT refactorings is a little bit depressing. Only four or five refactorings are available and some of them are unusable due to the fact that they are too slow or they do not work correctly.\newline
+Who every useses an IDE like Eclipse would be pleased to have a couple of working refactorings to make its life easier. Is it the rookie who does not really care or understand what he is acctually doing or the pro programmer which needs a fast and good working tool to fullfil his work without messing around with unnecessary things. Good refactoring functionallity is needed by every type of programmer and brings benefits in multiple areas of development, most important in automation, correctness and speed.
+
+\section{Motivation}
+
+Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutly last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.\newline
+Soon you start asking yourself after another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file why nobody has implemented a refactoring for this or that?\newline
+One answer seems to be this is not such an easy task to archive. But neather the less we do not want to be part of the people who always complain about open source software. We change it! Yes we can!
+
+\section{What we do}
+
+One big problem of C++ is the separation of the source and the header files. This is big pain point for every C++ programmer. Not to update the signature in one of the files will result in compilation error which causes ether lack of understanding or loss of time. It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``Toogle Key'' to ``move'' the whole function in the implementation file and restore the actual function declaration in the header file.
+
+\section{Expected outcome}
+
+It should be possible for the programmer to speed up the process of creating new member functions based on the header file. This means, write the function declaration, implement it right in the header, move it to the implementation file, finished.
+
+\end{document}          
