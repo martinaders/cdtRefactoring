@@ -1,28 +1,63 @@
 \documentclass[a4paper,10pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
 
+\usepackage{color}
+\usepackage{listings}
+
+\lstset{language=C++, numbers=left, numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small, rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname, captionpos=b}
+\definecolor{gray}{rgb}{0.7,0.7,0.7}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+
 % Title Page
-\title{Projectplan}
-\author{Martin Schwab, Thomas Kallenberg}
+\title{Taskagreement for CDT Refactoring HS 2010}
+\author{Martin Schwab, Thomas Kallenberg\\ \\Supervised by Prof. Peter Sommerlad}
+\date{\today}
 
 
 \begin{document}
+
 \maketitle
 
 \section{Current situation}
 
-In contrast to Java Refactoring, the number of CDT refactorings is a little bit depressing. Only four or five refactorings are available and some of them are unusable due to the fact that they are too slow or they do not work correctly.\newline
-Who every useses an IDE like Eclipse would be pleased to have a couple of working refactorings to make its life easier. Is it the rookie who does not really care or understand what he is acctually doing or the pro programmer which needs a fast and good working tool to fullfil his work without messing around with unnecessary things. Good refactoring functionallity is needed by every type of programmer and brings benefits in multiple areas of development, most important in automation, correctness and speed.
+In contrast to Java refactoring, the number of CDT refactorings is a little bit depressing. Only four or five refactorings are available and some of them are unusable due to the fact that they are too slow or they do not work correctly.\newline
+Who every useses an IDE like Eclipse would be pleased to have a couple of working refactorings to make its life easier. Is it the rookie who does not really care or understand what he is actually doing or the pro programmer which needs a fast and good working tool to fulfill his work without messing around with unnecessary things. Good refactoring functionality is needed by every type of programmer and brings benefits in multiple areas of development, most important in automation, correctness and speed.
 
 \section{Motivation}
 
-Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutly last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.\newline
-Soon you start asking yourself after another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file why nobody has implemented a refactoring for this or that?\newline
-One answer seems to be this is not such an easy task to archive. But neather the less we do not want to be part of the people who always complain about open source software. We change it! Yes we can!
+Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutely last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.\newline\newline
+One big problem of C++ is the separation of the source and the header files. This is big pain point for every programmer. Not to update the function signature in one of the files will result in compilation error which causes ether lack of understanding for the rookie or loss of time.\newline
+After another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file you start asking yourself: Why nobody has implemented something to prevent such an stupid error?\newline
+One answer seems to be this is not such an easy task to archive. But nether the less we do not want to be part of the people who always complain about open source software. We change it, because we can.
 
 \section{What we do}
 
-One big problem of C++ is the separation of the source and the header files. This is big pain point for every C++ programmer. Not to update the signature in one of the files will result in compilation error which causes ether lack of understanding or loss of time. It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``Toogle Key'' to ``move'' the whole function in the implementation file and restore the actual function declaration in the header file.
+It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should be a ``override virtual member function'' feature which completes our function management features.
+
+\subsection{Toggle Key}
+
+\subsubsection{The different position of definition}
+
+In C++ there are three possible positions where a function may be defined.
+
+\lstinputlisting[caption=In Class implementation in A.h]{classheader_implementation.c}
+\lstinputlisting[caption=Implementation outside of the class in A.h]{outside_class_implementation.c}
+
+\begin{tabular}{p{5cm}p{.5cm}p{6cm}}
+\lstinputlisting[caption=two file solution - A.h]{implementation_file.h}
+& &
+\lstinputlisting[caption=two file solution - A.cpp]{implementation_file.c}
+\end{tabular}
+
+In a first version of our plug-in, it should be possible to move the function definition from inside the class declaration to outside of the class declaration in the sane file. In the example above this would be a step from Listing 1 to Listing 2. In a second step this movement is made reversible (Listing 2 to Listing 1).
+
+The third step is to move the function definition from the header file (A.h) to the implementation file (A.cpp). Listing 2 will results in Listing 3 and Listing 4. Step four is moving function definition from the implementation file back to the header. The solution with Listing 3 and Listing 4 will end up in Listing 2.
+
+\subsection{Re-Implementation of Implement Function}
+
+The current Implement Function mechanism is too slow and fragile for propoer usage. Therefor we want to reimplement the implement function functionallity in the CDT.
+
+\subsection{Override virtual member function}
 
 \section{Expected outcome}
 

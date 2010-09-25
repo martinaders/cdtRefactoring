@@ -1,0 +1,3 @@
+int A::x() { 
+	/* implementation */ 
+}
