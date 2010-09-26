@@ -1,6 +1,5 @@
 \documentclass[a4paper,10pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
-
 \usepackage{color}
 \usepackage{listings}
 
@@ -8,63 +7,40 @@
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-% Title Page
-\title{Task agreement for CDT Refactoring HS 2010}
-\author{Martin Schwab, Thomas Kallenberg\\ \\Supervised by Prof. Peter Sommerlad}
-\date{\today}
-
+%\author{Martin Schwab, Thomas Kallenberg\\ \\Supervised by Prof. Peter Sommerlad}
 
 \begin{document}
 
-\maketitle
+\section*{Task agreement for CDT refactoring semester thesis}
 
-\section{Current situation}
+During this semester thesis it is planned to introduce and improve one or more refactorings to the Eclipse CDT project. The priorities are as follows
 
-The Eclipse Java Development Toolkit (JDT) has a large set of both quick and useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a small range of such code helpers today. In addition, some of them don't work satisfactorily: Extracting the body of a hello world function takes more than three seconds on our machines. Reliability? Try to \texttt{extract constant} the hello world string of the same program. It will fail. The code won't even compile. There is still a lot of work to do in CDT to make the life of programmers more comfortable. However this is no easy task since C++ is a lot more complex than Java.
+\begin{enumerate}
+\item Toggle (Member-) Function Implementation
+\item Override virtual Member Function
+\item Re-implement Implement Function
+\end{enumerate}
 
-To make CDT more attractive it is necessary not only to add more refactorings but to make them fast and reliable. The reason why we want to do so is explained next.
+Our goal is to start with the first refactoring to gain insight on how to solve the other two refactorings since they share some similarities. However it is not our goal to implement as many refactorings as possible. We don't want our work to be thrown away at the end of the semester. To become part of the main CDT repository our work needs to fulfill three requirements: Quality, speed and integration. 
 
-\section{Motivation}
-Every second semester student at HSR has to go through a C++ course. At the beginning we both used Eclipse for solving the exercises. After a while it was clear that touching the refactoring buttons was a dangerous idea because in many cases they broke your code. Compile errors all over the place and difficult exercise assignments didn't make our life easier. This should make clear that there is a need for better implementations. But we would not have started changing a big project such as CDT if there were no people who could help us to do so.
+Shneiderman[citation!] defined a maximum of one second of response time for small and frequent tasks as acceptable. Currently \texttt{extract function} consumes about four seconds to extract the body of a hello world code. Our goal is to make local changes in less than a second. 
 
-The Institute For Software at HSR with its group around Peter Sommerlad and Emanuel Graf has been working on Eclipse refactorings for a long time. Since 2006 nine Eclipse refactoring projects have been completed there for different languages. We knew we would have good support and a big knowledge base if we wrote a semester thesis around this topic. After some first steps trying to get an overview of the source we decided to give it a try although we knew that working on legacy code will consume a lot of time without coding.
+% To have a realistic chance to get a good mark we need SMART goals.
+% SMART is an acronym for „Specific Measurable Accepted Realistic Timely“
+There are theoretically six different ways of toggling function implementation although not every variation is useful. Three of them are needed to toggle circularly from \texttt{in-class} to \texttt{in-header} to \texttt{separate-file} and back again to \texttt{in-class}. We concentrate on this order during this project until we realize that another order would be more comfortable. Depending on the success of the implementation of those three variations of the first refactoring we continue with "Override virtual member function" and "Re-implement implement function". 
 
-\section{What we do}
-One problem in C++ is the separation of the source and the header files. This is a pain point for every programmer. Forgetting to update the function signature in one of the files will result in compilation error which causes either lack of understanding for the rookie or loss of time.
+\begin{itemize} % TODO: transform into line text instead of bullets.
+\item Quality: There are at least 20 different special cases covered with test cases for each refactoring subtype.
+\item Integration: Sitting in front of a fresh Eclipse CDT installation a first semester student can install our refactoring in less than five minutes.
+\item Automation: After changing some code a maximum of three commands are needed to redeploy the project.
+\end{itemize}
 
-After another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file you start asking yourself: Why nobody has yet implemented something to prevent such an error?
+The semester thesis starts on September 20th and has to be finished until december xx 2010.
 
-One answer seems to be that this is not an easy task to archive. But nevertheless we do not want to be part of the people who always complain about open source software. We change it. We can (hopefully...).
+\subsection*{Students}
+Thomas Kallenberg \dotfill
+Martin Schwab \dotfill
+\subsection*{Project supervisor}
+Peter Sommerlad \dotfill
+\end{document}
 
-It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should be a ``override virtual member function'' feature which completes our function management features.
-
-\subsection{Toggle Key}
-
-\subsubsection{The different position of definition}
-
-In C++ there are three possible positions where a function may be defined.
-
-\lstinputlisting[caption=In Class implementation in A.h]{classheader_implementation.c}
-\lstinputlisting[caption=Implementation outside of the class in A.h]{outside_class_implementation.c}
-
-\begin{tabular}{p{5cm}p{.5cm}p{6cm}}
-\lstinputlisting[caption=two file solution - A.h]{implementation_file.h}
-& &
-\lstinputlisting[caption=two file solution - A.cpp]{implementation_file.c}
-\end{tabular}
-
-In a first version of our plug-in, it should be possible to move the function definition from inside the class declaration to outside of the class declaration in the sane file. In the example above this would be a step from Listing 1 to Listing 2. In a second step this movement is made reversible (Listing 2 to Listing 1).
-
-The third step is to move the function definition from the header file (A.h) to the implementation file (A.cpp). Listing 2 will results in Listing 3 and Listing 4. Step four is moving function definition from the implementation file back to the header. The solution with Listing 3 and Listing 4 will end up in Listing 2.
-
-\subsection{Re-Implementation of Implement Function}
-
-The current Implement Function mechanism is too slow and fragile for propoer usage. Therefor we want to reimplement the implement function functionallity in the CDT.
-
-\subsection{Override virtual member function}
-
-\section{Expected outcome}
-
-It should be possible for the programmer to speed up the process of creating new member functions based on the header file. This means, write the function declaration, implement it right in the header, move it to the implementation file, finished.
-
-\end{document}          
