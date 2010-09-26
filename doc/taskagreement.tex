@@ -22,18 +22,19 @@
 
 The Eclipse Java Development Toolkit (JDT) has a large set of both quick and useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a small range of such code helpers today. In addition, some of them don't work satisfactorily: Extracting the body of a hello world function takes more than three seconds on our machines. Reliability? Try to \texttt{extract constant} the hello world string of the same program. It will fail. The code won't even compile. There is still a lot of work to do in CDT to make the life of programmers more comfortable. However this is no easy task since C++ is a lot more complex than Java.
 
-To make CDT more attractive it is necessary not only to add more refactorings but to make them fast and reliable.
+To make CDT more attractive it is necessary not only to add more refactorings but to make them fast and reliable. The reason why we want to do so is explained next.
 
 \section{Motivation}
-Since it is more thrilling to write something new we will first warm up writing a new code helper before starting to change legacy code.
+Every second semester student at HSR has to go through a C++ course. At the beginning we both used Eclipse for solving the exercises. After a while it was clear that touching the refactoring buttons was a dangerous idea because in many cases they broke your code. Compile errors all over the place and difficult exercise assignments didn't make our life easier. This should make clear that there is a need for better implementations. But we would not have started changing a big project such as CDT if there were no people who could help us to do so.
 
-Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutely last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.
-
-One big problem of C++ is the separation of the source and the header files. This is big pain point for every programmer. Not to update the function signature in one of the files will result in compilation error which causes ether lack of understanding for the rookie or loss of time.\newline
-After another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file you start asking yourself: Why nobody has implemented something to prevent such an stupid error?\newline
-One answer seems to be this is not such an easy task to archive. But nether the less we do not want to be part of the people who always complain about open source software. We change it, because we can.
+The Institute For Software at HSR with its group around Peter Sommerlad and Emanuel Graf has been working on Eclipse refactorings for a long time. Since 2006 nine Eclipse refactoring projects have been completed there for different languages. We knew we would have good support and a big knowledge base if we wrote a semester thesis around this topic. After some first steps trying to get an overview of the source we decided to give it a try although we knew that working on legacy code will consume a lot of time without coding.
 
 \section{What we do}
+One problem in C++ is the separation of the source and the header files. This is a pain point for every programmer. Forgetting to update the function signature in one of the files will result in compilation error which causes either lack of understanding for the rookie or loss of time.
+
+After another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file you start asking yourself: Why nobody has yet implemented something to prevent such an error?
+
+One answer seems to be that this is not an easy task to archive. But nevertheless we do not want to be part of the people who always complain about open source software. We change it. We can (hopefully...).
 
 It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should be a ``override virtual member function'' feature which completes our function management features.
 
