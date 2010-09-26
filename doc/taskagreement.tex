@@ -9,7 +9,7 @@
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
 % Title Page
-\title{Taskagreement for CDT Refactoring HS 2010}
+\title{Task agreement for CDT Refactoring HS 2010}
 \author{Martin Schwab, Thomas Kallenberg\\ \\Supervised by Prof. Peter Sommerlad}
 \date{\today}
 
@@ -20,12 +20,15 @@
 
 \section{Current situation}
 
-In contrast to Java refactoring, the number of CDT refactorings is a little bit depressing. Only four or five refactorings are available and some of them are unusable due to the fact that they are too slow or they do not work correctly.\newline
-Who every useses an IDE like Eclipse would be pleased to have a couple of working refactorings to make its life easier. Is it the rookie who does not really care or understand what he is actually doing or the pro programmer which needs a fast and good working tool to fulfill his work without messing around with unnecessary things. Good refactoring functionality is needed by every type of programmer and brings benefits in multiple areas of development, most important in automation, correctness and speed.
+The Eclipse Java Development Toolkit (JDT) has a large set of both quick and useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a small range of such code helpers today. In addition, some of them don't work satisfactorily: Extracting the body of a hello world function takes more than three seconds on our machines. Reliability? Try to \texttt{extract constant} the hello world string of the same program. It will fail. The code won't even compile. There is still a lot of work to do in CDT to make the life of programmers more comfortable. However this is no easy task since C++ is a lot more complex than Java.
+
+To make CDT more attractive it is necessary not only to add more refactorings but to make them fast and reliable.
 
 \section{Motivation}
+Since it is more thrilling to write something new we will first warm up writing a new code helper before starting to change legacy code.
 
-Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutely last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.\newline\newline
+Like most of the students learning C++ it was not an easy task for us. Compile Errors all over the place and difficult exercise assignments does not make the life easier. The absolutely last thing in the world is if you have to mess around with stupid repetitive code changes which are highly error prone.
+
 One big problem of C++ is the separation of the source and the header files. This is big pain point for every programmer. Not to update the function signature in one of the files will result in compilation error which causes ether lack of understanding for the rookie or loss of time.\newline
 After another 2 hours of compile error hunting because you forgot to rename a function signature in both, the header and the implementation file you start asking yourself: Why nobody has implemented something to prevent such an stupid error?\newline
 One answer seems to be this is not such an easy task to archive. But nether the less we do not want to be part of the people who always complain about open source software. We change it, because we can.
