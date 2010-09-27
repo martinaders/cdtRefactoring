@@ -1,42 +1,84 @@
 \documentclass[a4paper,10pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
-\usepackage{color}
-\usepackage{listings}
 
-\lstset{language=C++, numbers=left, numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small, rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname, captionpos=b}
-\definecolor{gray}{rgb}{0.7,0.7,0.7}
-\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-%\author{Martin Schwab, Thomas Kallenberg\\ \\Supervised by Prof. Peter Sommerlad}
+
 
 \begin{document}
 
 \section*{Task agreement for CDT refactoring semester thesis}
 
-During this semester thesis it is planned to introduce and improve one or more refactorings to the Eclipse CDT project. The priorities are as follows
+During this semester thesis it is planned to introduce and improve one or more
+refactorings to the Eclipse CDT project. The priorities are as follows
 
 \begin{enumerate}
 \item Toggle (Member-) Function Implementation
-\item Override virtual Member Function
 \item Re-implement Implement Function
+\item Override virtual Member Function
 \end{enumerate}
 
-Our goal is to start with the first refactoring to gain insight on how to solve the other two refactorings since they share some similarities. However it is not our goal to implement as many refactorings as possible. We don't want our work to be thrown away at the end of the semester. To become part of the main CDT repository our work needs to fulfill three requirements: Quality, speed and integration. 
+Our goal is to start with the first refactoring to gain insight on how to solve
+the other two refactorings since they share some similarities. However it is not
+our goal to implement as many refactorings as possible. We don't want our work
+to be thrown away at the end of the semester. To become part of the main CDT
+repository our work needs to fulfill three requirements: Quality, speed and
+integration. 
 
-Shneiderman[citation!] defined a maximum of one second of response time for small and frequent tasks as acceptable. Currently \texttt{extract function} consumes about four seconds to extract the body of a hello world code. Our goal is to make local changes in less than a second. 
+Shneiderman[citation!] defined a maximum of one second of response time for
+small and frequent tasks as acceptable. Currently \texttt{extract function}
+consumes about four seconds to extract the body of a hello world code. Our goal
+is to make local changes in less than a second.\newline
 
 % To have a realistic chance to get a good mark we need SMART goals.
 % SMART is an acronym for „Specific Measurable Accepted Realistic Timely“
-There are theoretically six different ways of toggling function implementation although not every variation is useful. Three of them are needed to toggle circularly from \texttt{in-class} to \texttt{in-header} to \texttt{separate-file} and back again to \texttt{in-class}. We concentrate on this order during this project until we realize that another order would be more comfortable. Depending on the success of the implementation of those three variations of the first refactoring we continue with "Override virtual member function" and "Re-implement implement function". 
+There are theoretically six different ways of toggling function implementation
+although not every variation is useful. Three of them are needed to toggle
+circularly from \texttt{in-class} to \texttt{in-header} to
+\texttt{separate-file}  and back again to \texttt{in-class}. We concentrate on
+this order during this project.\newline
+Depending on the success of the implementation of those three variations of the
+first refactoring we continue with the re-implementation of  ``Implement
+Function'' and then ``Override virtual member function''.
 
-% TODO: schöner machen...
-Quality: There are at least 20 different special cases covered with test cases for each refactoring subtype.
+\pagebreak
 
-Integration: Sitting in front of a fresh Eclipse CDT installation a first semester student can install our refactoring in less than five minutes.
+\section*{General Goals}
 
-Automation: After changing some code a maximum of three commands are needed to redeploy the project.
+\begin{itemize}
+ \item Quality: All special cases are covered with test cases for each
+refactoring subtype.
+ \item Integration: Sitting in front of a fresh Eclipse CDT installation a first
+semester student can install our refactoring in less than five minutes.
+ \item Automation: After changing some code a maximum of three commands are
+needed to redeploy the project.
+\end{itemize}
 
-The semester thesis starts on September 20th and has to be finished until december xx 2010.
+\section*{Minimum Goals}
+
+All general goals have been archived. Additionally:
+\begin{itemize}
+ \item Toggling between \texttt{in-class}, \texttt{in-header},
+\texttt{separate-file} and back again to \texttt{in-class} works.
+\end{itemize}
+
+\section*{Medium Goals}
+All minimum goals have been archived. Additionally:
+\begin{itemize}
+ \item Re-Implement the ``Implement Function'' feature.
+ \item The ``Implement Function'' should work fast. even on a reasonably
+slow machine. %define what is slow?
+%more quality functions here
+\end{itemize}
+
+\section*{Maximum Goals}
+All medium goals have been archived. Additionally:
+\begin{itemize}
+ \item ``Override virtual member function`` has been implemented.
+ \item ''Override virtual member function`` works fast.\newline
+\end{itemize}
+
+The semester thesis starts on September 20th and has to be finished until
+December 23rd, 2010.
 
 \subsection*{Students}
 Thomas Kallenberg \dotfill
