@@ -1,12 +1,12 @@
 //!NullRefactoringOne
 //#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
 //@.config
-filename=before.h
-//before.h
+filename=A.h
+//A.h
 #include<iostream>
 using namespace std;
 
-int main() {
+/*$*/int main()/*$$*/ {
   cout << "Hello World" << endl;
   return 0;
 }
