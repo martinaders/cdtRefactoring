@@ -1,0 +1,16 @@
+//!NullRefactoringOne
+//#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
+//@.config
+filename=before.h
+//before.h
+#include<iostream>
+using namespace std;
+
+int main() {
+  cout << "Hello World" << endl;
+  return 0;
+}
+
+//=
+nix ist mehr da wo es war
+
