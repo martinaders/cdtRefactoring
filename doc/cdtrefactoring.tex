@@ -1,5 +1,14 @@
 \documentclass[a4paper,10pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
+\usepackage{color}
+\usepackage{listings}
+
+\lstset{language=C++, numbers=left,
+numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small,
+rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname,
+captionpos=b}
+\definecolor{gray}{rgb}{0.7,0.7,0.7}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
 % Title Page
 \title{CDT Refactorings: Toggle member function, Implement function, Override virtual member function}
