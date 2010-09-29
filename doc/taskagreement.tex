@@ -23,7 +23,7 @@ integration.
 
 Quality is achieved through automatic testing. Refactorings are thankful to test
 since they have a clear before and after state. As for speed, a maximum of one
-second of response time for small and frequent tasks is
+second of response time for local changes is
 acceptable. For example \texttt{Extract function} consumes about four seconds to
 extract the body of a hello world code. Our goal is to process local changes in
 less than a second. The last matter is integration. We think we did good work if
@@ -43,40 +43,35 @@ Function'' and then ``Override virtual member function''.
 
 \pagebreak
 
-\section*{General Goals}
+\subsection*{General Goals}
 
 \begin{itemize}
- \item Quality: All common cases are covered with test cases for each
+ \item Quality: Common cases are covered with test cases for each
 refactoring subtype.
- \item Integration: Sitting in front of a fresh Eclipse CDT installation a first
-semester student can install our refactoring in less than five minutes.
- \item Automation: After changing some code a maximum of three commands are
-needed to redeploy the project.
+ \item Integration and Automation: Sitting in front of a fresh Eclipse CDT installation a first
+semester student can install our refactoring in less than five minutes. After changing some code a maximum of three commands are needed to redeploy the project.
+ \item Project organization: Fixed two-week iterations are used. Redmine is used for planning and tracking time, issue tracking and as information radiator for the supervisor. A project documentation is written. Organization and results are weekly reviewed together with the supervisor to reduce misunderstanding and improve efficiency.
 \end{itemize}
 
-\section*{Minimum Goals}
+\subsection*{Advanced goals}
 
 All general goals have been achieved. Additionally:
 \begin{itemize}
  \item Toggling between \texttt{in-class}, \texttt{in-header},
-\texttt{separate-file} and back again to \texttt{in-class} works.
+\texttt{separate-file} and back again to \texttt{in-class} works for basic and some frequent special cases.
 \end{itemize}
 
-\section*{Medium Goals}
+\subsection*{Intermediate goals}
 All minimum goals have been archived. Additionally:
 \begin{itemize}
- \item Re-Implement the ``Implement Function'' feature.
- \item The ``Implement Function'' should work fast. even on a reasonably
-slow machine. %define what is slow?
-%more quality functions here
+ \item Profiling ``Implement Function'' to systematically find its bottlenecks or
+ \item re-Implement the ``Implement Function'' feature.
+ \item ``Implement Function'' is done within 3 seconds in a 5'000 LoC project.
+ \item No unintended circular dependencies can be found in the plugin code.
 \end{itemize}
 
-\section*{Maximum Goals}
-All medium goals have been archived. Additionally:
-\begin{itemize}
- \item ``Override virtual member function`` has been implemented.
- \item ''Override virtual member function`` works fast.\newline
-\end{itemize}
+\subsection*{Deluxe goals and outlook}
+It may be possible to use the code from the above refactorings. In this case it would be easier to implement the ``Override virtual member function'' and make it fast. \newline
 
 The semester thesis starts on September 20th and has to be finished until
 December 23rd, 2010.
