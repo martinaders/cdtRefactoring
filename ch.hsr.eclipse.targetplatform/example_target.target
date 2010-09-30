@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Eclipse Core Target">
+	<locations>
+		<location includeAllPlatforms="false" includeMode="slicer" type="InstallableUnit">
+			<unit id="org.eclipse.sdk.ide" version="3.6.2"/>
+			<repository location="http://download.eclipse.org/releases/helios"/>
+		</location>
+		<localtion includeAllPatforms="false" includeMode="slicer" type="InstallableUnit">
+			<unit id="org.eclipse.cdt" version="7.0.1" />
+			<repository location="http://download.eclipse.org/tools/cdt/releases/helios" />
+		</location>
+	</locations>
+</target>
