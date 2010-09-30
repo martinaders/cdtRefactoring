@@ -2,6 +2,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{color}
 \usepackage{listings}
+\usepackage{graphicx}
 
 \lstset{language=C++, numbers=left,
 numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small,
@@ -10,24 +11,22 @@ captionpos=b}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-% Title Page
 \title{CDT Refactorings}
 \subtitle{Toggle member function, Implement function, Override virtual member function}
-\titlehead{Hochschule Rapperswil HSR \\ Oberseestrasse soundso \\ 0000 Rapperswil }
-\subject{Studienarbeit}
+\titlehead{\includegraphics{logo_hsr_farbig.pdf}}
+\subject{semester thesis}
 \date{\today}
 \publishers{Supervisor: Peter Sommerlad}
 \author{Martin Schwab, Thomas Kallenberg}
-
 \begin{document}
 \maketitle
 \pagenumbering{roman}
-\begin{abstract}
-Welches Problem wurde mit welchen Ergebinissen bearbeitet + Schlussfolgerungen.
-\end{abstract}
-\tableofcontents
-%\section*{Tables}
 
+\begin{abstract}
+Welches Problem wurde mit welchen Ergebnissen bearbeitet + Schlussfolgerungen.
+\end{abstract}
+
+\tableofcontents
 \pagenumbering{arabic}
 
 \chapter{Introduction}
@@ -45,21 +44,21 @@ After another 2 hours of compile error hunting because you forgot to rename a fu
 
 One answer seems to be that this is not an easy task to archive. But nevertheless we do not want to be part of the people who always complain about open source software. We change it. We can (hopefully...).
 
-It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should be a ``override virtual member function'' feature which completes our function management features.
+It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should \marginline{fdsfds}be a ``override virtual member function'' feature which completes our function management features.
 
 \section{Toggle Key}
 \subsection{The different position of definition}
 
 In C++ there are three possible positions where a function may be defined.
 
-%\lstinputlisting[caption=In Class implementation in A.h]{../../resources/classheader_implementation.c}
-%\lstinputlisting[caption=Implementation outside of the class in A.h]{../../resources/outside_class_implementation.c}
+\lstinputlisting[caption=In Class implementation in A.h]{classheader_implementation.c}
+\lstinputlisting[caption=Implementation outside of the class in A.h]{outside_class_implementation.c}
 
-%\begin{tabular}{p{5cm}p{.5cm}p{6cm}}
-%\lstinputlisting[caption=two file solution - A.h]{implementation_file.h}
-%& &
-%\lstinputlisting[caption=two file solution - A.cpp]{implementation_file.c}
-%\end{tabular}
+\begin{tabular}{p{5cm}p{.5cm}p{6cm}}
+\lstinputlisting[caption=two file solution - A.h]{implementation_file.h}
+& &
+\lstinputlisting[caption=two file solution - A.cpp]{implementation_file.c}
+\end{tabular}
 
 In a first version of our plug-in, it should be possible to move the function definition from inside the class declaration to outside of the class declaration in the sane file. In the example above this would be a step from Listing 1 to Listing 2. In a second step this movement is made reversible (Listing 2 to Listing 1).
 
