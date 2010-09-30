@@ -30,17 +30,22 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.TextSelection;
 import org.osgi.framework.Bundle;
 
+import org.eclipse.cdt.ui.testplugin.CTestPlugin;
 import org.eclipse.cdt.ui.tests.refactoring.Messages;
 import org.eclipse.cdt.ui.tests.refactoring.RefactoringBaseTest;
+import org.eclipse.cdt.ui.tests.refactoring.RefactoringTester;
 import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
 
 import ch.hsr.eclipse.cdt.Activator;
 
 /**
+ * Copied from Emanuels RefactoringTester and changed minimally to support 
+ * separate plugin. Don't try to extend the class because all methods 
+ * are static and thus can't be overridden.
+ * 
  * @author Emanuel Graf
- *
  */
-public class ExternalRefactoringTester extends TestSuite{
+public class ExternalRefactoringTester extends TestSuite {
 	
 	enum MatcherState{skip, inTest, inSource, inExpectedResult}
 	
@@ -50,6 +55,7 @@ public class ExternalRefactoringTester extends TestSuite{
 	private static final String resultRegexp = "//=.*$"; //$NON-NLS-1$
 	
 	public static Test suite(String name, String file)throws Exception {
+		System.out.println("Running suite() in evil RefactoringTester");
 		BufferedReader in = createReader(file);
 
 		ArrayList<RefactoringBaseTest> testCases = createTests(in);
@@ -58,7 +64,8 @@ public class ExternalRefactoringTester extends TestSuite{
 	}
 	
 	protected static BufferedReader createReader(String file) throws IOException {
-		// Only this line is different than in the original class.
+		System.out.println("cool createReader is being run");
+		// Only this line has changed
 		Bundle bundle = Activator.getDefault().getBundle();
 		Path path = new Path(file);
 		String file2 = FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile();
@@ -218,4 +225,3 @@ public class ExternalRefactoringTester extends TestSuite{
 		return suite;
 	}
 }
-

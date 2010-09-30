@@ -6,7 +6,7 @@ import java.util.Vector;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
-import org.eclipse.core.resources.IFile;
+import org.eclipse.ltk.core.refactoring.Change;
 
 import ch.hsr.eclipse.cdt.NullRefactoring;
 
@@ -22,8 +22,10 @@ public class NullRefactoringTest extends RefactoringTest {
 
 	@Override
 	protected void runTest() throws Throwable {
-		IFile refFile = null;
-		CRefactoring refactoring = new NullRefactoring(refFile ,selection, null, cproject);
+		CRefactoring refactoring = new NullRefactoring(null, selection, null, cproject);
+		Change change = refactoring.createChange(NULL_PROGRESS_MONITOR);
+		change.perform(NULL_PROGRESS_MONITOR);
+		compareFiles(fileMap);
 	}
 
 }
