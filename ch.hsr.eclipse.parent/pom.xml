@@ -8,7 +8,7 @@
 	<name>Eclipse cdt refactoring - Parent project</name>
 
 	 <properties>
-		 <tycho-version>0.9.0</tycho-version>
+		 <tycho-version>0.8.0</tycho-version>
 	 </properties>
 
 	<build>
@@ -114,10 +114,11 @@
 	</profiles>
 
 	<modules>
-		<module>../ch.hsr.eclipse.updates</module>
 		<module>../ch.hsr.eclipse.cdt</module>
-		<module>../ch.hsr.eclipse.doc</module>
+		<module>../ch.hsr.eclipse.cdt.tests</module>
 		<module>../ch.hsr.eclipse.targetplatform</module>
+		<module>../ch.hsr.eclipse.updates</module>
+		<module>../ch.hsr.eclipse.doc</module>
 		<!--
 		<module>../ch.hsr.eclipse.tests</module>
 		<module>../ch.hsr.eclipse.eclemma.runtime.equinox</module>

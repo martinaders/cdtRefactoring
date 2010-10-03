@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests
+Bundle-SymbolicName: ch.hsr.eclipse.cdt.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Fragment-Host: ch.hsr.eclipse.cdt
+Require-Bundle: org.eclipse.ltk.core.refactoring,
+ org.eclipse.core.runtime,
+ org.junit4;bundle-version="4.8.1",
+ org.eclipse.jface.text;bundle-version="3.6.1",
+ org.eclipse.ltk.ui.refactoring;bundle-version="3.5.0"
+Import-Package: org.eclipse.cdt.internal.ui.refactoring

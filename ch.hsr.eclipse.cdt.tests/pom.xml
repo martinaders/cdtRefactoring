@@ -10,10 +10,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.hsr.eclipse</groupId>
-	<artifactId>cdt.tests</artifactId>
+	<artifactId>bundle.tests</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
-	<name>Eclipse refactoring - OSGi bundle tests</name>
+	<name>Tycho build examples - OSGi bundle tests</name>
 
 	<profiles>
 		<profile>
