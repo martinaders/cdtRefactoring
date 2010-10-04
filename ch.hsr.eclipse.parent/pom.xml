@@ -114,8 +114,10 @@
 	</profiles>
 
 	<modules>
-		<module>../ch.hsr.eclipse.updates</module>
 		<module>../ch.hsr.eclipse.cdt</module>
+		<module>../ch.hsr.eclipse.cdt.tests</module>
+		<module>../ch.hsr.eclipse.targetplatform</module>
+		<module>../ch.hsr.eclipse.updates</module>
 		<module>../ch.hsr.eclipse.doc</module>
 		<!--
 		<module>../ch.hsr.eclipse.tests</module>
