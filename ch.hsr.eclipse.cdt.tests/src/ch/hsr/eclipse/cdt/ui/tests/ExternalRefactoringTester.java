@@ -217,9 +217,7 @@ public class ExternalRefactoringTester extends TestSuite {
 		Iterator<RefactoringBaseTest> it = testCases.iterator();
 		while(it.hasNext()) {
 			RefactoringBaseTest subject =it.next();
-			// TODO: Why won't this compile? 
-			// suite.addTest(subject);
-			System.err.println("unfinished todo in ExternalRefactoring.java");
+			suite.addTest(subject);
 		}
 		return suite;
 	}

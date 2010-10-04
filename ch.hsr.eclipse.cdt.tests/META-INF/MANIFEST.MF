@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.junit,
  org.eclipse.cdt.ui.tests;bundle-version="5.1.0",
  org.eclipse.jface.text;bundle-version="3.6.0",
- org.eclipse.cdt.core.tests;bundle-version="5.3.0",
+ org.eclipse.cdt.core.tests,
  org.eclipse.core.resources;bundle-version="3.6.0",
  org.eclipse.ltk.core.refactoring;bundle-version="3.5.100",
  ch.hsr.eclipse.cdt;bundle-version="1.0.0"

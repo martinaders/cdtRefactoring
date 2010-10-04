@@ -8,7 +8,7 @@
 	<name>Eclipse cdt refactoring - Parent project</name>
 
 	 <properties>
-		 <tycho-version>0.8.0</tycho-version>
+		 <tycho-version>0.9.0</tycho-version>
 	 </properties>
 
 	<build>

@@ -7,6 +7,7 @@ import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
 import org.eclipse.ltk.core.refactoring.Change;
+
 import ch.hsr.eclipse.cdt.ui.NullRefactoring;
 
 public class NullRefactoringTest extends RefactoringTest {
