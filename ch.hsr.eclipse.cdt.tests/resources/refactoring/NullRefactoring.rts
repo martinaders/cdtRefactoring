@@ -1,4 +1,4 @@
-//!NothingChangesTest
+//!TestRemoveWholeMemberFunction
 //#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
 //@.config
 filename=A.h
@@ -14,23 +14,4 @@ class A {
 using namespace std;
 
 class A {
-  void member();
-};
-//!RemoveSelectedMethodTest
-//#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
-//@.config
-filename=A.h
-//@A.h
-#include<iostream>
-using namespace std;
-
-class A {
-  void /*$*/member/*$$*/();
-};
-//=
-#include<iostream>
-using namespace std;
-
-class A {
-  void /*$*/member/*$$*/();
 };
