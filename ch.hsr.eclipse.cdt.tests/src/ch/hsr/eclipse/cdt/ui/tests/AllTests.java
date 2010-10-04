@@ -1,8 +1,8 @@
 package ch.hsr.eclipse.cdt.ui.tests;
 
-import ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTestSuite;
 
 public class AllTests extends TestSuite {
 
