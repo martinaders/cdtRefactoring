@@ -1,4 +1,4 @@
-package ch.hsr.eclipse.cdt;
+package ch.hsr.eclipse.cdt.ui;
 
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
