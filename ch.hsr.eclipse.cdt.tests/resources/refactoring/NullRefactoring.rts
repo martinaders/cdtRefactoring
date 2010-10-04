@@ -2,7 +2,7 @@
 //#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
 //@.config
 filename=A.h
-//A.h
+//@A.h
 #include<iostream>
 using namespace std;
 
@@ -20,7 +20,7 @@ class A {
 //#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
 //@.config
 filename=A.h
-//A.h
+//@A.h
 #include<iostream>
 using namespace std;
 

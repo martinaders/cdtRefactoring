@@ -52,7 +52,6 @@ public class ExternalRefactoringTester extends TestSuite {
 	private static final String resultRegexp = "//=.*$"; //$NON-NLS-1$
 	
 	public static Test suite(String name, String file)throws Exception {
-		System.out.println("Running suite() in cool RefactoringTester");
 		BufferedReader in = createReader(file);
 
 		ArrayList<RefactoringBaseTest> testCases = createTests(in);
@@ -61,7 +60,6 @@ public class ExternalRefactoringTester extends TestSuite {
 	}
 	
 	protected static BufferedReader createReader(String file) throws IOException {
-		System.out.println("cool createReader is being run");
 		// Only this line has changed
 		Bundle bundle = Activator.getDefault().getBundle();
 		Path path = new Path(file);
@@ -217,9 +215,7 @@ public class ExternalRefactoringTester extends TestSuite {
 		Iterator<RefactoringBaseTest> it = testCases.iterator();
 		while(it.hasNext()) {
 			RefactoringBaseTest subject =it.next();
-			// TODO: Why won't this compile? 
-			// suite.addTest(subject);
-			System.err.println("unfinished todo in ExternalRefactoring.java");
+			suite.addTest(subject);
 		}
 		return suite;
 	}

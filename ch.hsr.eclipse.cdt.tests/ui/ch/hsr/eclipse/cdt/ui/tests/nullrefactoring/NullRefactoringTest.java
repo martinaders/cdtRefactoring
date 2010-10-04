@@ -25,7 +25,7 @@ public class NullRefactoringTest extends RefactoringTest {
 		Change change = refactoring.createChange(NULL_PROGRESS_MONITOR);
 		change.perform(NULL_PROGRESS_MONITOR);
 		compareFiles(fileMap);
-		System.err.println("Not implemented yet.");
+
 	}
 
 }
