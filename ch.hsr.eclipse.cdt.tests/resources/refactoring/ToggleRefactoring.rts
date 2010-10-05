@@ -1,5 +1,5 @@
 //!TestRemoveMemberFunctionDeclaration
-//#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
 //@A.h
