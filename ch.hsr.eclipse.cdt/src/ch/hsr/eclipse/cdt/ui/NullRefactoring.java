@@ -25,7 +25,6 @@ public class NullRefactoring extends CRefactoring {
 
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
-		final NullRefactoring ref = this;
 		return new CRefactoringDescription("id", "proj", "desc", "comment", 0, new HashMap<String, String>()) {
 			@Override
 			public Refactoring createRefactoring(RefactoringStatus status)

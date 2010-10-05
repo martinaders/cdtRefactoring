@@ -11,6 +11,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.cdt.internal.ui.refactoring
+Import-Package: org.eclipse.cdt.internal.ui.refactoring,
+ org.eclipse.cdt.ui.tests
 Export-Package: ch.hsr.eclipse.cdt.ui,
  ch.hsr.eclipse.cdt.ui.toggle
