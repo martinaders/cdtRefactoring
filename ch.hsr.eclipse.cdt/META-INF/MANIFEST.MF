@@ -12,4 +12,5 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.cdt.internal.ui.refactoring
-Export-Package: ch.hsr.eclipse.cdt.ui
+Export-Package: ch.hsr.eclipse.cdt.ui,
+ ch.hsr.eclipse.cdt.ui.deltoggle
