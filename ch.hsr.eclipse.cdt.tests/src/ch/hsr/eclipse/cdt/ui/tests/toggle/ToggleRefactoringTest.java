@@ -1,4 +1,4 @@
-package ch.hsr.eclipse.cdt.ui.tests.deleterefactoring;
+package ch.hsr.eclipse.cdt.ui.tests.toggle;
 
 import java.util.Properties;
 import java.util.Vector;
@@ -8,11 +8,11 @@ import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import ch.hsr.eclipse.cdt.ui.deltoggle.DelToggleRefactoring;
+import ch.hsr.eclipse.cdt.ui.toggle.ToggleRefactoring;
 
-public class DeleteRefactoringTest extends RefactoringTest {
+public class ToggleRefactoringTest extends RefactoringTest {
 
-	public DeleteRefactoringTest(String name, Vector<TestSourceFile> files) {
+	public ToggleRefactoringTest(String name, Vector<TestSourceFile> files) {
 		super(name, files);
 	}
 
@@ -26,7 +26,7 @@ public class DeleteRefactoringTest extends RefactoringTest {
 
 	@Override
 	protected void runTest() throws Throwable {
-		Refactoring refactoring = new DelToggleRefactoring(project.getFile(fileName), selection, cproject);
+		Refactoring refactoring = new ToggleRefactoring(project.getFile(fileName), selection, cproject);
 		RefactoringStatus preconditions = refactoring.checkInitialConditions(NULL_PROGRESS_MONITOR);
 		assertFalse(preconditions.hasError());
 		compareFiles(fileMap);
