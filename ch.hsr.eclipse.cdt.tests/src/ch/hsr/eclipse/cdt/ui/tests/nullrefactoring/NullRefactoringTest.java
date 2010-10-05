@@ -2,6 +2,7 @@ package ch.hsr.eclipse.cdt.ui.tests.nullrefactoring;
 
 import java.util.Properties;
 import java.util.Vector;
+
 import org.eclipse.cdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -21,10 +22,9 @@ public class NullRefactoringTest extends RefactoringTest {
 
 	@Override
 	protected void runTest() throws Throwable {
-		Refactoring refactoring = new NullRefactoring(null, selection, null, cproject);
+		Refactoring refactoring = new NullRefactoring(project.getFile(fileName), selection, cproject);
 		RefactoringStatus preconditions = refactoring.checkInitialConditions(NULL_PROGRESS_MONITOR);
-		if (preconditions.hasError())
-			fail("Initial conditions not satisfied.");
+		assertFalse(preconditions.hasEntries());
 		compareFiles(fileMap);
 	}
 

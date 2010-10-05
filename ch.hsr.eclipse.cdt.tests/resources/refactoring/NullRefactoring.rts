@@ -7,22 +7,6 @@ filename=A.h
 using namespace std;
 
 class A {
-  void member();
-};
-//=
-#include<iostream>
-using namespace std;
-
-class A {
-  void member();
-};
-//!TestDoNothingAndLooseSelection
-//#ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTest
-//@A.h
-#include<iostream>
-using namespace std;
-
-class A {
   void /*$*/member/*$$*/();
 };
 //=
