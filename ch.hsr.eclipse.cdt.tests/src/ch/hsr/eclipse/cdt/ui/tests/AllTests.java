@@ -2,6 +2,7 @@ package ch.hsr.eclipse.cdt.ui.tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import ch.hsr.eclipse.cdt.ui.tests.nullrefactoring.NullRefactoringTestSuite;
 import ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTestSuite;
 
 public class AllTests extends TestSuite {
@@ -11,6 +12,7 @@ public class AllTests extends TestSuite {
 	}
 
 	public AllTests() throws Exception {
+		addTest(NullRefactoringTestSuite.suite());
 		addTest(ToggleRefactoringTestSuite.suite());
 	}
 }
