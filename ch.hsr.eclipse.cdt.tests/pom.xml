@@ -10,10 +10,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.hsr.eclipse</groupId>
-	<artifactId>bundle.tests</artifactId>
+	<artifactId>cdt.tests</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
-	<name>Tycho build examples - OSGi bundle tests</name>
+	<name>CDT Tests</name>
 
 	<build>
 		<plugins>
@@ -22,6 +22,8 @@
 				<artifactId>maven-osgi-test-plugin</artifactId>
 				<configuration>
 					<useUIHarness>true</useUIHarness>
+					<testSuite>ch.hsr.eclipse.cdt.tests</testSuite>
+					<testClass>ch.hsr.eclipse.cdt.ui.tests.AllTests</testClass>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -36,7 +38,6 @@
 			</activation>
 			<build>
 				<plugins>
-
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
@@ -85,7 +86,5 @@
 				</plugins>
 			</build>
 		</profile>
-
 	</profiles>
-
 </project>
