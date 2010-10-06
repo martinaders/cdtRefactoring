@@ -15,4 +15,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.6.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.cdt.internal.ui.refactoring
+Import-Package: org.eclipse.cdt.internal.ui.refactoring,
+ org.eclipse.jface.viewers
