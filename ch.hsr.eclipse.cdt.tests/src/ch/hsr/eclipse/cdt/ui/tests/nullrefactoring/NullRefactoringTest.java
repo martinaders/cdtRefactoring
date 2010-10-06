@@ -24,7 +24,7 @@ public class NullRefactoringTest extends RefactoringTest {
 	protected void runTest() throws Throwable {
 		Refactoring refactoring = new NullRefactoring(project.getFile(fileName), selection, cproject);
 		RefactoringStatus preconditions = refactoring.checkInitialConditions(NULL_PROGRESS_MONITOR);
-		assertFalse(preconditions.hasEntries());
+		assertConditionsOk(preconditions);
 		compareFiles(fileMap);
 	}
 

@@ -1,0 +1,17 @@
+//!TestRemoveMemberFunctionDeclaration
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include<iostream>
+using namespace std;
+
+class A {
+  void /*$*/member/*$$*/();
+};
+//=
+#include<iostream>
+using namespace std;
+
+class A {
+};
