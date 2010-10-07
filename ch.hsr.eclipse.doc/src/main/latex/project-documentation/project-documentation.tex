@@ -12,7 +12,7 @@ captionpos=b}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
 \title{CDT Refactorings}
-\subtitle{Toggle member function, Implement function, Override virtual member function}
+%\subtitle{Toggle member function, Implement function, Override virtual member function}
 \titlehead{\includegraphics{logo_hsr_farbig.pdf}}
 \subject{semester thesis}
 \date{\today}
@@ -34,7 +34,7 @@ The \marginline{situation}Eclipse Java Development Toolkit (JDT) has a large set
 
 To make CDT more attractive it is necessary not only to add more refactorings but to make them fast and reliable. The reason why we want to do so is explained next.
 
-Every \marginline{motivation} second semester student at HSR has to go through a C++ course. At the beginning we both used Eclipse for solving the exercises. After a while it was clear that touching the refactoring buttons was a dangerous idea because in many cases they broke your code. Compile errors all over the place and difficult exercise assignments didn't make our life easier. This should make clear that there is a need for better implementations. But we would not have started changing a big project such as CDT if there were no people who could help us to do so.
+Every \marginline{motivation} second semester student at HSR has to go through a C++ course. At the beginning we both used Eclipse for solving the exercises. After a while it was clear that touching the refactoring buttons was a dangerous idea because in some cases they broke your code. Compile errors all over the place and difficult exercise assignments didn't make our life easier. This should make clear that there is a need for better implementations. But we would not have started changing a big project such as CDT if there were no people who could help us to do so.
 
 The \marginline{support} Institute For Software at HSR with its group around Peter Sommerlad and Emanuel Graf has been working on Eclipse refactorings for a long time. Since 2006 nine Eclipse refactoring projects have been completed there for different languages. We knew we would have good support and a big knowledge base if we wrote a semester thesis around this topic. After some first steps trying to get an overview of the source we decided to give it a try although we knew that working on legacy code will consume a lot of time without coding.
 
@@ -47,6 +47,7 @@ One answer seems to be that this is not an easy task to archive. But nevertheles
 It should be possible to declare a function in the header, shoot up an ``Implement Member Function'' which will open a block right in the header file and then use a ``toogle Key'' to ``move'' the whole function to the implementation file and restore the actual function declaration in the header file. Therefore we need to extend CDT with the two following features. First a Toggle Key to move the function definition from header to class and backwards. In a second part we re-implement the ``Implement Function`` feature. The last part of our work should \marginline{fdsfds}be a ``override virtual member function'' feature which completes our function management features.
 
 \section{Toggle Key}
+
 \subsection{The different position of definition}
 
 In C++ there are three possible positions where a function may be defined.
