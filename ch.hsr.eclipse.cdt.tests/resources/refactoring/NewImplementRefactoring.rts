@@ -1,0 +1,21 @@
+//!TestImplementFunctionTest
+//#ch.hsr.eclipse.cdt.ui.tests.newimplement.NewImplementRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include<iostream>
+using namespace std;
+
+class A {
+  void /*$*/member/*$$*/();
+};
+//=
+#include<iostream>
+using namespace std;
+
+class A {
+  void member()
+    {
+    }
+
+};
