@@ -25,8 +25,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.text.edits.TextEditGroup;
 
-import ch.hsr.eclipse.cdt.ui.NullRefactoring;
-
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
 
@@ -41,7 +39,7 @@ public class ToggleRefactoring extends CRefactoring {
 			@Override
 			public Refactoring createRefactoring(RefactoringStatus status)
 					throws CoreException {
-				return new NullRefactoring(getFile(), getSelection(),
+				return new ToggleRefactoring(getFile(), getSelection(),
 						getCProject());
 			}
 		};
@@ -99,10 +97,8 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(parent.getTranslationUnit());
 		TextEditGroup edit = new TextEditGroup("Toggle");
-		System.out.println("class: " + clazz.getRawSignature().toString());
 		rewrite.insertBefore(clazz, null, func, edit);
 		rewrite.remove(memberDeclaration, edit);
-		System.out.println("djfjd lk ajsdkfl jaösfdlasddlkas fdalksd faslkdf öalsd kjfafjasldkfalaskdf");
 	}
 
 }

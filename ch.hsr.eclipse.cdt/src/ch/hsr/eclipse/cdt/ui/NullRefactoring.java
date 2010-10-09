@@ -15,6 +15,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+@SuppressWarnings("restriction")
 public class NullRefactoring extends CRefactoring {
 
 	static protected final String NAME = "NullRefactoring"; //$NON-NLS-1$
@@ -38,6 +39,8 @@ public class NullRefactoring extends CRefactoring {
 	protected void collectModifications(IProgressMonitor pm,
 			ModificationCollector collector) throws CoreException,
 			OperationCanceledException {
+		
+		
 	}
 
 }

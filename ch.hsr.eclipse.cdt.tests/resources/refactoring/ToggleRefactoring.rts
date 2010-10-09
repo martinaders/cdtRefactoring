@@ -15,3 +15,6 @@ using namespace std;
 
 class A {
 };
+
+void member();
+
