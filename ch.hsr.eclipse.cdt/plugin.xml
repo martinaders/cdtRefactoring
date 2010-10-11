@@ -100,11 +100,11 @@
             </separator>
          </menu>
          <action
+               class="ch.hsr.eclipse.cdt.ui.TogglingActionDelegate"
                definitionId="ch.hsr.eclipse.cdt.command1"
                id="ch.hsr.eclipse.cdt.action3"
                label="%refactoringToggleRefactoring.label"
                menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
-               retarget="true"
                style="push">
          </action>
       </actionSet>
