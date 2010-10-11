@@ -2,36 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            description="%CodingActionSet.description"
-            id="org.eclipse.cdt.ui.CodingActionSet"
-            label="%CodingActionSet.label"
-            visible="false">
-         <menu
-               id="org.eclipse.jdt.ui.refactoring.menu"
-               label="%Refactoring.menu.label"
-               path="edit">
-            <separator
-                  name="reorgGroup">
-            </separator>
-            <separator
-                  name="codingGroup">
-            </separator>
-            <separator
-                  name="reorgGroup2">
-            </separator>
-         </menu>
-         <action
-               definitionId="ch.hsr.eclipse.cdt.command1"
-               id="ch.hsr.eclipse.cdt.action1"
-               label="%refactoringToggleRefactoring.label"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
-               retarget="true">
-         </action>
-      </actionSet>
-   </extension>
-   <extension
          point="org.eclipse.ui.commands">
       <command
             categoryId="org.eclipse.cdt.ui.category.refactoring"
@@ -54,6 +24,90 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="CTRL+SHIFT+V">
       </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.jdt.ui.refactoring.menu?after=reorgGroup2">
+         <command
+               commandId="ch.hsr.eclipse.cdt.command1"
+               label="%refactoringToggleRefactoring.label"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="%CodingActionSet.description"
+            id="org.eclipse.cdt.ui.CodingActionSet"
+            label="%CodingActionSet.label"
+            visible="false">
+         <menu
+               id="org.eclipse.jdt.ui.refactoring.menu"
+               label="%Refactoring.menu.label"
+               path="edit">
+            <separator
+                  name="reorgGroup">
+            </separator>
+            <separator
+                  name="codingGroup">
+            </separator>
+            <separator
+                  name="reorgGroup2">
+            </separator>
+            <separator
+                  name="typeGroup">
+            </separator>
+            <separator
+                  name="typeGroup2">
+            </separator>
+            <separator
+                  name="codingGroup2">
+            </separator>
+            <separator
+                  name="typeGroup3">
+            </separator>
+            <separator
+                  name="historyGroup">
+            </separator>
+         </menu>
+         <menu
+               id="org.eclipse.jdt.ui.source.menu"
+               label="%Source.menu.label"
+               path="edit">
+            <separator
+                  name="commentGroup">
+            </separator>
+            <separator
+                  name="editGroup">
+            </separator>
+            <separator
+                  name="importGroup">
+            </separator>
+            <separator
+                  name="generateGroup">
+            </separator>
+            <separator
+                  name="codeGroup">
+            </separator>
+            <separator
+                  name="externalizeGroup">
+            </separator>
+            <separator
+                  name="convertGroup">
+            </separator>
+         </menu>
+         <action
+               definitionId="ch.hsr.eclipse.cdt.command1"
+               id="ch.hsr.eclipse.cdt.action3"
+               label="%refactoringToggleRefactoring.label"
+               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
+               retarget="true"
+               style="push">
+         </action>
+      </actionSet>
    </extension>
 
 </plugin>
