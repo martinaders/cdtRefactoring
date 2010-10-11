@@ -1,5 +1,9 @@
 package ch.hsr.eclipse.cdt;
 
+import org.eclipse.cdt.ui.refactoring.actions.Messages;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -20,6 +24,10 @@ public class Activator extends AbstractUIPlugin {
 	public Activator() {
 	}
 
+//    public static final String MENU_ID = "org.eclipse.cdt.ui.refactoring.menu"; //$NON-NLS-1$
+//    public static final String GROUP_REORG = "reorgGroup"; //$NON-NLS-1$
+//    private String fGroupName= IWorkbenchActionConstants.GROUP_REORGANIZE;
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
@@ -27,6 +35,10 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+
+//		IMenuManager refactorSubmenu = new MenuManager(org.eclipse.cdt.ui.refactoring.actions.Messages.CRefactoringActionGroup_menu, MENU_ID);
+//		IMenuManager menu = null;
+//		menu.appendToGroup(fGroupName, refactorSubmenu);
 	}
 
 	/*

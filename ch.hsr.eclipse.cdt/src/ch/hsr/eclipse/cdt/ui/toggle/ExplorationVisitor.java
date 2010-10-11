@@ -29,72 +29,72 @@ final class ExplorationVisitor extends ASTVisitor {
 	}
 
 	public int visit(IASTTranslationUnit tu) {
-		System.out.println("*** " + tu.getClass() + " : " + tu.getRawSignature());
+		System.out.println("*** " + tu.getClass() + " : \n" + tu.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTName name) {
-		System.out.println("*** " + name.getClass() + " : " + name.getRawSignature());
+		System.out.println("*** " + name.getClass() + " : \n" + name.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTDeclaration declaration) {
-		System.out.println("*** " + declaration.getClass() + " : " + declaration.getRawSignature());
+		System.out.println("*** " + declaration.getClass() + " : \n" + declaration.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTInitializer initializer) {
-		System.out.println("*** " + initializer.getClass() + " : " + initializer.getRawSignature());
+		System.out.println("*** " + initializer.getClass() + " : \n" + initializer.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTParameterDeclaration parameterDeclaration) {
-		System.out.println("*** " + parameterDeclaration.getClass() + " : " + parameterDeclaration.getRawSignature());
+		System.out.println("*** " + parameterDeclaration.getClass() + " : \n" + parameterDeclaration.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTDeclarator declarator) {
-		System.out.println("*** " + declarator.getClass() + " : " + declarator.getRawSignature());
+		System.out.println("*** " + declarator.getClass() + " : \n" + declarator.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTDeclSpecifier declSpec) {
-		System.out.println("*** " + declSpec.getClass() + " : " + declSpec.getRawSignature());
+		System.out.println("*** " + declSpec.getClass() + " : \n" + declSpec.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTArrayModifier arrayModifier) {
-		System.out.println("*** " + arrayModifier.getClass() + " : " + arrayModifier.getRawSignature());
+		System.out.println("*** " + arrayModifier.getClass() + " : \n" + arrayModifier.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTPointerOperator ptrOperator) {
-		System.out.println("*** " + ptrOperator.getClass() + " : " + ptrOperator.getRawSignature());
+		System.out.println("*** " + ptrOperator.getClass() + " : \n" + ptrOperator.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTExpression expression) {
-		System.out.println("*** " + expression.getClass() + " : " + expression.getRawSignature());
+		System.out.println("*** " + expression.getClass() + " : \n" + expression.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTStatement statement) {
-		System.out.println("*** " + statement.getClass() + " : " + statement.getRawSignature());
+		System.out.println("*** " + statement.getClass() + " : \n" + statement.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTTypeId typeId) {
-		System.out.println("*** " + typeId.getClass() + " : " + typeId.getRawSignature());
+		System.out.println("*** " + typeId.getClass() + " : \n" + typeId.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTEnumerator enumerator) {
-		System.out.println("*** " + enumerator.getClass() + " : " + enumerator.getRawSignature());
+		System.out.println("*** " + enumerator.getClass() + " : \n" + enumerator.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 
 	public int visit(IASTProblem problem) {
-		System.out.println("*** " + problem.getClass() + " : " + problem.getRawSignature());
+		System.out.println("*** " + problem.getClass() + " : \n" + problem.getRawSignature());
 		return PROCESS_CONTINUE;
 	}
 }

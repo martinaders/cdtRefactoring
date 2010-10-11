@@ -19,6 +19,7 @@ void func2(int arg = 0);
 /// ... Doxygen comment 2 ...
 void func3() { int x = 0; }
 
+
 class A {
   void /*$*/member/*$$*/();
 };
