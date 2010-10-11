@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/ch.hsr.eclipse.cdt.feature_1.0.0.qualifier.jar" id="ch.hsr.eclipse.cdt.feature" version="1.0.0.qualifier"/>
+</site>

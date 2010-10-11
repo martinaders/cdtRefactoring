@@ -117,17 +117,12 @@
 		<module>../ch.hsr.eclipse.cdt</module>
 		<module>../ch.hsr.eclipse.cdt.tests</module>
 		<module>../ch.hsr.eclipse.targetplatform</module>
-		<module>../ch.hsr.eclipse.updates</module>
+		<module>../ch.hsr.eclipse.update</module>
 		<module>../ch.hsr.eclipse.doc</module>
+		<module>../ch.hsr.eclipse.feature</module>
 		<!--
-		<module>../ch.hsr.eclipse.tests</module>
 		<module>../ch.hsr.eclipse.eclemma.runtime.equinox</module>
 		<module>../se.mattiasholmqvist.tychoexamples.eclemma.runtime.equinox</module>
-		<module>../se.mattiasholmqvist.tychoexamples.targetplatform</module>
-		<module>../se.mattiasholmqvist.tychoexamples.feature</module>
-		<module>../se.mattiasholmqvist.tychoexamples.updates</module>
-		<module>../se.mattiasholmqvist.tychoexamples.bundle</module>
-		<module>../se.mattiasholmqvist.tychoexamples.bundle.tests</module>
 		-->
 	</modules>
 
