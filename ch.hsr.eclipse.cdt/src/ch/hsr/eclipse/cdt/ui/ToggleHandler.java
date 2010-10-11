@@ -6,6 +6,10 @@ import org.eclipse.core.commands.ExecutionException;
 
 public class ToggleHandler extends AbstractHandler {
 
+	public ToggleHandler() {
+		System.out.println("handler created");
+	}
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		System.out.println("Hellllllllll Yeeeeeeeeeeeaaaaaaaaahhhhhhhhhhh!!!!!!!");

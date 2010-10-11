@@ -22,25 +22,12 @@
                   name="reorgGroup2">
             </separator>
          </menu>
-         <menu
-               id="org.eclipse.jdt.ui.source.menu"
-               label="%Source.menu.label"
-               path="edit">
-            <separator
-                  name="generateGroup">
-            </separator>
-            <separator
-                  name="codeGroup">
-            </separator>
-            <separator
-                  name="convertGroup">
-            </separator>
-         </menu>
          <action
                definitionId="ch.hsr.eclipse.cdt.command1"
                id="ch.hsr.eclipse.cdt.action1"
                label="%refactoringToggleRefactoring.label"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2">
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
+               retarget="true">
          </action>
       </actionSet>
    </extension>
@@ -58,6 +45,15 @@
             class="ch.hsr.eclipse.cdt.ui.ToggleHandler"
             commandId="ch.hsr.eclipse.cdt.command1">
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="ch.hsr.eclipse.cdt.command1"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+SHIFT+V">
+      </key>
    </extension>
 
 </plugin>
