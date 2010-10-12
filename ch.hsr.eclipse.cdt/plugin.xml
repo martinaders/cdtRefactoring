@@ -10,13 +10,6 @@
       </command>
    </extension>
    <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="ch.hsr.eclipse.cdt.ui.ToggleHandler"
-            commandId="ch.hsr.eclipse.cdt.command1">
-      </handler>
-   </extension>
-   <extension
          point="org.eclipse.ui.bindings">
       <key
             commandId="ch.hsr.eclipse.cdt.command1"
@@ -26,53 +19,12 @@
       </key>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.jdt.ui.refactoring.menu?after=reorgGroup2">
-         <command
-               commandId="ch.hsr.eclipse.cdt.command1"
-               label="%refactoringToggleRefactoring.label"
-               style="push">
-         </command>
-      </menuContribution>
-   </extension>
-   <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             description="%CodingActionSet.description"
             id="org.eclipse.cdt.ui.CodingActionSet"
             label="%CodingActionSet.label"
             visible="false">
-         <menu
-               id="org.eclipse.jdt.ui.refactoring.menu"
-               label="%Refactoring.menu.label"
-               path="edit">
-            <separator
-                  name="reorgGroup">
-            </separator>
-            <separator
-                  name="codingGroup">
-            </separator>
-            <separator
-                  name="reorgGroup2">
-            </separator>
-            <separator
-                  name="typeGroup">
-            </separator>
-            <separator
-                  name="typeGroup2">
-            </separator>
-            <separator
-                  name="codingGroup2">
-            </separator>
-            <separator
-                  name="typeGroup3">
-            </separator>
-            <separator
-                  name="historyGroup">
-            </separator>
-         </menu>
          <menu
                id="org.eclipse.jdt.ui.source.menu"
                label="%Source.menu.label"
@@ -100,7 +52,7 @@
             </separator>
          </menu>
          <action
-               class="ch.hsr.eclipse.cdt.ui.TogglingActionDelegate"
+               class="ch.hsr.eclipse.cdt.ui.toggle.TogglingActionDelegate"
                definitionId="ch.hsr.eclipse.cdt.command1"
                id="ch.hsr.eclipse.cdt.action3"
                label="%refactoringToggleRefactoring.label"

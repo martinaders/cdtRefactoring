@@ -2,12 +2,9 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.util.HashMap;
 
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.internal.core.dom.parser.ASTAmbiguousNode;
-import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -58,8 +55,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void collectRemoveChanges(ModificationCollector collector) {
-		ASTVisitor visitor = new ExplorationVisitor(true);
-		unit.accept(visitor);
 		IASTSimpleDeclaration memberDeclaration = SelectionHelper
 				.findFirstSelectedDeclaration(region, unit);
 		TextEditGroup infoText = new TextEditGroup("Remove member");
