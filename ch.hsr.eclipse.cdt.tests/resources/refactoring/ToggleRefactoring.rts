@@ -6,6 +6,20 @@ filename=A.h
 #include<iostream>
 using namespace std;
 
+/**
+ * ... Doxygen ...
+ */
+int func1();
+
+/*!
+ * ... text ...
+ */
+void func2(int arg = 0);
+
+/// ... Doxygen comment 2 ...
+void func3() { int x = 0; }
+
+
 class A {
   void /*$*/member/*$$*/();
 };

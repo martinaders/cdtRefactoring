@@ -10,7 +10,7 @@
 The Eclipse Java Development Toolkit (JDT) has a large set of both quick and
 useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a
 small range of such code helpers today. In addition, some of them don't work
-satisfactorily: Currenty, extracting the body of a hello world function takes more than
+satisfyingly: Currenty, extracting the body of a hello world function takes more than
 three seconds on our machines. Reliability? Try to \texttt{extract constant} the
 hello world string of the same program. Currently it will fail. The code won't even
 compile.\newline
@@ -27,7 +27,7 @@ After two minutes of compile error hunting because you forgot to rename a
 function signature in both, the header and the implementation file, you start
 asking yourself: Why nobody has yet implemented a solution to prevent such an
 error?\newline
-One answer seems to be that this is not an easy task to archive. But
+One answer seems to be that this is not an easy task to achieve. But
 nevertheless we do not want to be part of the people who always complain about
 open source software. We change it, because we can. \newline
  
@@ -95,7 +95,7 @@ Re-Implement the ``Implement Function'' feature.
  \item A new function block is created with nearly no delay right below the
 function signature.
  \item A default return statement is created when the block is created.
- \item If the statement can not be determined, a comment is inserted into the block.
+ \item If the return statement cannot be determined, a comment is inserted into the block.
 \end{itemize}
 
 \subsection*{High level goals and outlook}
@@ -105,6 +105,7 @@ Additionally, content assist can be implemented. This could be part of a
 bachelor thesis which continues and completes the work done in this semester
 thesis.
 
+\subsection*{Project duration}
 The semester thesis starts on September 20th and has to be finished until
 December 23rd, 2010.
 \end{document}
