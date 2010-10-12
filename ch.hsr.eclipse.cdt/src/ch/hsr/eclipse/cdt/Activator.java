@@ -12,13 +12,11 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 	
 	public Activator() {
-		System.out.println("Toggle-Plugin created");
 	}
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		System.out.println("Toggle-Plugin started");
 	}
 
 	public void stop(BundleContext context) throws Exception {
