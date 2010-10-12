@@ -38,8 +38,8 @@ public class NewImplementRefactoring extends CRefactoring {
 
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
-		return new CRefactoringDescription("id1", "proj1", "desc1", "comment1", 0,
-				new HashMap<String, String>()) {
+		return new CRefactoringDescription("id1", "proj1", "desc1", "comment1",
+				0, new HashMap<String, String>()) {
 			@Override
 			public Refactoring createRefactoring(RefactoringStatus status)
 					throws CoreException {
@@ -61,7 +61,6 @@ public class NewImplementRefactoring extends CRefactoring {
 				unlockIndex();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -72,25 +71,24 @@ public class NewImplementRefactoring extends CRefactoring {
 				.findFirstSelectedDeclaration(region, unit);
 		IASTNode parent = memberDeclaration.getParent().getParent();
 
-		IASTNode clazz = parent.getParent();
+		IASTFunctionDefinition func = new CPPASTFunctionDefinition();
+		func.setParent(null);
+		func.setDeclSpecifier(new CPPASTSimpleDeclSpecifier());
+		IASTName name = memberDeclaration.getDeclarators()[0].getName().copy();
+		func.setDeclarator(new CPPASTFunctionDeclarator(name));
+		func.setBody(new CPPASTCompoundStatement());
 
-		 IASTFunctionDefinition func = new CPPASTFunctionDefinition();
-		 func.setParent(null);
-		 func.setDeclSpecifier(new CPPASTSimpleDeclSpecifier());
-		 IASTName name = memberDeclaration.getDeclarators()[0].getName().copy();
-		 func.setDeclarator(new CPPASTFunctionDeclarator(name));
-		 func.setBody(new CPPASTCompoundStatement());
-
-		//return type
-		IASTNode returnvalue = ASTHelper.getDeclarationForNode(memberDeclaration);
-		IASTDeclSpecifier value = ASTHelper.getDeclarationSpecifier(returnvalue).copy();
+		// return type
+		IASTNode returnvalue = ASTHelper
+				.getDeclarationForNode(memberDeclaration);
+		IASTDeclSpecifier value = ASTHelper
+				.getDeclarationSpecifier(returnvalue).copy();
 		func.setDeclSpecifier(value);
-			
+
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(parent
 				.getTranslationUnit());
 		TextEditGroup edit = new TextEditGroup("Toggle");
 		rewrite.replace(memberDeclaration, func, edit);
-		//rewrite.insertBefore(parent, null, func, edit);
 	}
 
 }

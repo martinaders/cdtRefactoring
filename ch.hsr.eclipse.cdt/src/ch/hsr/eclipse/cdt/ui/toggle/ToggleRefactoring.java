@@ -66,14 +66,6 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTNode parent = memberDeclaration.getParent().getParent();
 		
 		IASTNode clazz = parent.getParent();
-		
-//		System.out.println(parent.getRawSignature());
-//		System.out.println(parent.getParent().getRawSignature());
-//		IASTFunctionDefinition func = new CPPASTFunctionDefinition();
-//		func.setParent(null);
-//		func.setDeclSpecifier(new CPPASTSimpleDeclSpecifier());
-//		func.setDeclarator(new CPPASTFunctionDeclarator(new CPPASTName("asdfasdf".toCharArray())));
-//		func.setBody(new CPPASTCompoundStatement());
 
 		//function name
 		IASTSimpleDeclaration func = new CPPASTSimpleDeclaration();
@@ -84,7 +76,7 @@ public class ToggleRefactoring extends CRefactoring {
 		declaration.setParent(func);
 		func.addDeclarator(declaration);
 		
-		//inline --TODO:
+		//TODO: inline
 //		IASTSimpleDeclSpecifier inline = new CPPASTSimpleDeclSpecifier();
 //		inline.setInline(true);
 //		inline.setParent(declaration);
