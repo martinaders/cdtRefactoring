@@ -1,24 +1,49 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
+import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTStatement;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompoundStatement;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTParameterDeclaration;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
+import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.internal.ui.refactoring.utils.ASTHelper;
+import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
+import org.eclipse.cdt.internal.ui.util.SelectionUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -61,36 +86,66 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void collectMoveChanges(ModificationCollector collector) {
-		IASTSimpleDeclaration memberDeclaration = SelectionHelper
-				.findFirstSelectedDeclaration(region, unit);
-		IASTNode parent = memberDeclaration.getParent().getParent();
+		IASTFunctionDefinition memberdefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
 		
-		IASTNode clazz = parent.getParent();
+		IASTDeclSpecifier newdeclspec = memberdefinition.getDeclSpecifier().copy();
+		newdeclspec.setInline(true);
+		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(getQualifiedName(memberdefinition));
 
-		//function name
-		IASTSimpleDeclaration func = new CPPASTSimpleDeclaration();
-		func.setParent(clazz);
+		//TODO: add the parameters
 		
-		IASTName name = memberDeclaration.getDeclarators()[0].getName().copy();
-		IASTStandardFunctionDeclarator declaration = new CPPASTFunctionDeclarator(name);
-		declaration.setParent(func);
-		func.addDeclarator(declaration);
+		IASTStatement newbody = memberdefinition.getBody().copy();
+		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+		newfunc.setParent(unit);
 		
-		//TODO: inline
-//		IASTSimpleDeclSpecifier inline = new CPPASTSimpleDeclSpecifier();
-//		inline.setInline(true);
-//		inline.setParent(declaration);
-//		func.setDeclSpecifier(inline);
-		
-		//return type
-		IASTNode returnvalue = ASTHelper.getDeclarationForNode(memberDeclaration);
-		IASTDeclSpecifier value = ASTHelper.getDeclarationSpecifier(returnvalue).copy();
-		func.setDeclSpecifier(value);
-		
-		ASTRewrite rewrite = collector.rewriterForTranslationUnit(parent.getTranslationUnit());
+		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup edit = new TextEditGroup("Toggle");
-		rewrite.insertBefore(clazz, null, func, edit);
-		rewrite.remove(memberDeclaration, edit);
+		rewrite.insertBefore(unit, null, newfunc, edit);
+		
+		rewrite.replace(memberdefinition, new CPPASTFunctionDeclarator(memberdefinition.getDeclarator().getName().copy()), edit);
+	}
+
+	private ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
+		ICPPASTQualifiedName newdecl = new CPPASTQualifiedName();
+		for (IASTName name : getAllQualifiedNames(memberdefinition)) {
+			newdecl.addName(name.copy());
+		}
+		newdecl.addName(memberdefinition.getDeclarator().getName().copy());
+		return newdecl;
+	}
+	
+	private ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
+		ArrayList<IASTName> names = new ArrayList<IASTName>();
+		IASTNode node = memberdefinition; 
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
+			}
+		}
+		Collections.reverse(names);
+		return names;
+	}
+
+	static class ToggleSelectionHelper extends SelectionHelper {		
+		public static IASTFunctionDefinition getFirstSelectedFunctionDefinition(final Region region, final IASTTranslationUnit unit) {
+			final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
+			
+			unit.accept(new CPPASTVisitor() {
+				{
+					shouldVisitDeclarators = true;
+				}
+				public int visit(IASTDeclarator declarator) {
+					if (declarator instanceof CPPASTFunctionDeclarator) {
+						if (declarator.getParent() instanceof ICPPASTFunctionDefinition && isSelectionOnExpression(region, unit)) {
+							container.setObject((IASTFunctionDefinition) declarator.getParent());
+						}
+					}
+					return super.visit(declarator);
+				}
+			});
+			return container.getObject();
+		}
 	}
 
 }
