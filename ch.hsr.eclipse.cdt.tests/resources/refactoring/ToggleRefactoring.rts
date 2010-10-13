@@ -1,4 +1,4 @@
-//!TestRemoveMemberFunctionDeclaration
+//!TestMoveFunctionDeclaration
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -6,15 +6,28 @@ filename=A.h
 #include<iostream>
 using namespace std;
 
+template <typename T>
 class A {
-  void /*$*/member/*$$*/();
+  class B {
+    T /*$*/member/*$$*/()
+    {
+    	return T();
+    }
+  };
 };
 //=
 #include<iostream>
 using namespace std;
 
+template <typename T>
 class A {
+  class B {
+  };
 };
 
-void member();
+inline T A::B::member()
+{
+    return T();
+}
+
 
