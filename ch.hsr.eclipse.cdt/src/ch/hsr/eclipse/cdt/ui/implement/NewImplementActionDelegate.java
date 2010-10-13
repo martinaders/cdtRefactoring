@@ -4,17 +4,18 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.IWorkingCopy;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.editors.text.TextEditor;
-
-import ch.hsr.eclipse.cdt.ui.implement.SilentWizard;
 
 public class NewImplementActionDelegate implements IWorkbenchWindowActionDelegate {
 	private IWorkbenchWindow window;
@@ -37,12 +38,14 @@ public class NewImplementActionDelegate implements IWorkbenchWindowActionDelegat
 	}
 
 	private void runRefactoring(NewImplementRefactoring refactoring) {
-		RefactoringWizard wizard = new SilentWizard(refactoring);
-		RefactoringWizardOpenOperation operator = new RefactoringWizardOpenOperation(wizard);
 		try {
-			operator.run(editor.getSite().getShell(), refactoring.getName());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+			RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());
+			if (status.hasEntries())
+				return;
+			Change changes = refactoring.createChange(new NullProgressMonitor());
+			changes.perform(new NullProgressMonitor());
+		} catch (OperationCanceledException e) {
+		} catch (CoreException e) {
 		}
 	}
 
