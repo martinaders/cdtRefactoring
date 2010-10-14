@@ -10,6 +10,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
@@ -21,6 +22,7 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
@@ -73,6 +75,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void collectMoveChanges(ModificationCollector collector) {
 		IASTFunctionDefinition memberdefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
+		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(memberdefinition);
 		
 		IASTDeclSpecifier newdeclspec = memberdefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
@@ -86,9 +89,18 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup edit = new TextEditGroup("Toggle");
+		rewrite.replace(memberdefinition, declaration, edit);
 		rewrite.insertBefore(unit, null, newfunc, edit);
 		
-		rewrite.replace(memberdefinition, new CPPASTFunctionDeclarator(memberdefinition.getDeclarator().getName().copy()), edit);
+	}
+
+	private IASTSimpleDeclaration createDeclarationFromDefinition(
+			IASTFunctionDefinition memberdefinition) {
+		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
+		result.addDeclarator(declarator);
+		return result;
 	}
 
 	private ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
