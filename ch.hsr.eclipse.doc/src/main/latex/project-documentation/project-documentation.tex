@@ -1,9 +1,9 @@
-\documentclass[a4paper,12pt,abstract=on]{scrreprt}
+\documentclass[a4paper,12pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
-\usepackage{color}
-\usepackage{listings}
 \usepackage{graphicx}
 
+\usepackage{listings}
+\usepackage{color}
 \lstset{language=C++, numbers=left,
 numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small,
 rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname,
@@ -11,14 +11,28 @@ captionpos=b}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
+\textheight 19cm
+\textwidth 14cm
+\headsep 2.5cm
+\oddsidemargin 0.75cm
+\evensidemargin 0.75cm
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\leftmark}
+\rfoot{\thepage}
+
 \title{CDT Refactorings}
 %\subtitle{Toggle member function, Implement function, Override virtual member function}
-\titlehead{\includegraphics{logo_hsr_farbig.pdf}}
+%\titlehead{\includegraphics{logo_hsr_farbig.pdf}}
 \subject{semester thesis}
 \date{\today}
 \publishers{Supervisor: Peter Sommerlad}
 \author{Martin Schwab, Thomas Kallenberg}
 \begin{document}
+
 \maketitle
 \pagenumbering{roman}
 
@@ -27,9 +41,11 @@ Welches Problem wurde mit welchen Ergebnissen bearbeitet + Schlussfolgerungen.
 \end{abstract}
 
 \tableofcontents
+\thispagestyle{fancy}
 \pagenumbering{arabic}
 
 \chapter{Introduction}
+\thispagestyle{fancy}
 
 \section{The current situation}
 
@@ -150,21 +166,22 @@ The semester thesis starts on September 20th and has to be finished until
 December 23rd, 2010.
 
 \chapter{Concepts and Design}
+\thispagestyle{fancy}
 
 \section{Toggle Key}
 
 \subsection{The different position of definition}
 
 In C++ there are three possible positions where a \marginline{definition
-occurrence} function definition may occur. Listing \ref{classheaderimpl} shows
+position} function definition may occur. Listing \ref{classheaderimpl} shows
 the definition in the header. This is a rather uncommon for a definition but the
-initial position placed by the new \textit{Implement Member Function} decribed
+initial position placed by the new \textit{Implement Member Function} described
 in later in 1.1.2.
 %TODO: add right link here
 \lstinputlisting[caption={In Class implementation in A.h},
 label={classheaderimpl}]{classheader_implementation.c}
 
-The most common position for templated member functions are described by
+The most common position for ``templated`` member functions are described by
 Listing \ref{outsideclass}. Due to the problem of the \textbf{extern} TODO:LINK
 keyword the definition must stay in the header file.
 \lstinputlisting[caption={Implementation outside of the class in
@@ -228,6 +245,7 @@ body with default empty return statement.
 \section{Override virtual member function}
 
 \chapter{Implementation}
+\thispagestyle{fancy}
 This chapter describes how the solution was actually implemented.
 
 \chapter{Tests and Results}
@@ -249,6 +267,7 @@ A. Verhein, A. Simeon, "Werkzeugkasten Technische Berichte 1", 31.07.2008
 \chapter*{Nutzungsvereinbarung}
 \chapter*{Erklärung der Urheberschaft}
 \part{Appendix}
+\thispagestyle{fancy}
 %\section{Poster}
 
 
