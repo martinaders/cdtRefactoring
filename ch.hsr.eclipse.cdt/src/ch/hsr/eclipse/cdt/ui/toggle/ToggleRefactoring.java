@@ -2,7 +2,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -12,10 +12,7 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
@@ -24,18 +21,12 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
-import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
-import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
@@ -47,15 +38,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
-		return new CRefactoringDescription("id", "proj", "desc", "comment", 0,
-				new HashMap<String, String>()) {
-			@Override
-			public Refactoring createRefactoring(RefactoringStatus status)
-					throws CoreException {
-				return new ToggleRefactoring(getFile(), getSelection(),
-						getCProject());
-			}
-		};
+		return new EmptyRefactoringDescription();
 	}
 
 	@Override
@@ -123,27 +106,6 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 		Collections.reverse(names);
 		return names;
-	}
-
-	static class ToggleSelectionHelper extends SelectionHelper {		
-		public static IASTFunctionDefinition getFirstSelectedFunctionDefinition(final Region region, final IASTTranslationUnit unit) {
-			final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
-			
-			unit.accept(new CPPASTVisitor() {
-				{
-					shouldVisitDeclarators = true;
-				}
-				public int visit(IASTDeclarator declarator) {
-					if (declarator instanceof CPPASTFunctionDeclarator) {
-						if (declarator.getParent() instanceof ICPPASTFunctionDefinition && isSelectionOnExpression(region, unit)) {
-							container.setObject((IASTFunctionDefinition) declarator.getParent());
-						}
-					}
-					return super.visit(declarator);
-				}
-			});
-			return container.getObject();
-		}
 	}
 
 }
