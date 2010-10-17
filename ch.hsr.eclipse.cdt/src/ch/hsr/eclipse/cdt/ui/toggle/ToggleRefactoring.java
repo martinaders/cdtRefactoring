@@ -1,24 +1,15 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTName;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -31,6 +22,8 @@ import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
+
+	private IASTFunctionDefinition selectedMemberDefinition;
 
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
@@ -57,24 +50,31 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void collectMoveChanges(ModificationCollector collector) {
-		IASTFunctionDefinition memberdefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(memberdefinition);
-		
-		IASTDeclSpecifier newdeclspec = memberdefinition.getDeclSpecifier().copy();
+		selectedMemberDefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
+		IASTFunctionDefinition newfunc = getReplacementFunction();
+		addFunctionReplaceModification(collector, newfunc);
+	}
+
+	private IASTFunctionDefinition getReplacementFunction() {
+		IASTDeclSpecifier newdeclspec = selectedMemberDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
-		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(getQualifiedName(memberdefinition));
+		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(ToggleSelectionHelper.getQualifiedName(selectedMemberDefinition));
 
 		//TODO: add the parameters
 		
-		IASTStatement newbody = memberdefinition.getBody().copy();
+		IASTStatement newbody = selectedMemberDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		newfunc.setParent(unit);
-		
+		return newfunc;
+	}
+
+	private void addFunctionReplaceModification(
+			ModificationCollector collector, IASTFunctionDefinition newfunc) {
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup edit = new TextEditGroup("Toggle");
-		rewrite.replace(memberdefinition, declaration, edit);
+		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedMemberDefinition);
+		rewrite.replace(selectedMemberDefinition, declaration, edit);
 		rewrite.insertBefore(unit, null, newfunc, edit);
-		
 	}
 
 	private IASTSimpleDeclaration createDeclarationFromDefinition(
@@ -84,28 +84,6 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
-	}
-
-	private ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
-		ICPPASTQualifiedName newdecl = new CPPASTQualifiedName();
-		for (IASTName name : getAllQualifiedNames(memberdefinition)) {
-			newdecl.addName(name.copy());
-		}
-		newdecl.addName(memberdefinition.getDeclarator().getName().copy());
-		return newdecl;
-	}
-	
-	private ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
-		ArrayList<IASTName> names = new ArrayList<IASTName>();
-		IASTNode node = memberdefinition; 
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
-			}
-		}
-		Collections.reverse(names);
-		return names;
 	}
 
 }
