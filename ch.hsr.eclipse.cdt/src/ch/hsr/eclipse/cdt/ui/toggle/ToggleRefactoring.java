@@ -10,7 +10,9 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -128,6 +130,15 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
 		ICPPASTQualifiedName quali = ToggleSelectionHelper.getQualifiedName(selectedDefinition);
 		funcdecl.setName(quali);
+		for (IASTNode node : funcdecl.getChildren()) {
+			System.out.println("nodeType: " + node.getClass());
+			if (node instanceof ICPPASTParameterDeclaration) {
+				ICPPASTParameterDeclaration param = (ICPPASTParameterDeclaration) node;
+				ICPPASTDeclarator d = param.getDeclarator();
+				System.out.println("hatswas? " + d.getInitializer());
+				d.setInitializer(null);
+			}
+		}
 		
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
