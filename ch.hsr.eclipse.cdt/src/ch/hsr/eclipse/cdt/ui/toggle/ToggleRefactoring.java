@@ -1,15 +1,21 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.ExpansionOverlapsBoundaryException;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -27,6 +33,7 @@ public class ToggleRefactoring extends CRefactoring {
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private final TextSelection selection;
+	private IASTNode parentInsertionPoint;
 
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
@@ -54,11 +61,54 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void collectMoveChanges(ModificationCollector collector) {
-		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration( unit, selection);
+		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
 		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
 		determinePosition();
-		IASTFunctionDefinition newfunc = getReplacementDefinition();
-		addFunctionReplaceModification(collector, newfunc);
+		if (selectedDefinition.getDeclarator() == selectedDeclaration) {
+			System.out.println("We're in the in-class situation.");
+			IASTFunctionDefinition newfunc = getReplacementDefinition();
+			addFunctionReplaceModification(collector, newfunc);
+		} else {
+			System.out.println("We're in the in-header situation.");
+			IASTFunctionDefinition newfunc = getInClassDefinition();
+			addDeclarationReplaceModification(collector, newfunc);
+		}
+
+	}
+
+	private void addDeclarationReplaceModification(
+			ModificationCollector collector, IASTFunctionDefinition definition) {
+		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
+		TextEditGroup infoText = new TextEditGroup("Toggle");
+		rewrite.remove(selectedDefinition, infoText);
+		rewrite.replace(selectedDeclaration.getParent(), definition, infoText);
+	}
+
+	private IASTFunctionDefinition getInClassDefinition() {
+		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
+		newdeclspec.setInline(false);
+		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
+
+		//TODO: add the parameters
+		IASTStatement newbody = selectedDefinition.getBody().copy();
+		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+		// falsch, muss entsprechende klasse sein
+		parentInsertionPoint = getParentInsertionPoint();
+		newfunc.setParent(parentInsertionPoint);
+		return newfunc;
+	}
+
+	private IASTNode getParentInsertionPoint() {
+		IASTNode node = selectedDeclaration; 
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				ICPPASTCompositeTypeSpecifier type = (ICPPASTCompositeTypeSpecifier) node;
+				System.out.println("Found class declaration: " + type.getName().getSimpleID().toString());
+				return type;
+			}
+		}
+		return unit;
 	}
 
 	private void determinePosition() {

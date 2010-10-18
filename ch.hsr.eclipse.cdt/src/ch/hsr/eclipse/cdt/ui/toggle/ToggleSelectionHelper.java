@@ -63,6 +63,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 					// TODO: In addition, check if at same offset as selection
 					System.out.println("Found matching declaration: " + func.getRawSignature());
 					container.setObject((CPPASTFunctionDeclarator) func);
+					return PROCESS_ABORT;
 				}
 				return super.visit(node);
 			}
@@ -70,7 +71,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return container.getObject();
 	}
 
-	private static ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
+	public static ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
 		ArrayList<IASTName> names = new ArrayList<IASTName>();
 		IASTNode node = memberdefinition; 
 		while(node.getParent() != null) {
@@ -83,7 +84,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return names;
 	}
 
-	private static ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
+	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
 		ICPPASTQualifiedName newdecl = new CPPASTQualifiedName();
 		for (IASTName name : getAllQualifiedNames(memberdefinition)) {
 			newdecl.addName(name.copy());
