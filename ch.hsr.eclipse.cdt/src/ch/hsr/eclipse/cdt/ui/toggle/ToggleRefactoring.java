@@ -66,33 +66,6 @@ public class ToggleRefactoring extends CRefactoring {
 			System.out.println("declaration AND definition needed. Cannot toggle. Stopping.");
 			return;
 		}
-
-		if (isSelectionInHeaderFile())
-			System.out.println("We're in a header file.");
-		else
-			System.out.println("We're in a source file.");
-
-//		// To find this out, there is more work involved.
-//		if (selectedDefinition.getTranslationUnit().equals(selectedDeclaration.getTranslationUnit()))
-//			System.out.println("Declaration and Definition are placed into the same files.");
-		
-//		System.out.println("Declaration and Definition are placed in different files.");
-//		System.out.println("Declaration and Definition are both placed in the header file.");
-//		 System.out.println("and they're together.");
-//		 System.out.println("and they're placed apart.");
-
-//		System.out.println("The specifiers for this declaration: " + selectedDeclaration.getDeclSpecifier());
-//		System.out.println("We're inside a class and the current scope is xy");
-//		System.out.println("We're outside of any class. The function has scope xy. So look there for existing declarations.");
-//		
-//		System.out.println("We've selected a free function.");
-//		 System.out.println("The free function shall be toggled to a separate file.");
-//		 System.out.println("The free function shall be toggled back into the source file.");
-	}
-
-	private boolean isSelectionInHeaderFile() {
-		String filename = unit.getContainingFilename();
-		return filename.endsWith(".h") || filename.endsWith(".hpp");
 	}
 
 	private IASTFunctionDefinition getReplacementDefinition() {
