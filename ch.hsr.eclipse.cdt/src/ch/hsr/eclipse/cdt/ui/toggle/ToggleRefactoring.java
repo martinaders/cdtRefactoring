@@ -4,7 +4,6 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -14,8 +13,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,34 +56,25 @@ public class ToggleRefactoring extends CRefactoring {
 	private void collectMoveChanges(ModificationCollector collector) {
 		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration( unit, selection);
 		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
-
-//		determinePosition();
-//		IASTFunctionDefinition newfunc = getReplacementFunction();
-//		addFunctionReplaceModification(collector, newfunc);
+		determinePosition();
+		IASTFunctionDefinition newfunc = getReplacementDefinition();
+		addFunctionReplaceModification(collector, newfunc);
 	}
 
 	private void determinePosition() {
-		if (selectedDeclaration == null) {
-			System.out.println("No function declaration selected. Cannot toggle. Stopping.");
+		if (selectedDeclaration == null || selectedDefinition == null) {
+			System.out.println("declaration AND definition needed. Cannot toggle. Stopping.");
 			return;
 		}
-		System.out.println("The declarator found: " + selectedDefinition.getRawSignature());
-		System.out.println("The declaration found: " + selectedDeclaration.getRawSignature());
-		if (selectedDefinition.getDeclarator().equals(selectedDeclaration)) {
-			System.out.println("The declarator is the same node as de definition");
-		}
+
 		if (isSelectionInHeaderFile())
 			System.out.println("We're in a header file.");
 		else
 			System.out.println("We're in a source file.");
-		
-		if (selectedDefinition == null && selectedDeclaration != null) // 2nd part is obsolete
-			System.out.println("We're in a pure deCLARAtion.");
-		else
-			System.out.println("We're in a deFINItion so we can access its body."); // stimmt nicht weils die klassendefinition findet
 
-		if (selectedDefinition.getTranslationUnit().equals(selectedDeclaration.getTranslationUnit()))
-			System.out.println("Declaration and Definition are placed into the same files.");
+//		// To find this out, there is more work involved.
+//		if (selectedDefinition.getTranslationUnit().equals(selectedDeclaration.getTranslationUnit()))
+//			System.out.println("Declaration and Definition are placed into the same files.");
 		
 //		System.out.println("Declaration and Definition are placed in different files.");
 //		System.out.println("Declaration and Definition are both placed in the header file.");
@@ -107,10 +95,10 @@ public class ToggleRefactoring extends CRefactoring {
 		return filename.endsWith(".h") || filename.endsWith(".hpp");
 	}
 
-	private IASTFunctionDefinition getReplacementFunction() {
+	private IASTFunctionDefinition getReplacementDefinition() {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
-		IASTFunctionDeclarator funcdecl = selectedDeclaration;
+		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
 
 		//TODO: add the parameters
 		
@@ -121,12 +109,12 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void addFunctionReplaceModification(
-			ModificationCollector collector, IASTFunctionDefinition newfunc) {
+			ModificationCollector collector, IASTFunctionDefinition definition) {
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
-		TextEditGroup edit = new TextEditGroup("Toggle");
+		TextEditGroup infoText = new TextEditGroup("Toggle");
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
-		rewrite.replace(selectedDefinition, declaration, edit);
-		rewrite.insertBefore(unit, null, newfunc, edit);
+		rewrite.replace(selectedDefinition, declaration, infoText);
+		rewrite.insertBefore(unit, null, definition, infoText);
 	}
 
 	private IASTSimpleDeclaration createDeclarationFromDefinition(

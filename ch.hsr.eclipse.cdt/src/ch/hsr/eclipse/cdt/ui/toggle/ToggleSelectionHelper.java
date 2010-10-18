@@ -70,4 +70,26 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return container.getObject();
 	}
 
+	private static ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
+		ArrayList<IASTName> names = new ArrayList<IASTName>();
+		IASTNode node = memberdefinition; 
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
+			}
+		}
+		Collections.reverse(names);
+		return names;
+	}
+
+	private static ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
+		ICPPASTQualifiedName newdecl = new CPPASTQualifiedName();
+		for (IASTName name : getAllQualifiedNames(memberdefinition)) {
+			newdecl.addName(name.copy());
+		}
+		newdecl.addName(memberdefinition.getDeclarator().getName().copy());
+		return newdecl;
+	}
+
 }
