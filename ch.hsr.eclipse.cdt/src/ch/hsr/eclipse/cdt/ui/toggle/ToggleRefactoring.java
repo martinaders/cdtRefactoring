@@ -10,12 +10,17 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTReferenceOperator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -66,8 +71,8 @@ public class ToggleRefactoring extends CRefactoring {
 		determinePosition();
 		if (selectedDefinition.getDeclarator() == selectedDeclaration) {
 			System.out.println("We're in the in-class situation.");
-			IASTFunctionDefinition newfunc = getReplacementDefinition();
-			addFunctionReplaceModification(collector, newfunc);
+			IASTFunctionDefinition newfunc = getInHeaderDefinition();
+			addDefinitionAppendModification(collector, newfunc);
 		} else {
 			System.out.println("We're in the in-header situation.");
 			IASTFunctionDefinition newfunc = getInClassDefinition();
@@ -89,7 +94,6 @@ public class ToggleRefactoring extends CRefactoring {
 		newdeclspec.setInline(false);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
 
-		//TODO: add the parameters
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		// falsch, muss entsprechende klasse sein
@@ -118,12 +122,12 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private IASTFunctionDefinition getReplacementDefinition() {
+	private IASTFunctionDefinition getInHeaderDefinition() {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
-
-		//TODO: add the parameters
+		ICPPASTQualifiedName quali = ToggleSelectionHelper.getQualifiedName(selectedDefinition);
+		funcdecl.setName(quali);
 		
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
@@ -131,7 +135,7 @@ public class ToggleRefactoring extends CRefactoring {
 		return newfunc;
 	}
 
-	private void addFunctionReplaceModification(
+	private void addDefinitionAppendModification(
 			ModificationCollector collector, IASTFunctionDefinition definition) {
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup infoText = new TextEditGroup("Toggle");
