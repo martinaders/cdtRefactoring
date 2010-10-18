@@ -1,0 +1,78 @@
+\chapter{Specification}
+\thispagestyle{fancy}
+
+\section{Toggle Key}
+
+\subsection{The different position of definition}
+
+In C++ there are three possible positions where a \marginline{definition
+position} function definition may occur. Listing \ref{classheaderimpl} shows
+the definition in the header. This is a rather uncommon for a definition but the
+initial position placed by the new \textit{Implement Member Function} described
+in later in 1.1.2.
+%TODO: add right link here
+\lstinputlisting[caption={In Class implementation in A.h},
+label={classheaderimpl}]{classheader_implementation.c}
+
+The most common position for ``templated`` member functions are described by
+Listing \ref{outsideclass}. Due to the problem of the \textbf{extern} TODO:LINK
+keyword the definition must stay in the header file.
+\lstinputlisting[caption={Implementation outside of the class in
+A.h}, label={outsideclass}]{outside_class_implementation.c}
+
+The most common way in C++ is the separation of header and the implemenation
+file, shown by listing \ref{twofilesolution_header} and listing
+\ref{twofilesolution_impl}.
+
+\begin{tabular}{p{5cm}p{.5cm}p{6cm}}
+\lstinputlisting[caption={two file solution - A.h},
+label={twofilesolution_header}]{implementation_file.h}
+& & 
+\lstinputlisting[caption={two file solution - A.cpp},
+label={twofilesolution_impl}]{implementation_file.c}
+\end{tabular}
+
+\subsection{How it works}
+
+The \textit{Toggle Key} is used to move the definition of a member function
+between the positions described above. For a non-templated member function
+moving will be done in the following order:
+\begin{itemize}
+ \item From inline in the class in the header file
+ \item to the outside of the class in the same header file
+ \item to the implementation file
+ \item and back to inline of the class in the header file.
+\end{itemize}
+
+However, for templated member function this does not make much sense. Therefore
+templated functions will only have a two way toggle.
+\begin{itemize}
+ \item From inline in the class in the header
+ \item to the outside of the class in the same header
+ \item and then back to inline in the class.
+\end{itemize}
+
+The Editor is not switched at any time but stays at the same file.
+
+\section{Re-Implementation of Implement Member Function}
+
+\subsection{The need for a new Implement Member Function}
+
+The current CDT plug-in already includes a \textit{Implement Member
+Function}. But this implementation is slow and it does not really
+fit together with the \textit{Toggle Key}. It breaks the coding
+flow for adding functionality to classes twice which could be reason not to use
+the toggle key. Therefore toggle key will be supported by a new
+Implement Member Function which synergies with the toggle key.
+
+\subsection{How it works}
+
+After writing a function declaration in the class definition, not yet written
+the ``;'', code completion can be used to create the function body with a
+appropriated default empty return statement.\newline
+
+An already completed function declaration can be transformed to a function
+definition by using the ``Implement Member Function'' hot-key which creates a
+body with default empty return statement.
+
+\section{Override virtual member function}
