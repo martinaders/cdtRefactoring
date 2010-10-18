@@ -1,28 +1,20 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.ExpansionOverlapsBoundaryException;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTReferenceOperator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -69,7 +61,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void collectMoveChanges(ModificationCollector collector) {
 		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
-		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
+		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection, selectedDeclaration);
 		determinePosition();
 		if (selectedDefinition.getDeclarator() == selectedDeclaration) {
 			System.out.println("We're in the in-class situation.");
@@ -131,11 +123,9 @@ public class ToggleRefactoring extends CRefactoring {
 		ICPPASTQualifiedName quali = ToggleSelectionHelper.getQualifiedName(selectedDefinition);
 		funcdecl.setName(quali);
 		for (IASTNode node : funcdecl.getChildren()) {
-			System.out.println("nodeType: " + node.getClass());
 			if (node instanceof ICPPASTParameterDeclaration) {
 				ICPPASTParameterDeclaration param = (ICPPASTParameterDeclaration) node;
 				ICPPASTDeclarator d = param.getDeclarator();
-				System.out.println("hatswas? " + d.getInitializer());
 				d.setInitializer(null);
 			}
 		}
