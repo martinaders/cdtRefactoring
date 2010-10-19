@@ -33,7 +33,6 @@ import org.eclipse.text.edits.TextEditGroup;
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
 	
-	IASTFunctionDefinition memberdefinition;
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private final TextSelection selection;
@@ -52,15 +51,11 @@ public class ToggleRefactoring extends CRefactoring {
 		if (initStatus.hasFatalError()) {
 			return initStatus;
 		}
-		//replace this with indexing
-		memberdefinition = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
-		
-		if (memberdefinition == null) {
-			initStatus.addFatalError("could not get a definition");
-		}
-		else if (!(memberdefinition instanceof IASTFunctionDefinition)) {
-			System.out.println("Is not a declaration abort");
-			initStatus.addFatalError("Is not a function definition");
+		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
+		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
+
+		if (selectedDeclaration == null || selectedDefinition == null) {
+			initStatus.addFatalError("declaration AND definition needed. Cannot toggle. Stopping.");
 		}
 		return initStatus;
 	}
@@ -77,7 +72,7 @@ public class ToggleRefactoring extends CRefactoring {
 		try {
 			lockIndex();
 			try {
-				collectModificationsSafely();
+				collectModificationsWithCaseDistinguish();
 			} finally {
 				unlockIndex();
 			}
@@ -86,11 +81,7 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private void collectModificationsSafely() {
-		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
-		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
-		if (!determinePosition())
-			return;
+	private void collectModificationsWithCaseDistinguish() {
 		if (isInClassSituation())
 			handleInClassSituation();
 		else
@@ -120,15 +111,16 @@ public class ToggleRefactoring extends CRefactoring {
 		rewrite.replace(selectedDeclaration.getParent(), definition, infoText);
 	}
 
+	@Deprecated
 	private void collectMoveChanges(ModificationCollector collector) {
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition();
 		
-		IASTDeclSpecifier newdeclspec = memberdefinition.getDeclSpecifier().copy();
+		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
-		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(ToggleSelectionHelper.getQualifiedName(memberdefinition));
+		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(ToggleSelectionHelper.getQualifiedName(selectedDefinition));
 		//TODO: add the parameters
 		
-		IASTStatement newbody = memberdefinition.getBody().copy();
+		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		ICPPASTTemplateDeclaration decl = getTemplateDeclaration();
 		decl.setDeclaration(newfunc);
@@ -136,12 +128,13 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup edit = new TextEditGroup("Toggle");
-		rewrite.replace(memberdefinition, declaration, edit);
+		rewrite.replace(selectedDefinition, declaration, edit);
 		rewrite.insertBefore(unit, null, decl, edit);
 	}
 
+	@Deprecated
 	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
-		IASTNode node = memberdefinition;
+		IASTNode node = selectedDefinition;
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTTemplateDeclaration)
@@ -150,9 +143,10 @@ public class ToggleRefactoring extends CRefactoring {
 		return (ICPPASTTemplateDeclaration) node.copy();
 	}
 
+	@Deprecated
 	private IASTSimpleDeclaration createDeclarationFromDefinition() {
-		IASTFunctionDeclarator declarator = memberdefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTFunctionDeclarator declarator = selectedDefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = selectedDefinition.getDeclSpecifier().copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
@@ -181,14 +175,6 @@ public class ToggleRefactoring extends CRefactoring {
 			}
 		}
 		return unit;
-	}
-
-	private boolean determinePosition() {
-		if (selectedDeclaration == null || selectedDefinition == null) {
-			System.out.println("declaration AND definition needed. Cannot toggle. Stopping.");
-			return false;
-		}
-		return true;
 	}
 
 	private IASTFunctionDefinition getInHeaderDefinition() {
