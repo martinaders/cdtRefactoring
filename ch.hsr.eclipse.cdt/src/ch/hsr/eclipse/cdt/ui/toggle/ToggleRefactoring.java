@@ -16,6 +16,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
@@ -101,10 +102,22 @@ public class ToggleRefactoring extends CRefactoring {
 		rewriter.replace(selectedDefinition, declaration, infoText);
 		rewriter.insertBefore(unit, null, getInHeaderDefinition(), infoText);
 	}
+	
+	private IASTSimpleDeclaration createDeclarationFromDefinition(IASTFunctionDefinition memberdefinition) {
+		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
+		result.addDeclarator(declarator);
+		return result;
+	}
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		rewriter.remove(selectedDefinition, infoText);
+		IASTNode toremove = (ASTNode) selectedDefinition; 
+		if (toremove.getParent() != null && toremove.getParent() instanceof ICPPASTTemplateDeclaration)
+			toremove = selectedDefinition.getParent();
+		
+		rewriter.remove(toremove, infoText);
 		rewriter.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
 	}
 
@@ -134,18 +147,6 @@ public class ToggleRefactoring extends CRefactoring {
 		return unit;
 	}
 
-	private IASTNode getTemplateDeclaration() {
-		IASTNode node = selectedDefinition;
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTTemplateDeclaration)
-				break;
-		}
-		IASTNode copy = node.copy();
-		copy.setParent(unit);
-		return (IASTNode) copy;
-	}
-
 	private IASTNode getInHeaderDefinition() {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
@@ -162,16 +163,32 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
-		// TODO: Improve template insertion
-		IASTNode templateDeclaration = getTemplateDeclaration();
-		templateDeclaration.getChildren()[0] = null;
-		newfunc.setParent(templateDeclaration);
-		return templateDeclaration;
+		
+		IASTNode node = getTemplateDeclaration();
+		if (node != null && node instanceof ICPPASTTemplateDeclaration) {
+			ICPPASTTemplateDeclaration templdecl = (ICPPASTTemplateDeclaration) node; 
+			templdecl.setParent(unit);
+			templdecl.setDeclaration(newfunc);
+			return templdecl;
+		} else {
+			newfunc.setParent(unit);
+			return newfunc;
+		}
 	}
 
-	private IASTSimpleDeclaration createDeclarationFromDefinition(IASTFunctionDefinition memberdefinition) {
-		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+	private IASTNode getTemplateDeclaration() {
+		IASTNode node = selectedDeclaration;
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTTemplateDeclaration)
+				break;
+		}
+		return node.copy();
+	}
+
+	private IASTSimpleDeclaration createDeclarationFromDefinition() {
+		IASTDeclarator declarator = selectedDefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = selectedDefinition.getDeclSpecifier().copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
