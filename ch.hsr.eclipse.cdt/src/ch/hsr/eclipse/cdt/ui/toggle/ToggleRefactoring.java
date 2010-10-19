@@ -35,7 +35,7 @@ public class ToggleRefactoring extends CRefactoring {
 	
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
-	private final TextSelection selection;
+	private TextSelection selection;
 	private IASTNode parentInsertionPoint;
 	private ModificationCollector modifications;
 
@@ -91,65 +91,22 @@ public class ToggleRefactoring extends CRefactoring {
 	private boolean isInClassSituation() {
 		return selectedDefinition.getDeclarator() == selectedDeclaration;
 	}
+	
+	private void handleInClassSituation() {
+		System.out.println("We're in the in-class situation.");
+		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
+		TextEditGroup infoText = new TextEditGroup("Toggle");
+		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
+		rewrite.replace(selectedDefinition, declaration, infoText);
+		rewrite.insertBefore(unit, null, getInHeaderDefinition(), infoText);
+	}
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		IASTFunctionDefinition newfunc = getInClassDefinition();
-		addDeclarationReplaceModification(newfunc);
-	}
-
-	private void handleInClassSituation() {
-		System.out.println("We're in the in-class situation.");
-		IASTFunctionDefinition newfunc = getInHeaderDefinition();
-		addDefinitionAppendModification(newfunc);
-	}
-
-	private void addDeclarationReplaceModification(IASTFunctionDefinition definition) {
 		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
 		TextEditGroup infoText = new TextEditGroup("Toggle");
 		rewrite.remove(selectedDefinition, infoText);
-		rewrite.replace(selectedDeclaration.getParent(), definition, infoText);
-	}
-
-	@Deprecated
-	private void collectMoveChanges(ModificationCollector collector) {
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition();
-		
-		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
-		newdeclspec.setInline(true);
-		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(ToggleSelectionHelper.getQualifiedName(selectedDefinition));
-		//TODO: add the parameters
-		
-		IASTStatement newbody = selectedDefinition.getBody().copy();
-		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
-		ICPPASTTemplateDeclaration decl = getTemplateDeclaration();
-		decl.setDeclaration(newfunc);
-		newfunc.setParent(decl);
-		
-		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
-		TextEditGroup edit = new TextEditGroup("Toggle");
-		rewrite.replace(selectedDefinition, declaration, edit);
-		rewrite.insertBefore(unit, null, decl, edit);
-	}
-
-	@Deprecated
-	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
-		IASTNode node = selectedDefinition;
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTTemplateDeclaration)
-				break;
-		}
-		return (ICPPASTTemplateDeclaration) node.copy();
-	}
-
-	@Deprecated
-	private IASTSimpleDeclaration createDeclarationFromDefinition() {
-		IASTFunctionDeclarator declarator = selectedDefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = selectedDefinition.getDeclSpecifier().copy();
-		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
-		result.addDeclarator(declarator);
-		return result;
+		rewrite.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
@@ -160,6 +117,7 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		parentInsertionPoint = getParentInsertionPoint(selectedDeclaration, unit);
+		// TODO: use newfunc.setParent(getTemplateDeclaration()) here
 		newfunc.setParent(parentInsertionPoint);
 		return newfunc;
 	}
@@ -175,6 +133,16 @@ public class ToggleRefactoring extends CRefactoring {
 			}
 		}
 		return unit;
+	}
+
+	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
+		IASTNode node = selectedDefinition;
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTTemplateDeclaration)
+				break;
+		}
+		return (ICPPASTTemplateDeclaration) node.copy();
 	}
 
 	private IASTFunctionDefinition getInHeaderDefinition() {
@@ -193,20 +161,12 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+		// TODO: use newfunc.setParent(getTemplateDeclaration()) here
 		newfunc.setParent(unit);
 		return newfunc;
 	}
 
-	private void addDefinitionAppendModification(IASTFunctionDefinition definition) {
-		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
-		TextEditGroup infoText = new TextEditGroup("Toggle");
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
-		rewrite.replace(selectedDefinition, declaration, infoText);
-		rewrite.insertBefore(unit, null, definition, infoText);
-	}
-
-	private IASTSimpleDeclaration createDeclarationFromDefinition(
-			IASTFunctionDefinition memberdefinition) {
+	private IASTSimpleDeclaration createDeclarationFromDefinition(IASTFunctionDefinition memberdefinition) {
 		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
 		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
