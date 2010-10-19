@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
@@ -24,61 +22,28 @@ import org.eclipse.jface.text.TextSelection;
  */
 class ToggleSelectionHelper extends SelectionHelper {		
 	
-	public static CPPASTFunctionDeclarator getSelectedDeclaration(final IASTTranslationUnit unit, final TextSelection selection) {
-		final Container<CPPASTFunctionDeclarator> container = new Container<CPPASTFunctionDeclarator>();
-		final Container<CPPASTFunctionDeclarator> selectedDeclaration = new Container<CPPASTFunctionDeclarator>();
-
-		// Find the selected node (warning: DRY but existing function is not reliable!)
-		unit.accept(new CPPASTVisitor() {
-			{
-				shouldVisitDeclarators = true;
-			}
-			public int visit(IASTDeclarator node) {
-				if (!(node instanceof CPPASTFunctionDeclarator))
-					return super.visit(node);
-				if (isSelectionOnExpression(getRegion(selection), node)) {
-					selectedDeclaration.setObject((CPPASTFunctionDeclarator) node);
-				}
-				return super.visit(node);
-			}
-		});
-		if (selectedDeclaration.getObject() == null) {
+	public static CPPASTFunctionDeclarator getSelectedDeclaration(IASTTranslationUnit unit, TextSelection selection) {
+		CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
+		if (selectedDeclaration == null) {
 			System.out.println("cannot determine selected function.");
 			return null;
 		}
+		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
+		unit.accept(visitor);
+		return visitor.result;
+	}
 
-		// Now find the declarator that should be replaced by the refactoring
-		final String selectedNodeName = new String(selectedDeclaration.getObject().getName().getSimpleID());
-		unit.accept(new CPPASTVisitor() {
-			{
-				shouldVisitDeclarators = true;
-			}
-			public int visit(IASTDeclarator node) {
-				if (!(node instanceof CPPASTFunctionDeclarator))
-					return super.visit(node);
-				CPPASTFunctionDeclarator func = (CPPASTFunctionDeclarator) node;
-				String currentNodeName = new String(func.getName().getSimpleID());
-				// TODO: Name, Scope and Parameter names have to be the same
-				// TODO: checking number of parameters as a small step towards correctness
-				if (currentNodeName.equals(selectedNodeName) && func.getParameters().length == selectedDeclaration.getObject().getParameters().length) {
-					// prioritize plain declarations over definitions
-					if (container.getObject() == null || !(func.getParent() instanceof ICPPASTFunctionDefinition)) {
-						System.out.println("Found matching declaration: " + func.getRawSignature());
-						container.setObject((CPPASTFunctionDeclarator) func);
-					}
-					return PROCESS_CONTINUE;
-				}
-				return super.visit(node);
-			}
-		});
-		return container.getObject();
+	private static CPPASTFunctionDeclarator getSelectedDeclarator(IASTTranslationUnit unit, TextSelection selection) {
+		SelectedDeclaratorFinder visitor = new SelectedDeclaratorFinder(selection);
+		unit.accept(visitor);
+		return visitor.result;
 	}
 
 	public static IASTFunctionDefinition getSelectedDefinition(
 			final IASTTranslationUnit unit, final TextSelection selection, final CPPASTFunctionDeclarator selectedDeclaration) {
 		if (selectedDeclaration == null)
 			return null;
-		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
+		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
 		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		
 		unit.accept(new CPPASTVisitor() {
@@ -93,12 +58,12 @@ class ToggleSelectionHelper extends SelectionHelper {
 				// TODO: add a more strict and complete equality check
 				if (currentNodeName.equals(selectedNodeName)) {
 					System.out.println("Found matching definition: " + func.getRawSignature());
-					container.setObject((IASTFunctionDefinition) func);
+					result.setObject((IASTFunctionDefinition) func);
 				}
 				return super.visit(node);
 			}
 		});
-		return container.getObject();
+		return result.getObject();
 	}
 
 	public static ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {

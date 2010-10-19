@@ -53,7 +53,7 @@ public class ToggleRefactoring extends CRefactoring {
 		try {
 			lockIndex();
 			try {
-				collectMoveChanges();
+				collectModificationsSafely();
 			} finally {
 				unlockIndex();
 			}
@@ -62,7 +62,7 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private void collectMoveChanges() {
+	private void collectModificationsSafely() {
 		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
 		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection, selectedDeclaration);
 		if (!determinePosition())
