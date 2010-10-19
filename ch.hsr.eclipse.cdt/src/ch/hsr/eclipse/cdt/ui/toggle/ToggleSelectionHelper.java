@@ -43,10 +43,12 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return visitor.result;
 	}
 
-	public static IASTFunctionDefinition getSelectedDefinition(
-			final IASTTranslationUnit unit, final TextSelection selection, final CPPASTFunctionDeclarator selectedDeclaration) {
-		if (selectedDeclaration == null)
+	public static IASTFunctionDefinition getSelectedDefinition(IASTTranslationUnit unit, TextSelection selection) {
+		final CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
+		if (selectedDeclaration == null) {
+			System.out.println("cannot determine selected function.");
 			return null;
+		}
 		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
 		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		

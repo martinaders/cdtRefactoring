@@ -34,27 +34,6 @@ import org.eclipse.text.edits.TextEditGroup;
 public class ToggleRefactoring extends CRefactoring {
 	
 	IASTFunctionDefinition memberdefinition;
-
-	@Override
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
-			throws CoreException, OperationCanceledException {
-		super.checkInitialConditions(pm);
-		if (initStatus.hasFatalError()) {
-			return initStatus;
-		}
-		//replace this with indexing
-		memberdefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
-		
-		if (memberdefinition == null) {
-			initStatus.addFatalError("could not get a definition");
-		}
-		else if (!(memberdefinition instanceof IASTFunctionDefinition)) {
-			System.out.println("Is not a declaration abort");
-			initStatus.addFatalError("Is not a function definition");
-		}
-		return initStatus;
-	}
-
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private final TextSelection selection;
@@ -66,6 +45,26 @@ public class ToggleRefactoring extends CRefactoring {
 		this.selection = (TextSelection) selection;
 	}
 
+	@Override
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
+			throws CoreException, OperationCanceledException {
+		super.checkInitialConditions(pm);
+		if (initStatus.hasFatalError()) {
+			return initStatus;
+		}
+		//replace this with indexing
+		memberdefinition = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
+		
+		if (memberdefinition == null) {
+			initStatus.addFatalError("could not get a definition");
+		}
+		else if (!(memberdefinition instanceof IASTFunctionDefinition)) {
+			System.out.println("Is not a declaration abort");
+			initStatus.addFatalError("Is not a function definition");
+		}
+		return initStatus;
+	}
+	
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
 		return new EmptyRefactoringDescription();
@@ -89,7 +88,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void collectModificationsSafely() {
 		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
-		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection, selectedDeclaration);
+		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
 		if (!determinePosition())
 			return;
 		if (isInClassSituation())
