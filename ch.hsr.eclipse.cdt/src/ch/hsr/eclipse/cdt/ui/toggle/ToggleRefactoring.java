@@ -7,6 +7,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
@@ -33,6 +34,7 @@ public class ToggleRefactoring extends CRefactoring {
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private final TextSelection selection;
 	private IASTNode parentInsertionPoint;
+	private ModificationCollector modifications;
 
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
@@ -46,11 +48,12 @@ public class ToggleRefactoring extends CRefactoring {
 
 	@Override
 	protected void collectModifications(IProgressMonitor pm,
-			ModificationCollector collector) throws CoreException {
+			ModificationCollector modifications) throws CoreException {
+		this.modifications = modifications;
 		try {
 			lockIndex();
 			try {
-				collectMoveChanges(collector);
+				collectMoveChanges();
 			} finally {
 				unlockIndex();
 			}
@@ -59,25 +62,35 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private void collectMoveChanges(ModificationCollector collector) {
+	private void collectMoveChanges() {
 		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
 		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection, selectedDeclaration);
-		determinePosition();
-		if (selectedDefinition.getDeclarator() == selectedDeclaration) {
-			System.out.println("We're in the in-class situation.");
-			IASTFunctionDefinition newfunc = getInHeaderDefinition();
-			addDefinitionAppendModification(collector, newfunc);
-		} else {
-			System.out.println("We're in the in-header situation.");
-			IASTFunctionDefinition newfunc = getInClassDefinition();
-			addDeclarationReplaceModification(collector, newfunc);
-		}
-
+		if (!determinePosition())
+			return;
+		if (isInClassSituation())
+			handleInClassSituation();
+		else
+			handleInHeaderSituation();
 	}
 
-	private void addDeclarationReplaceModification(
-			ModificationCollector collector, IASTFunctionDefinition definition) {
-		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
+	private boolean isInClassSituation() {
+		return selectedDefinition.getDeclarator() == selectedDeclaration;
+	}
+
+	private void handleInHeaderSituation() {
+		System.out.println("We're in the in-header situation.");
+		IASTFunctionDefinition newfunc = getInClassDefinition();
+		addDeclarationReplaceModification(newfunc);
+	}
+
+	private void handleInClassSituation() {
+		System.out.println("We're in the in-class situation.");
+		IASTFunctionDefinition newfunc = getInHeaderDefinition();
+		addDefinitionAppendModification(newfunc);
+	}
+
+	private void addDeclarationReplaceModification(IASTFunctionDefinition definition) {
+		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
 		TextEditGroup infoText = new TextEditGroup("Toggle");
 		rewrite.remove(selectedDefinition, infoText);
 		rewrite.replace(selectedDeclaration.getParent(), definition, infoText);
@@ -90,30 +103,30 @@ public class ToggleRefactoring extends CRefactoring {
 
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
-		// falsch, muss entsprechende klasse sein
-		parentInsertionPoint = getParentInsertionPoint();
+		parentInsertionPoint = getParentInsertionPoint(selectedDeclaration, unit);
 		newfunc.setParent(parentInsertionPoint);
 		return newfunc;
 	}
 
-	private IASTNode getParentInsertionPoint() {
-		IASTNode node = selectedDeclaration; 
+	public IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child, IASTTranslationUnit alternative) {
+		IASTNode node = child;
 		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTCompositeTypeSpecifier type = (ICPPASTCompositeTypeSpecifier) node;
-				System.out.println("Found class declaration: " + type.getName().getSimpleID().toString());
+				System.out.println("Will insert copied function here: " + new String(type.getName().getSimpleID()));
 				return type;
 			}
 		}
 		return unit;
 	}
 
-	private void determinePosition() {
+	private boolean determinePosition() {
 		if (selectedDeclaration == null || selectedDefinition == null) {
 			System.out.println("declaration AND definition needed. Cannot toggle. Stopping.");
-			return;
+			return false;
 		}
+		return true;
 	}
 
 	private IASTFunctionDefinition getInHeaderDefinition() {
@@ -136,9 +149,8 @@ public class ToggleRefactoring extends CRefactoring {
 		return newfunc;
 	}
 
-	private void addDefinitionAppendModification(
-			ModificationCollector collector, IASTFunctionDefinition definition) {
-		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
+	private void addDefinitionAppendModification(IASTFunctionDefinition definition) {
+		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
 		TextEditGroup infoText = new TextEditGroup("Toggle");
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
 		rewrite.replace(selectedDefinition, declaration, infoText);

@@ -76,6 +76,8 @@ class ToggleSelectionHelper extends SelectionHelper {
 
 	public static IASTFunctionDefinition getSelectedDefinition(
 			final IASTTranslationUnit unit, final TextSelection selection, final CPPASTFunctionDeclarator selectedDeclaration) {
+		if (selectedDeclaration == null)
+			return null;
 		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
 		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		
