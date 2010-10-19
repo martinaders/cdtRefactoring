@@ -1,7 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -38,7 +37,6 @@ public class ToggleRefactoring extends CRefactoring {
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private TextSelection selection;
-	private IASTNode parentInsertionPoint;
 	private ASTRewrite rewriter;
 	private TextEditGroup infoText;
 
@@ -113,7 +111,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		IASTNode toremove = (ASTNode) selectedDefinition; 
+		IASTNode toremove = selectedDefinition; 
 		if (toremove.getParent() != null && toremove.getParent() instanceof ICPPASTTemplateDeclaration)
 			toremove = selectedDefinition.getParent();
 		
@@ -122,26 +120,21 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
-		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
-		newdeclspec.setInline(false);
-		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
-
-		IASTStatement newbody = selectedDefinition.getBody().copy();
-		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
-		parentInsertionPoint = getParentInsertionPoint(selectedDeclaration, unit);
-		// TODO: use newfunc.setParent(getTemplateDeclaration()) here ?
-		newfunc.setParent(parentInsertionPoint);
+		IASTDeclSpecifier newDeclSpec = selectedDefinition.getDeclSpecifier().copy();
+		newDeclSpec.setInline(false);
+		IASTFunctionDeclarator newDeclaration = selectedDeclaration.copy();
+		IASTStatement newBody = selectedDefinition.getBody().copy();
+		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newDeclSpec, newDeclaration, newBody);
+		newfunc.setParent(getParentInsertionPoint(selectedDeclaration, unit));
 		return newfunc;
 	}
 
-	public IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child, IASTTranslationUnit alternative) {
+	private IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child, IASTTranslationUnit alternative) {
 		IASTNode node = child;
 		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				ICPPASTCompositeTypeSpecifier type = (ICPPASTCompositeTypeSpecifier) node;
-				System.out.println("Will insert copied function here: " + new String(type.getName().getSimpleID()));
-				return type;
+				return (ICPPASTCompositeTypeSpecifier) node;
 			}
 		}
 		return unit;
@@ -151,17 +144,10 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
-		ICPPASTQualifiedName quali = ToggleSelectionHelper.getQualifiedName(selectedDefinition);
-		funcdecl.setName(quali);
-		for (IASTNode node : funcdecl.getChildren()) {
-			if (node instanceof ICPPASTParameterDeclaration) {
-				ICPPASTParameterDeclaration param = (ICPPASTParameterDeclaration) node;
-				ICPPASTDeclarator d = param.getDeclarator();
-				d.setInitializer(null);
-			}
-		}
-		
+		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition));
+		removeParameterInitializations(funcdecl);
 		IASTStatement newbody = selectedDefinition.getBody().copy();
+		
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		
 		IASTNode node = getTemplateDeclaration();
@@ -176,6 +162,15 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
+	private void removeParameterInitializations(IASTFunctionDeclarator funcdecl) {
+		for (IASTNode child : funcdecl.getChildren()) {
+			if (child instanceof ICPPASTParameterDeclaration) {
+				ICPPASTParameterDeclaration parameter = (ICPPASTParameterDeclaration) child;
+				parameter.getDeclarator().setInitializer(null);
+			}
+		}
+	}
+
 	private IASTNode getTemplateDeclaration() {
 		IASTNode node = selectedDeclaration;
 		while(node.getParent() != null) {
@@ -184,14 +179,6 @@ public class ToggleRefactoring extends CRefactoring {
 				break;
 		}
 		return node.copy();
-	}
-
-	private IASTSimpleDeclaration createDeclarationFromDefinition() {
-		IASTDeclarator declarator = selectedDefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = selectedDefinition.getDeclSpecifier().copy();
-		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
-		result.addDeclarator(declarator);
-		return result;
 	}
 
 	@Override
