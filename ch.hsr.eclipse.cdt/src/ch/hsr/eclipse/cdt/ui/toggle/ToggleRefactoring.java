@@ -1,6 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -115,7 +116,7 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
 		parentInsertionPoint = getParentInsertionPoint(selectedDeclaration, unit);
-		// TODO: use newfunc.setParent(getTemplateDeclaration()) here
+		// TODO: use newfunc.setParent(getTemplateDeclaration()) here ?
 		newfunc.setParent(parentInsertionPoint);
 		return newfunc;
 	}
@@ -133,17 +134,19 @@ public class ToggleRefactoring extends CRefactoring {
 		return unit;
 	}
 
-	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
+	private IASTNode getTemplateDeclaration() {
 		IASTNode node = selectedDefinition;
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTTemplateDeclaration)
 				break;
 		}
-		return (ICPPASTTemplateDeclaration) node.copy();
+		IASTNode copy = node.copy();
+		copy.setParent(unit);
+		return (IASTNode) copy;
 	}
 
-	private IASTFunctionDefinition getInHeaderDefinition() {
+	private IASTNode getInHeaderDefinition() {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
@@ -159,9 +162,11 @@ public class ToggleRefactoring extends CRefactoring {
 		
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
-		// TODO: use newfunc.setParent(getTemplateDeclaration()) here
-		newfunc.setParent(unit);
-		return newfunc;
+		// TODO: Improve template insertion
+		IASTNode templateDeclaration = getTemplateDeclaration();
+		templateDeclaration.getChildren()[0] = null;
+		newfunc.setParent(templateDeclaration);
+		return templateDeclaration;
 	}
 
 	private IASTSimpleDeclaration createDeclarationFromDefinition(IASTFunctionDefinition memberdefinition) {
