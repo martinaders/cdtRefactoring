@@ -7,6 +7,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
@@ -17,6 +18,8 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
@@ -89,10 +92,11 @@ class ToggleSelectionHelper extends SelectionHelper {
 			else if (node instanceof ICPPASTTemplateDeclaration) {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
+						IASTName name = names.remove(names.size()-1);
 						ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
-						names.add(tempcild.getName());
-						//TODO: fix me: not insert template as name but as template parameter
-						//NOT: A::T::B but A<T>::B
+						IASTNamedTypeSpecifier t = new CPPASTNamedTypeSpecifier(tempcild.getName().copy());
+						IASTName toadd = new CPPASTName((name + "<" + t.getName() + ">").toCharArray());
+						names.add(toadd);
 					}
 				}
 			}
