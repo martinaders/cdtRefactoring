@@ -11,7 +11,10 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
@@ -78,6 +81,19 @@ class ToggleSelectionHelper extends SelectionHelper {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
 				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
+			}
+			else if (node instanceof ICPPASTNamespaceDefinition) {
+				names.add(((ICPPASTNamespaceDefinition) node).getName());
+			}
+			else if (node instanceof ICPPASTTemplateDeclaration) {
+				for(IASTNode child : node.getChildren()) {
+					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
+						ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
+						names.add(tempcild.getName());
+						//TODO: fix me: not insert template as name but as template parameter
+						//NOT: A::T::B but A<T>::B
+					}
+				}
 			}
 		}
 		Collections.reverse(names);
