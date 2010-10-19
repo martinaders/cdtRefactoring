@@ -51,6 +51,66 @@ class A {
 };
 
 
+//!TestNestedClassInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	class B {
+		void /*$*/member/*$$*/(int a, int b) {
+			return;
+		}
+	};
+};
+//=
+#include <iostream>
+
+class A {
+	class B {
+		void member(int a, int b);
+	};
+};
+
+inline void A::B::member(int a, int b)
+{
+    return;
+}
+
+
+//!TestNestedClassInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	class B {
+		void member(int a, int b);
+	};
+};
+
+inline void A::B::/*$*/member/*$$*/(int a, int b)
+{
+    return;
+}
+//=
+#include <iostream>
+
+class A {
+	class B {
+		void member(int a, int b)
+	    {
+	        return;
+	    }
+
+	};
+};
+
+
 //!TestDefaultParameterInitializerInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -135,4 +195,39 @@ template<typename T> inline T A<T>::B::member()
     return T();
 }
 
+
+//!TestTemplateFunctionInHeaderTOInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+template <typename T>
+class A {
+  class B {
+    T member()
+    {
+    	return T();
+    }
+  };
+  
+};
+template<typename T> inline T A<T>::B::/*$*/member/*$$*/()
+{
+    return T();
+}
+//=
+#include <iostream>
+
+template <typename T>
+class A {
+  class B {
+    T member()
+    {
+    	return T();
+    }
+  };
+  
+};
 
