@@ -4,22 +4,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 
 /**
  * Helps finding a FunctionDefinition in the parent nodes of the current selection. 
  */
+@SuppressWarnings("restriction")
 class ToggleSelectionHelper extends SelectionHelper {		
 	
 	public static CPPASTFunctionDeclarator getSelectedDeclaration(IASTTranslationUnit unit, TextSelection selection) {
@@ -85,7 +89,28 @@ class ToggleSelectionHelper extends SelectionHelper {
 			newdecl.addName(name.copy());
 		}
 		newdecl.addName(memberdefinition.getDeclarator().getName().copy());
+		newdecl.setFullyQualified(true);
 		return newdecl;
+	}
+	
+	@Deprecated
+	public static IASTFunctionDefinition getFirstSelectedFunctionDefinition(final Region region, final IASTTranslationUnit unit) {
+		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
+		
+		unit.accept(new CPPASTVisitor() {
+			{
+				shouldVisitDeclarators = true;
+			}
+			public int visit(IASTDeclarator declarator) {
+				if (declarator instanceof CPPASTFunctionDeclarator) {
+					if ((declarator.getParent() instanceof ICPPASTFunctionDefinition) && isSelectionOnExpression(region, declarator)) {
+						container.setObject((IASTFunctionDefinition) declarator.getParent());
+					}
+				}
+				return super.visit(declarator);
+			}
+		});
+		return container.getObject();
 	}
 
 }

@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
@@ -22,13 +23,37 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
+	
+	IASTFunctionDefinition memberdefinition;
+
+	@Override
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
+			throws CoreException, OperationCanceledException {
+		super.checkInitialConditions(pm);
+		if (initStatus.hasFatalError()) {
+			return initStatus;
+		}
+		//replace this with indexing
+		memberdefinition = ToggleSelectionHelper.getFirstSelectedFunctionDefinition(region, unit);
+		
+		if (memberdefinition == null) {
+			initStatus.addFatalError("could not get a definition");
+		}
+		else if (!(memberdefinition instanceof IASTFunctionDefinition)) {
+			System.out.println("Is not a declaration abort");
+			initStatus.addFatalError("Is not a function definition");
+		}
+		return initStatus;
+	}
 
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
@@ -94,6 +119,44 @@ public class ToggleRefactoring extends CRefactoring {
 		TextEditGroup infoText = new TextEditGroup("Toggle");
 		rewrite.remove(selectedDefinition, infoText);
 		rewrite.replace(selectedDeclaration.getParent(), definition, infoText);
+	}
+
+	private void collectMoveChanges(ModificationCollector collector) {
+		IASTSimpleDeclaration declaration = createDeclarationFromDefinition();
+		
+		IASTDeclSpecifier newdeclspec = memberdefinition.getDeclSpecifier().copy();
+		newdeclspec.setInline(true);
+		IASTFunctionDeclarator funcdecl = new CPPASTFunctionDeclarator(ToggleSelectionHelper.getQualifiedName(memberdefinition));
+		//TODO: add the parameters
+		
+		IASTStatement newbody = memberdefinition.getBody().copy();
+		IASTFunctionDefinition newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+		ICPPASTTemplateDeclaration decl = getTemplateDeclaration();
+		decl.setDeclaration(newfunc);
+		newfunc.setParent(decl);
+		
+		ASTRewrite rewrite = collector.rewriterForTranslationUnit(unit);
+		TextEditGroup edit = new TextEditGroup("Toggle");
+		rewrite.replace(memberdefinition, declaration, edit);
+		rewrite.insertBefore(unit, null, decl, edit);
+	}
+
+	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
+		IASTNode node = memberdefinition;
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTTemplateDeclaration)
+				break;
+		}
+		return (ICPPASTTemplateDeclaration) node.copy();
+	}
+
+	private IASTSimpleDeclaration createDeclarationFromDefinition() {
+		IASTFunctionDeclarator declarator = memberdefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
+		result.addDeclarator(declarator);
+		return result;
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
@@ -166,4 +229,10 @@ public class ToggleRefactoring extends CRefactoring {
 		return result;
 	}
 
+	@Override
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)
+	throws CoreException, OperationCanceledException {
+		// TODO Auto-generated method stub
+		return super.checkFinalConditions(pm);
+	}
 }

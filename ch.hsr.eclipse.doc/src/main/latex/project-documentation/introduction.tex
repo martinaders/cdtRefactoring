@@ -1,0 +1,118 @@
+\chapter{Introduction}
+\thispagestyle{fancy}
+
+\section{The current situation}
+
+The Eclipse Java Development Toolkit (JDT) has a large set of both quick and
+useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a
+small range of such code helpers today. In addition, some of them don't work
+satisfyingly: Currenty, extracting the body of a hello world function takes more
+than three seconds on our machines. Reliability? Try to \texttt{extract
+constant} the hello world string of the same program. Currently it will fail.
+The code won't even compile.\newline
+Every bachelor student at HSR should to visit a C++ class. Nearly
+everybody uses Eclipse to solve the exercises. After a while it was clear that
+touching the refactoring buttons was a dangerous action because in some cases
+descibed above they broke your code. Compile errors all over the place and
+difficult exercise assignments didn't make our life easier.\newline
+One annoying problem in C++ is the separation of the source and the header
+files. This is a pain point for every programmer. Forgetting to update the
+function signature in one of the files will result in compilation error which
+causes either lack of understanding for beginners or loss of time.\newline
+After two minutes of compile error hunting because you forgot to rename a
+function signature in both, the header and the implementation file, you start
+asking yourself: Why nobody has yet implemented a solution to prevent such an
+error?\newline
+One answer seems to be that this is not an easy task to achieve. But
+nevertheless we do not want to be part of the people who always complain about
+open source software. We change it, because we can. \newline
+ 
+The IFS Institute for Software at HSR with its group around Professor Peter
+Sommerlad and
+Emanuel Graf has been working on Eclipse refactorings for a long time. Since
+2006 nine Eclipse refactoring projects have been completed.\newline
+
+\section{What is planed to do}
+
+During this semester thesis it is planned to introduce and improve one or more
+refactorings to the Eclipse CDT project. The priorities are as follows
+
+\begin{enumerate}
+\item Toggle (Member-) Function Implementation
+\item Re-implement Implement Function
+\item Override virtual Member Function
+\end{enumerate}
+
+There is a need for three toggling subfunctions to enable toggling circularly
+from \texttt{in-class}
+to \texttt{in-header} to \texttt{separate-file}  and back again to
+\texttt{in-class}. We concentrate on this order during this project. If the
+implementation is fast enough there is no need for a configuration dialog which
+defines the order of the toggle subfunctions.\newline
+
+Depending on the success of the implementation with those three variations of
+the
+first refactoring we continue with the re-implementation of  ``Implement
+Function'' and then ``Override virtual member function''.\newline
+
+The re-implementation of ``implement function'' should be very fast. It should
+only create an empty block below the function signature. This newly created
+block can then be toggled to the implementation file.
+
+\section{Basic Goals}
+
+\begin{itemize}
+ \item Toggling between \texttt{in-class}, \texttt{in-header},
+\texttt{separate-file} and back again to \texttt{in-class} works for basic and
+some frequent special cases.
+ \item Project organization: Fixed two-week iterations are used. Redmine is used
+for planning and tracking time, issue tracking and as information radiator for
+the supervisor. A project documentation is written. Organization and results are
+reviewed weekly together with the supervisor.
+ \item Quality: Common cases are covered with test cases for each
+refactoring subtype.
+ \item Integration and Automation: Sitting in front of a fresh Eclipse CDT
+installation a first semester student can install our refactoring using an
+update site as long as the functionality is not integrated into the main CDT
+plug-in.
+ \item To minimize the integration overhead with CDT it will be worked closely
+with Emanuel Graf as he is a CDT commiter.
+ \item At the end the project will be handed to the supervisor with two CD's and
+two paper versions of the documentation. An update site is created where the
+functionality can be added to Eclipse. A website describes in short the
+functionality and our project vision.
+\end{itemize}
+
+\section{Advanced goals}
+All basic goals have been archived. Additionally:\newline
+\begin{itemize}
+ \item Toggling function is fast. less than 1s
+\end{itemize}
+
+Re-Implement the ``Implement Function'' feature.
+\begin{itemize}
+ \item A new function block is created with nearly no delay right below the
+function signature.
+ \item A default return statement is created when the block is created.
+ \item If the return statement cannot be determined, a comment is inserted into
+the block.
+\end{itemize}
+
+\section{Expected outcome}
+
+Implement member function and the toggle key are written to work in synergy.
+First write the declaration for a member function in the class definition, then
+a hot-key is used to implement the function. At this point the toggle key can
+be hit at any time to move the function to the appropriate position and
+continue with the next new member function.
+
+\section{High level goals and outlook}
+
+If there is enough time an "Override virtual function" is implemented.
+Additionally, content assist can be implemented. This could be part of a
+bachelor thesis which continues and completes the work done in this semester
+thesis.
+
+\section{Project duration}
+The semester thesis starts on September 20th and has to be finished until
+December 23rd, 2010.
