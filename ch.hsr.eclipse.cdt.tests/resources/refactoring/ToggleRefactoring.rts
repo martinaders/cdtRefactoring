@@ -1,10 +1,115 @@
-//!TestMoveFunctionDeclaration
+//!TestSimpleFunctionInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
 //@A.h
-#include<iostream>
-using namespace std;
+#include <iostream>
+
+class A {
+	int /*$*/function()/*$$*/
+	{
+		return 0;
+	}
+};
+//=
+#include <iostream>
+
+class A {
+	int function();
+};
+
+inline int A::function()
+{
+    return 0;
+}
+
+
+//!TestSimpleFunctionInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	int function();
+};
+
+inline int /*$*/A::function()/*$$*/
+{
+	return 0;
+}
+//=
+#include <iostream>
+
+class A {
+	int function()
+    {
+        return 0;
+    }
+
+};
+
+
+//!TestDefaultParameterInitializerInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	void /*$*/member/*$$*/(int a=0, int b=0)
+	{
+		return;
+	}
+};
+//=
+#include <iostream>
+
+class A {
+	void member(int a=0, int b=0);
+};
+
+inline void A::member(int a, int b)
+{
+    return;
+}
+
+
+//!TestDefaultParameterInitializerInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	void member(int a=0, int b=0);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+{
+	return;
+}
+//=
+#include <iostream>
+
+class A {
+	void member(int a=0, int b=0)
+    {
+        return;
+    }
+
+};
+
+
+//!TestTemplateFunctionInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
 
 template <typename T>
 class A {
@@ -16,8 +121,7 @@ class A {
   };
 };
 //=
-#include<iostream>
-using namespace std;
+#include <iostream>
 
 template <typename T>
 class A {
@@ -26,7 +130,7 @@ class A {
   };
 };
 
-inline T A::B::member()
+template<typename T> inline T A<T>::B::member()
 {
     return T();
 }
