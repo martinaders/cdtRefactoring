@@ -37,11 +37,13 @@ public class ToggleRefactoring extends CRefactoring {
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private TextSelection selection;
 	private IASTNode parentInsertionPoint;
-	private ModificationCollector modifications;
+	private ASTRewrite rewriter;
+	private TextEditGroup infoText;
 
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
 		this.selection = (TextSelection) selection;
+		infoText = new TextEditGroup("Toggle function body placement");
 	}
 
 	@Override
@@ -68,7 +70,7 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	protected void collectModifications(IProgressMonitor pm,
 			ModificationCollector modifications) throws CoreException {
-		this.modifications = modifications;
+		rewriter = modifications.rewriterForTranslationUnit(unit);
 		try {
 			lockIndex();
 			try {
@@ -94,19 +96,15 @@ public class ToggleRefactoring extends CRefactoring {
 	
 	private void handleInClassSituation() {
 		System.out.println("We're in the in-class situation.");
-		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
-		TextEditGroup infoText = new TextEditGroup("Toggle");
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
-		rewrite.replace(selectedDefinition, declaration, infoText);
-		rewrite.insertBefore(unit, null, getInHeaderDefinition(), infoText);
+		rewriter.replace(selectedDefinition, declaration, infoText);
+		rewriter.insertBefore(unit, null, getInHeaderDefinition(), infoText);
 	}
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		ASTRewrite rewrite = modifications.rewriterForTranslationUnit(unit);
-		TextEditGroup infoText = new TextEditGroup("Toggle");
-		rewrite.remove(selectedDefinition, infoText);
-		rewrite.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
+		rewriter.remove(selectedDefinition, infoText);
+		rewriter.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
