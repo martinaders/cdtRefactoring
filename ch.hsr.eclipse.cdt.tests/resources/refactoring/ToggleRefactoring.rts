@@ -164,6 +164,79 @@ class A {
 };
 
 
+//!TestTryCatchFromInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+	void /*$*/member/*$$*/(int a, int b)
+	try 
+	{
+		return;
+	} catch (Exception e) 
+	{
+		return;
+	}
+};
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+	void member(int a, int b);
+};
+
+inline void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(Exception e){
+    return;
+}
+
+
+//!TestTryCatchFromInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+	void member(int a, int b);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+try
+{
+    return;
+}
+catch(Exception e){
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+	void member(int a, int b)
+    try
+    {
+        return;
+    }
+    catch(Exception e){
+        return;
+    }
+
+};
+
+
 //!TestTemplateFunctionInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
