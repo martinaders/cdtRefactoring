@@ -111,12 +111,14 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		IASTNode toremove = selectedDefinition; 
-		if (toremove.getParent() != null && toremove.getParent() instanceof ICPPASTTemplateDeclaration)
-			toremove = selectedDefinition.getParent();
-		
-		rewriter.remove(toremove, infoText);
+		rewriter.remove(getToBeRemovedDefinition(), infoText);
 		rewriter.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
+	}
+
+	private IASTNode getToBeRemovedDefinition() {
+		if (selectedDefinition.getParent() != null && selectedDefinition.getParent() instanceof ICPPASTTemplateDeclaration)
+			return selectedDefinition.getParent();
+		return selectedDefinition;
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
@@ -136,8 +138,7 @@ public class ToggleRefactoring extends CRefactoring {
 		return newfunc;
 	}
 
-	private IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child, IASTTranslationUnit alternative) {
-		IASTNode node = child;
+	private IASTNode getParentInsertionPoint(IASTNode node, IASTTranslationUnit alternative) {
 		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
