@@ -177,7 +177,7 @@ class A {
 	try 
 	{
 		return;
-	} catch (Exception e) 
+	} catch (std::exception e1) 
 	{
 		return;
 	}
@@ -195,7 +195,49 @@ try
 {
     return;
 }
-catch(Exception e){
+catch(std::exception e1){
+    return;
+}
+
+
+//!TestMultipleTryCatchFromInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void /*$*/member/*$$*/(int a, int b)
+    try 
+    {
+        return;
+    } catch (std::exception e1) 
+    {
+        return;
+    } catch (std::exception e2)
+    {
+        return;
+    }
+};
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception e1){
+    return;
+}
+catch(std::exception e2){
     return;
 }
 
@@ -217,7 +259,7 @@ try
 {
     return;
 }
-catch(Exception e){
+catch(std::exception e1){
     return;
 }
 //=
@@ -230,11 +272,118 @@ class A {
     {
         return;
     }
-    catch(Exception e){
+    catch(std::exception e1){
         return;
     }
 
 };
+
+
+//!TestMultipleTryCatchFromInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception e1){
+    return;
+}
+catch(std::exception e2){
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b)
+    try
+    {
+        return;
+    }
+    catch(std::exception e1){
+        return;
+    }
+    catch(std::exception e2){
+        return;
+    }
+
+};
+
+
+//!TestSimpleNamespaceInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void /*$*/foo()/*$$*/ {
+            return;
+        }
+    };
+}
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+
+inline void N::A::foo()
+{
+    return;
+}
+
+
+//!TestSimpleNamespaceInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+
+inline void /*$*/N::A::foo/*$$*/()
+{
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+
+    };
+}
 
 
 //!TestTemplateFunctionInClassToInHeader
