@@ -5,6 +5,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 
+@SuppressWarnings("restriction")
 class PlainDeclarationFinder extends CPPASTVisitor {
 	private CPPASTFunctionDeclarator similar;
 	private String similarName;

@@ -42,6 +42,7 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 		runRefactoring(new ToggleRefactoring(file, selection, project));
 	}
 
+	@SuppressWarnings("restriction")
 	private void runRefactoring(ToggleRefactoring refactoring) {
 		try {
 			RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());

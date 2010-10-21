@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+@SuppressWarnings("restriction")
 class EmptyRefactoringDescription extends CRefactoringDescription {
 	public EmptyRefactoringDescription() {
 		super("id", "proj", "desc", "comment", 0, new HashMap<String, String>());
