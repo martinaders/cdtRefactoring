@@ -1,5 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
@@ -10,6 +12,8 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
@@ -123,15 +127,10 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTDeclSpecifier newDeclSpec = selectedDefinition.getDeclSpecifier().copy();
 		newDeclSpec.setInline(false);
 		IASTFunctionDeclarator newDeclaration = selectedDeclaration.copy();
-		IASTStatement newBody = selectedDefinition.getBody().copy();
 		
-		//totaly duplicated code
-		IASTFunctionDefinition newfunc;
-		if (selectedDefinition instanceof ICPPASTFunctionWithTryBlock) {
-			newfunc = getCatchHandlers(newDeclSpec, newDeclaration, newBody);	
-		} else {
-			newfunc = new CPPASTFunctionDefinition(newDeclSpec, newDeclaration, newBody);
-		}
+		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
+				newDeclSpec, newDeclaration);
+		
 		newfunc.setParent(getParentInsertionPoint(selectedDeclaration, unit));
 		return newfunc;
 	}
@@ -151,22 +150,17 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
+		
 		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition));
 		removeParameterInitializations(funcdecl);
-		IASTStatement newbody = selectedDefinition.getBody().copy();
 		
-		IASTFunctionDefinition newfunc = null;
-		if (selectedDefinition instanceof ICPPASTFunctionWithTryBlock) {
-			newfunc = getCatchHandlers(newdeclspec, funcdecl, newbody);			
-		} else {
-			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);		
-		}
+		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
+				newdeclspec, funcdecl);
 		
-		IASTNode node = getTemplateDeclaration();
-		if (node != null && node instanceof ICPPASTTemplateDeclaration) {
-			ICPPASTTemplateDeclaration templdecl = (ICPPASTTemplateDeclaration) node; 
-			templdecl.setParent(unit);
+		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration();
+		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
+			templdecl.setParent(unit);
 			return templdecl;
 		} else {
 			newfunc.setParent(unit);
@@ -174,17 +168,58 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private IASTFunctionDefinition getCatchHandlers(
-			IASTDeclSpecifier newdeclspec, IASTFunctionDeclarator funcdecl,
-			IASTStatement newbody) {
-		IASTFunctionDefinition newfunc;
-		newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl, newbody);
+	private ICPPASTFunctionDefinition assembleFunctionDefinitionWithBody(
+			IASTDeclSpecifier newdeclspec, IASTFunctionDeclarator funcdecl) {
+		IASTStatement newbody = selectedDefinition.getBody().copy();
+		ICPPASTFunctionDefinition newfunc = null;
+		if (hasCatchHandlers()) {
+			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl, newbody);
+			addCatchHandlers(newfunc);
+		} else {
+			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+		}
 		
-		ICPPASTFunctionWithTryBlock oldfunc = (ICPPASTFunctionWithTryBlock) selectedDefinition;
-		for(ICPPASTCatchHandler chandler: oldfunc.getCatchHandlers()) {
-			((CPPASTFunctionWithTryBlock) newfunc).addCatchHandler(chandler.copy());
+		if (hasInitializerList(selectedDefinition)) {
+			addInitializerLists(newfunc);
 		}
 		return newfunc;
+	}
+
+	private boolean hasCatchHandlers() {
+		return selectedDefinition instanceof ICPPASTFunctionWithTryBlock;
+	}
+
+	private void addCatchHandlers(ICPPASTFunctionDefinition newfunc) {
+		for(ICPPASTCatchHandler chandler: ((ICPPASTFunctionWithTryBlock) selectedDefinition).getCatchHandlers()) {
+			((CPPASTFunctionWithTryBlock) newfunc).addCatchHandler(chandler.copy());
+		}
+	}
+
+	private void addInitializerLists(ICPPASTFunctionDefinition newfunc) {
+		for(ICPPASTConstructorChainInitializer singlelist: getAllInitializerList(selectedDefinition)) {
+			singlelist.setParent(newfunc);
+			newfunc.addMemberInitializer(singlelist);
+		}
+	}
+
+	private ArrayList<ICPPASTConstructorChainInitializer> getAllInitializerList(
+			IASTFunctionDefinition selectedDefinition2) {
+		ArrayList<ICPPASTConstructorChainInitializer> result = new ArrayList<ICPPASTConstructorChainInitializer>();
+		
+		for(IASTNode node : selectedDefinition2.getChildren()) {
+			if (node instanceof ICPPASTConstructorChainInitializer)
+				result.add(((ICPPASTConstructorChainInitializer) node).copy());
+		}
+		return result;
+	}
+
+	private boolean hasInitializerList(
+			IASTFunctionDefinition selectedDefinition2) {
+		for(IASTNode node : selectedDefinition2.getChildren()) {
+			if (node instanceof ICPPASTConstructorChainInitializer)
+				return true;
+		}
+		return false;
 	}
 
 	private void removeParameterInitializations(IASTFunctionDeclarator funcdecl) {
@@ -196,14 +231,14 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 	}
 
-	private IASTNode getTemplateDeclaration() {
+	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
 		IASTNode node = selectedDeclaration;
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTTemplateDeclaration)
-				break;
+				return (ICPPASTTemplateDeclaration) node.copy();
 		}
-		return node.copy();
+		return null;
 	}
 
 	@Override
