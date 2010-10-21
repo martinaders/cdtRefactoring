@@ -78,9 +78,9 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return result.getObject();
 	}
 
-	public static ArrayList<IASTName> getAllQualifiedNames(IASTFunctionDefinition memberdefinition) {
+	public static ArrayList<IASTName> getAllQualifiedNames(IASTNode node) {
 		ArrayList<IASTName> names = new ArrayList<IASTName>();
-		IASTNode node = memberdefinition; 
+		
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
@@ -93,9 +93,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
 						IASTName name = names.remove(names.size()-1);
-						ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
-						IASTNamedTypeSpecifier t = new CPPASTNamedTypeSpecifier(tempcild.getName().copy());
-						IASTName toadd = new CPPASTName((name + "<" + t.getName() + ">").toCharArray());
+						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
 						names.add(toadd);
 					}
 				}
@@ -103,6 +101,13 @@ class ToggleSelectionHelper extends SelectionHelper {
 		}
 		Collections.reverse(names);
 		return names;
+	}
+
+	private static IASTName getTemplateParameterName(IASTNode child) {
+		ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
+		IASTNamedTypeSpecifier t = new CPPASTNamedTypeSpecifier(tempcild.getName().copy());
+		IASTName templname = t.getName();
+		return templname;
 	}
 
 	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
