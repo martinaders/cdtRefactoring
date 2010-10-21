@@ -102,7 +102,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void handleInClassSituation() {
-		System.out.println("We're in the in-class situation.");
 		IASTSimpleDeclaration declaration 
 				= createDeclarationFromDefinition(selectedDefinition);
 		rewriter.replace(selectedDefinition, declaration, infoText);
@@ -120,7 +119,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void handleInHeaderSituation() {
-		System.out.println("We're in the in-header situation.");
 		IASTNode toremove = selectedDefinition;
 		if (toremove.getParent() != null
 				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)

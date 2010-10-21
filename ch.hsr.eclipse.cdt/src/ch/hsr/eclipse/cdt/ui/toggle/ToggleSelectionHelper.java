@@ -35,7 +35,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 	public static CPPASTFunctionDeclarator getSelectedDeclaration(IASTTranslationUnit unit, TextSelection selection) {
 		CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
 		if (selectedDeclaration == null) {
-			System.out.println("cannot determine selected function.");
 			return null;
 		}
 		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
@@ -52,7 +51,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 	public static IASTFunctionDefinition getSelectedDefinition(IASTTranslationUnit unit, TextSelection selection) {
 		final CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
 		if (selectedDeclaration == null) {
-			System.out.println("cannot determine selected function.");
 			return null;
 		}
 		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
@@ -69,7 +67,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 				String currentNodeName = new String(func.getDeclarator().getName().getSimpleID());
 				// TODO: add a more strict and complete equality check
 				if (currentNodeName.equals(selectedNodeName)) {
-					System.out.println("Found matching definition: " + func.getRawSignature());
 					result.setObject((IASTFunctionDefinition) func);
 				}
 				return super.visit(node);
