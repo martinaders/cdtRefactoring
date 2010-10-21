@@ -37,7 +37,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
-	
+
 	private IASTFunctionDefinition selectedDefinition;
 	private CPPASTFunctionDeclarator selectedDeclaration;
 	private TextSelection selection;
@@ -57,15 +57,18 @@ public class ToggleRefactoring extends CRefactoring {
 		if (initStatus.hasFatalError()) {
 			return initStatus;
 		}
-		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
-		selectedDefinition  = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
+		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(
+				unit, selection);
+		selectedDefinition = ToggleSelectionHelper.getSelectedDefinition(unit,
+				selection);
 
 		if (selectedDeclaration == null || selectedDefinition == null) {
-			initStatus.addFatalError("declaration AND definition needed. Cannot toggle. Stopping.");
+			initStatus
+					.addFatalError("declaration AND definition needed. Cannot toggle.");
 		}
 		return initStatus;
 	}
-	
+
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
 		return new EmptyRefactoringDescription();
@@ -97,17 +100,20 @@ public class ToggleRefactoring extends CRefactoring {
 	private boolean isInClassSituation() {
 		return selectedDefinition.getDeclarator() == selectedDeclaration;
 	}
-	
+
 	private void handleInClassSituation() {
 		System.out.println("We're in the in-class situation.");
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
+		IASTSimpleDeclaration declaration 
+				= createDeclarationFromDefinition(selectedDefinition);
 		rewriter.replace(selectedDefinition, declaration, infoText);
 		rewriter.insertBefore(unit, null, getInHeaderDefinition(), infoText);
 	}
-	
-	private IASTSimpleDeclaration createDeclarationFromDefinition(IASTFunctionDefinition memberdefinition) {
+
+	private IASTSimpleDeclaration createDeclarationFromDefinition(
+			IASTFunctionDefinition memberdefinition) {
 		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier()
+				.copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
@@ -115,27 +121,31 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void handleInHeaderSituation() {
 		System.out.println("We're in the in-header situation.");
-		IASTNode toremove = selectedDefinition; 
-		if (toremove.getParent() != null && toremove.getParent() instanceof ICPPASTTemplateDeclaration)
+		IASTNode toremove = selectedDefinition;
+		if (toremove.getParent() != null
+				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
 			toremove = selectedDefinition.getParent();
-		
+
 		rewriter.remove(toremove, infoText);
-		rewriter.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
+		rewriter.replace(selectedDeclaration.getParent(),
+				getInClassDefinition(), infoText);
 	}
 
 	private IASTFunctionDefinition getInClassDefinition() {
-		IASTDeclSpecifier newDeclSpec = selectedDefinition.getDeclSpecifier().copy();
+		IASTDeclSpecifier newDeclSpec = selectedDefinition.getDeclSpecifier()
+				.copy();
 		newDeclSpec.setInline(false);
 		IASTFunctionDeclarator newDeclaration = selectedDeclaration.copy();
-		
+
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
 				newDeclSpec, newDeclaration);
-		
+
 		newfunc.setParent(getParentInsertionPoint(selectedDeclaration, unit));
 		return newfunc;
 	}
 
-	private IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child, IASTTranslationUnit alternative) {
+	private IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child,
+			IASTTranslationUnit alternative) {
 		IASTNode node = child;
 		while (node.getParent() != null) {
 			node = node.getParent();
@@ -147,16 +157,18 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private IASTNode getInHeaderDefinition() {
-		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier().copy();
+		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier()
+				.copy();
 		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
-		
-		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition));
+
+		funcdecl.setName(ToggleSelectionHelper
+				.getQualifiedName(selectedDefinition));
 		removeParameterInitializations(funcdecl);
-		
+
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
 				newdeclspec, funcdecl);
-		
+
 		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration();
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
@@ -173,12 +185,14 @@ public class ToggleRefactoring extends CRefactoring {
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		ICPPASTFunctionDefinition newfunc = null;
 		if (hasCatchHandlers()) {
-			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl, newbody);
+			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl,
+					newbody);
 			addCatchHandlers(newfunc);
 		} else {
-			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl, newbody);
+			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl,
+					newbody);
 		}
-		
+
 		if (hasInitializerList(selectedDefinition)) {
 			addInitializerLists(newfunc);
 		}
@@ -190,13 +204,17 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void addCatchHandlers(ICPPASTFunctionDefinition newfunc) {
-		for(ICPPASTCatchHandler chandler: ((ICPPASTFunctionWithTryBlock) selectedDefinition).getCatchHandlers()) {
-			((CPPASTFunctionWithTryBlock) newfunc).addCatchHandler(chandler.copy());
+		for (ICPPASTCatchHandler chandler : 
+				((ICPPASTFunctionWithTryBlock) selectedDefinition)
+				.getCatchHandlers()) {
+			((CPPASTFunctionWithTryBlock) newfunc).addCatchHandler(chandler
+					.copy());
 		}
 	}
 
 	private void addInitializerLists(ICPPASTFunctionDefinition newfunc) {
-		for(ICPPASTConstructorChainInitializer singlelist: getAllInitializerList(selectedDefinition)) {
+		for (ICPPASTConstructorChainInitializer singlelist : 
+				getAllInitializerList(selectedDefinition)) {
 			singlelist.setParent(newfunc);
 			newfunc.addMemberInitializer(singlelist);
 		}
@@ -204,9 +222,10 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private ArrayList<ICPPASTConstructorChainInitializer> getAllInitializerList(
 			IASTFunctionDefinition selectedDefinition2) {
-		ArrayList<ICPPASTConstructorChainInitializer> result = new ArrayList<ICPPASTConstructorChainInitializer>();
-		
-		for(IASTNode node : selectedDefinition2.getChildren()) {
+		ArrayList<ICPPASTConstructorChainInitializer> result = 
+			new ArrayList<ICPPASTConstructorChainInitializer>();
+
+		for (IASTNode node : selectedDefinition2.getChildren()) {
 			if (node instanceof ICPPASTConstructorChainInitializer)
 				result.add(((ICPPASTConstructorChainInitializer) node).copy());
 		}
@@ -215,7 +234,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private boolean hasInitializerList(
 			IASTFunctionDefinition selectedDefinition2) {
-		for(IASTNode node : selectedDefinition2.getChildren()) {
+		for (IASTNode node : selectedDefinition2.getChildren()) {
 			if (node instanceof ICPPASTConstructorChainInitializer)
 				return true;
 		}
@@ -233,7 +252,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private ICPPASTTemplateDeclaration getTemplateDeclaration() {
 		IASTNode node = selectedDeclaration;
-		while(node.getParent() != null) {
+		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTTemplateDeclaration)
 				return (ICPPASTTemplateDeclaration) node.copy();
@@ -243,7 +262,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)
-	throws CoreException, OperationCanceledException {
+			throws CoreException, OperationCanceledException {
 		// TODO Auto-generated method stub
 		return super.checkFinalConditions(pm);
 	}
