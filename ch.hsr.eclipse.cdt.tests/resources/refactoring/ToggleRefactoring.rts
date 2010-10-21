@@ -51,6 +51,74 @@ class A {
 };
 
 
+//!TestConstructorToggleInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    /*$*/A/*$$*/(int x, int y)
+    :a(x), b(y)
+    {}
+};
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y);
+};
+
+inline A::A(int x, int y)
+:a(x), b(y)
+{
+}
+
+
+//!TestConstructorToggleInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y);
+};
+
+inline A::/*$*/A/*$$*/(int x, int y)
+:a(x), b(y)
+{
+}
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {
+    }
+
+};
+
+
 //!TestNestedClassInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
