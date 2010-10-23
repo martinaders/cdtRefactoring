@@ -25,6 +25,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.refactoring.utils.ASTHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -129,6 +130,12 @@ public class ToggleRefactoring extends CRefactoring {
 				getInClassDefinition(), infoText);
 	}
 
+	private IASTNode getToBeRemovedDefinition() {
+		if (selectedDefinition.getParent() != null && selectedDefinition.getParent() instanceof ICPPASTTemplateDeclaration)
+			return selectedDefinition.getParent();
+		return selectedDefinition;
+	}
+
 	private IASTFunctionDefinition getInClassDefinition() {
 		IASTDeclSpecifier newDeclSpec = selectedDefinition.getDeclSpecifier()
 				.copy();
@@ -142,9 +149,7 @@ public class ToggleRefactoring extends CRefactoring {
 		return newfunc;
 	}
 
-	private IASTNode getParentInsertionPoint(CPPASTFunctionDeclarator child,
-			IASTTranslationUnit alternative) {
-		IASTNode node = child;
+	private IASTNode getParentInsertionPoint(IASTNode node, IASTTranslationUnit alternative) {
 		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {

@@ -2,13 +2,14 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
@@ -17,11 +18,14 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.internal.core.browser.ASTTypeReference;
+import org.eclipse.cdt.internal.core.dom.parser.ASTQueries;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
+import org.eclipse.cdt.internal.ui.refactoring.utils.ASTHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
@@ -40,6 +44,13 @@ class ToggleSelectionHelper extends SelectionHelper {
 		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
 		unit.accept(visitor);
 		return visitor.result;
+//		IASTNode declarator = ASTHelper.getDeclarationForNode(selectedDeclaration);
+//		System.out.println(declarator.getClass());
+//		if (declarator instanceof CPPASTFunctionDeclarator) {
+//			System.out.println(declarator.getRawSignature());
+//			return (CPPASTFunctionDeclarator)declarator;
+//		}
+		//return null;
 	}
 
 	private static CPPASTFunctionDeclarator getSelectedDeclarator(IASTTranslationUnit unit, TextSelection selection) {
@@ -54,7 +65,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 			return null;
 		}
 		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
-		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		
 		unit.accept(new CPPASTVisitor() {
 			{
@@ -64,9 +74,10 @@ class ToggleSelectionHelper extends SelectionHelper {
 				if (!(node instanceof IASTFunctionDefinition))
 					return super.visit(node);
 				IASTFunctionDefinition func = (IASTFunctionDefinition) node;
-				String currentNodeName = new String(func.getDeclarator().getName().getSimpleID());
-				// TODO: add a more strict and complete equality check
-				if (currentNodeName.equals(selectedNodeName)) {
+				if (!(func.getDeclarator() instanceof CPPASTFunctionDeclarator))
+					return super.visit(node);
+				CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) func.getDeclarator();
+				if (declarator.getFunctionScope().equals(selectedDeclaration.getFunctionScope())) {
 					result.setObject((IASTFunctionDefinition) func);
 				}
 				return super.visit(node);
@@ -89,6 +100,8 @@ class ToggleSelectionHelper extends SelectionHelper {
 			else if (node instanceof ICPPASTTemplateDeclaration) {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
+						if (names.size() <= 0)
+							continue;
 						IASTName name = names.remove(names.size()-1);
 						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
 						names.add(toadd);
