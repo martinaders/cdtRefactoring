@@ -3,3 +3,8 @@
 *.*backup
 *.metadata
 target
+*.aux
+*.log
+*.toc
+#we do not really want to have pdfs
+*.pdf
