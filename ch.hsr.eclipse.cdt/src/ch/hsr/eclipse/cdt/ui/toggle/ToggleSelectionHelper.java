@@ -40,13 +40,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
 		unit.accept(visitor);
 		return visitor.result;
-//		IASTNode declarator = ASTHelper.getDeclarationForNode(selectedDeclaration);
-//		System.out.println(declarator.getClass());
-//		if (declarator instanceof CPPASTFunctionDeclarator) {
-//			System.out.println(declarator.getRawSignature());
-//			return (CPPASTFunctionDeclarator)declarator;
-//		}
-		//return null;
 	}
 
 	private static CPPASTFunctionDeclarator getSelectedDeclarator(IASTTranslationUnit unit, TextSelection selection) {
@@ -70,6 +63,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 				if (!(node instanceof IASTFunctionDefinition))
 					return super.visit(node);
 				IASTFunctionDefinition func = (IASTFunctionDefinition) node;
+
 				if (!(func.getDeclarator() instanceof CPPASTFunctionDeclarator))
 					return super.visit(node);
 				CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) func.getDeclarator();
@@ -96,8 +90,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 			else if (node instanceof ICPPASTTemplateDeclaration) {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
-						if (names.size() <= 0)
-							continue;
 						IASTName name = names.remove(names.size()-1);
 						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
 						names.add(toadd);
