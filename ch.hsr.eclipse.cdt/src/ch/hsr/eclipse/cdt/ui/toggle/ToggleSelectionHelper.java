@@ -35,12 +35,18 @@ class ToggleSelectionHelper extends SelectionHelper {
 	public static CPPASTFunctionDeclarator getSelectedDeclaration(IASTTranslationUnit unit, TextSelection selection) {
 		CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
 		if (selectedDeclaration == null) {
-			System.out.println("cannot determine selected function.");
 			return null;
 		}
 		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
 		unit.accept(visitor);
 		return visitor.result;
+//		IASTNode declarator = ASTHelper.getDeclarationForNode(selectedDeclaration);
+//		System.out.println(declarator.getClass());
+//		if (declarator instanceof CPPASTFunctionDeclarator) {
+//			System.out.println(declarator.getRawSignature());
+//			return (CPPASTFunctionDeclarator)declarator;
+//		}
+		//return null;
 	}
 
 	private static CPPASTFunctionDeclarator getSelectedDeclarator(IASTTranslationUnit unit, TextSelection selection) {
@@ -52,11 +58,9 @@ class ToggleSelectionHelper extends SelectionHelper {
 	public static IASTFunctionDefinition getSelectedDefinition(IASTTranslationUnit unit, TextSelection selection) {
 		final CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
 		if (selectedDeclaration == null) {
-			System.out.println("cannot determine selected function.");
 			return null;
 		}
 		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
-		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		
 		unit.accept(new CPPASTVisitor() {
 			{
@@ -66,10 +70,10 @@ class ToggleSelectionHelper extends SelectionHelper {
 				if (!(node instanceof IASTFunctionDefinition))
 					return super.visit(node);
 				IASTFunctionDefinition func = (IASTFunctionDefinition) node;
-				String currentNodeName = new String(func.getDeclarator().getName().getSimpleID());
-				// TODO: add a more strict and complete equality check
-				if (currentNodeName.equals(selectedNodeName)) {
-					System.out.println("Found matching definition: " + func.getRawSignature());
+				if (!(func.getDeclarator() instanceof CPPASTFunctionDeclarator))
+					return super.visit(node);
+				CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) func.getDeclarator();
+				if (declarator.getFunctionScope().equals(selectedDeclaration.getFunctionScope())) {
 					result.setObject((IASTFunctionDefinition) func);
 				}
 				return super.visit(node);
@@ -92,6 +96,8 @@ class ToggleSelectionHelper extends SelectionHelper {
 			else if (node instanceof ICPPASTTemplateDeclaration) {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
+						if (names.size() <= 0)
+							continue;
 						IASTName name = names.remove(names.size()-1);
 						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
 						names.add(toadd);

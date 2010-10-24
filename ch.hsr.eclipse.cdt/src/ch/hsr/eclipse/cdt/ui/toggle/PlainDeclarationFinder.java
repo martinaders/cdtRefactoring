@@ -1,38 +1,87 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import java.util.ArrayList;
+import java.util.Collections;
 
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+
+@SuppressWarnings("restriction")
 class PlainDeclarationFinder extends CPPASTVisitor {
-	private CPPASTFunctionDeclarator similar;
-	private String similarName;
 	public CPPASTFunctionDeclarator result;
+	private CPPASTFunctionDeclarator similar;
 	{
 		shouldVisitDeclarators = true;
 	}
 
 	PlainDeclarationFinder(CPPASTFunctionDeclarator similar) {
 		this.similar = similar;
-		this.similarName = new String(similar.getName().getSimpleID());
 	}
 
 	public int visit(IASTDeclarator node) {
 		if (!(node instanceof CPPASTFunctionDeclarator))
 			return super.visit(node);
-		CPPASTFunctionDeclarator func = (CPPASTFunctionDeclarator) node;
-		String currentNodeName = new String(func.getName().getSimpleID());
-		// TODO: Name, Scope and Parameter names have to be the same
-		// TODO: checking number of parameters as a small step towards correctness
-		if (currentNodeName.equals(similarName) && func.getParameters().length == similar.getParameters().length) {
+		CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) node;
+		if (isInSameScope(declarator, similar)) {
 			// prioritize plain declarations over definitions
-			if (result == null || !(func.getParent() instanceof ICPPASTFunctionDefinition)) {
-				System.out.println("Found matching declaration: " + func.getRawSignature());
-				result = func;
+			if (result == null || !(declarator.getParent() instanceof CPPASTFunctionDefinition)) {
+				System.out.println("Found matching declaration: "+ declarator.getRawSignature());
+				result = declarator;
 			}
-			return PROCESS_CONTINUE;
 		}
 		return super.visit(node);
+	}
+
+	private boolean isInSameScope(ICPPASTFunctionDeclarator declarator, ICPPASTFunctionDeclarator other) {
+		ArrayList<String> q1 = new ArrayList<String>();
+		ArrayList<String> q2 = new ArrayList<String>();
+
+		q1 = extractNames(declarator);
+		q2 = extractNames(other);
+
+		return compareScope(q1, q2);
+	}
+
+	private boolean compareScope(ArrayList<String> qualiA, ArrayList<String> qualiB) {
+		return qualiA.equals(qualiB);
+	}
+
+	private ArrayList<String> extractNames(ICPPASTFunctionDeclarator declarator) {
+		ArrayList<String> q1 = new ArrayList<String>();
+		IASTName qualiA = declarator.getName();
+		if (qualiA instanceof ICPPASTQualifiedName) {
+			ICPPASTQualifiedName temp = (ICPPASTQualifiedName)qualiA;
+			for (IASTName name : temp.getNames()) {
+				q1.add(name.toString());
+			}
+		}
+		
+		IASTNode parent = declarator.getParent();
+		ArrayList<String> arr = new ArrayList<String>();
+		while (parent != null) {
+			if (parent instanceof ICPPASTCompositeTypeSpecifier)
+				arr.add(((ICPPASTCompositeTypeSpecifier)parent).getName().toString());
+//			if (parent instanceof ICPPASTNamespaceDefinition)
+//				arr.add(((ICPPASTNamespaceDefinition)parent).getName().toString());
+			parent = parent.getParent();
+		}
+
+		Collections.reverse(arr);
+		for (String n : arr) {
+			q1.add(n);
+		}
+		
+		if (!(qualiA instanceof ICPPASTQualifiedName)) {
+			q1.add(qualiA.toString());
+		}
+		return q1;
 	}
 }

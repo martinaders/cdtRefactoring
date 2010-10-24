@@ -11,11 +11,11 @@ captionpos=b}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-\textheight 19cm
-\textwidth 14cm
+\textheight 20cm
+\textwidth 12.0cm
 \headsep 2.5cm
-\oddsidemargin 0.75cm
-\evensidemargin 0.75cm
+\oddsidemargin 2.0cm
+\evensidemargin 2.0cm
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -29,7 +29,7 @@ captionpos=b}
 \titlehead{\includegraphics{logo_hsr_farbig.pdf}}
 \subject{semester thesis}
 \date{\today}
-\publishers{Supervisor: Peter Sommerlad}
+\publishers{Supervisor: Prof. Peter Sommerlad}
 \author{Martin Schwab, Thomas Kallenberg}
 \begin{document}
 
@@ -37,46 +37,46 @@ captionpos=b}
 \pagenumbering{roman}
 
 \begin{abstract}
-Welches Problem wurde mit welchen Ergebnissen bearbeitet + Schlussfolgerungen.
+\thispagestyle{empty}
+This Document describes the work and the result our semester thesis, to
+develop multiple refactorings for the Eclipse CDT projects. The Toggle Member
+Function Refactoring to move C++ function definitions between various places and
+the re-implementation of the Implement function, to implement functions faster
+where successful. We describe various problems like performance and our
+solution to them.
 \end{abstract}
 
+\chapter*{Management Summary}
+\thispagestyle{empty}
+
 \tableofcontents
-\thispagestyle{fancy}
+\thispagestyle{empty}
 \pagenumbering{arabic}
+
 
 \include{introduction}
 \include{specification}
+\include{implementation}
 
-\chapter{Design}
-\thispagestyle{fancy}
-This chapter describes how the solution was actually implemented.
-
-\chapter{Implementation and Solution}
-
-\section{Configuration Management}
-
-\subsection{Git}
-
-\subsection{Maven and Tycho}
-
-\subsection{Hudson}
 
 \chapter{Interpretation}
-
-%\section{Projektbasis}
-%\section{Bemessung}
-%\section{Zeichnungen}
-%\section{Diverses}
+\thispagestyle{fancy}
 
 \chapter{Conclusions and future work}
-Results, Bewertung, open issues, Empfehlungen
+\thispagestyle{fancy}
+
 
 \chapter{Sources}
+\thispagestyle{fancy}
 A. Verhein, A. Simeon, "Werkzeugkasten Technische Berichte 1", 31.07.2008
 
-\chapter*{Nutzungsvereinbarung}
-\chapter*{Erklärung der Urheberschaft}
+\chapter*{User agreement}
+\chapter*{Copyright agreement}
 \part{Appendix}
+\chapter*{User Manual}
+\chapter*{Time managing}
+\chapter*{Glossary}
+
 \thispagestyle{fancy}
 %\section{Poster}
 

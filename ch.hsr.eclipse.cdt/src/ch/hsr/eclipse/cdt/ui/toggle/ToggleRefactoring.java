@@ -25,6 +25,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.refactoring.utils.ASTHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -102,7 +103,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void handleInClassSituation() {
-		System.out.println("We're in the in-class situation.");
 		IASTSimpleDeclaration declaration 
 				= createDeclarationFromDefinition(selectedDefinition);
 		rewriter.replace(selectedDefinition, declaration, infoText);
@@ -120,7 +120,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private void handleInHeaderSituation() {
-		System.out.println("We're in the in-header situation.");
 		rewriter.remove(getToBeRemovedDefinition(), infoText);
 		rewriter.replace(selectedDeclaration.getParent(), getInClassDefinition(), infoText);
 	}

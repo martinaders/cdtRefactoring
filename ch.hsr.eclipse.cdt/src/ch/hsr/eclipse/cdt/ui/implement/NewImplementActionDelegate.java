@@ -37,6 +37,7 @@ public class NewImplementActionDelegate implements IWorkbenchWindowActionDelegat
 		runRefactoring(new NewImplementRefactoring(file, selection, project));
 	}
 
+	@SuppressWarnings("restriction")
 	private void runRefactoring(NewImplementRefactoring refactoring) {
 		try {
 			RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());

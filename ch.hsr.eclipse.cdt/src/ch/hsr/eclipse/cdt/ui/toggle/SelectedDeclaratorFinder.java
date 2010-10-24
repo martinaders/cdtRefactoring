@@ -5,6 +5,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.jface.text.TextSelection;
 
+@SuppressWarnings("restriction")
 public class SelectedDeclaratorFinder extends CPPASTVisitor {
 	public CPPASTFunctionDeclarator result = null;
 	private TextSelection selection;
