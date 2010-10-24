@@ -12,9 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.6.0",
  org.eclipse.ltk.core.refactoring;bundle-version="3.5.100",
  ch.hsr.eclipse.cdt;bundle-version="1.0.0",
- org.eclipse.ui;bundle-version="3.6.0",
- org.eclipse.test;bundle-version="3.3.0",
- org.eclipse.test.performance;bundle-version="3.6.0"
+ org.eclipse.ui;bundle-version="3.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.cdt.internal.ui.refactoring,
