@@ -9,7 +9,7 @@ public class ToggleRefactoringTestSuite extends TestSuite {
 	public static Test suite() throws Exception {
 		TestSuite suite = new ToggleRefactoringTestSuite();
 		suite.addTest(ExternalRefactoringTester.suite("ToggleRefactoringTest", "resources/refactoring/ToggleRefactoring.rts"));
-		suite.addTest(new ToggleRefactoringPerformanceTest());
+		suite.addTestSuite(ToggleRefactoringPerformanceTest.class);
 		return suite;
 	}
 
