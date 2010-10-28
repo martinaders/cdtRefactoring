@@ -1,0 +1,21 @@
+//!InClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+	int /*$*/function()/*$$*/
+	{
+		return 0;
+	}
+};
+//=
+class A {
+	int function();
+};
+
+inline int A::function()
+{
+    return 0;
+}
+

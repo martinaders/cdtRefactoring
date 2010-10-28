@@ -1,29 +1,28 @@
 package ch.hsr.eclipse.cdt.ui.tests.toggle;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
+/**
+ * Runs common/all toggling scenarios and measures their performance.
+ */
+public class ToggleRefactoringPerformanceTest extends PerformanceTestPrinter {
 
-import org.eclipse.test.performance.PerformanceTestCase;
-
-import ch.hsr.eclipse.cdt.ui.tests.ExternalRefactoringTester;
-
-public class ToggleRefactoringPerformanceTest extends PerformanceTestCase {
-
-	public void testAllTests() {
-		for (int i= 0; i < 3; i++) {
-			startMeasuring();
-			toMeasure();
-			stopMeasuring();
-		}
-		commitMeasurements();
-		assertPerformance();
+	public void testWithIncludeStatements() throws Exception {
+		runTests("IncludeStatements.rts", 100);
 	}
 
-	private void toMeasure() {
-		try {
-			Test suite = ExternalRefactoringTester.suite("ToggleRefactoringTest", "resources/refactoring/ToggleRefactoring.rts");
-			suite.run(new TestResult());
-		} catch (Exception e) {
-		}
+	public void testWithoutIncludeStatements() throws Exception {
+		runTests("NoIncludeStatements.rts", 100);
 	}
+
+	public void testInClassToInHeader() throws Exception {
+		runTests("InClassToInHeader.rts", 100);
+	}
+
+	public void testInHeaderToInClass() throws Exception {
+		runTests("InHeaderToInClass.rts", 100);
+	}
+
+	public void testAllTests() throws Exception {
+		runTests("../ToggleRefactoring.rts");
+	}
+
 }

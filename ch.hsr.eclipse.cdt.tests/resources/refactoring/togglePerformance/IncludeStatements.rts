@@ -1,0 +1,29 @@
+//!withManyIncludes
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <memory>
+#include <algorithm>
+
+class A {
+	std::string /*$*/function()/*$$*/
+	{
+		return 0;
+	}
+};
+//=
+#include <iostream>
+
+class A {
+	std::string function();
+};
+
+inline std::string A::function()
+{
+    return 0;
+}
+
