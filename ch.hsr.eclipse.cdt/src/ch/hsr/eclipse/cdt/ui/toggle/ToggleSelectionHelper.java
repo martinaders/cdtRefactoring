@@ -64,6 +64,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 				if (!(node instanceof IASTFunctionDefinition))
 					return super.visit(node);
 				IASTFunctionDefinition func = (IASTFunctionDefinition) node;
+
 				if (!(func.getDeclarator() instanceof CPPASTFunctionDeclarator))
 					return super.visit(node);
 				CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) func.getDeclarator();
