@@ -316,7 +316,7 @@ class A {
 	try 
 	{
 		return;
-	} catch (std::exception e1) 
+	} catch (std::exception & e1) 
 	{
 		return;
 	}
@@ -334,7 +334,7 @@ try
 {
     return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
     return;
 }
 
@@ -356,7 +356,7 @@ try
 {
     return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
     return;
 }
 //=
@@ -388,7 +388,7 @@ try
 {
 	return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
 	return;
 }
 
@@ -406,10 +406,10 @@ class A {
     try 
     {
         return;
-    } catch (std::exception e1) 
+    } catch (std::exception & e1) 
     {
         return;
-    } catch (std::exception e2)
+    } catch (std::exception & e2)
     {
         return;
     }
@@ -427,10 +427,10 @@ try
 {
     return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
     return;
 }
-catch(std::exception e2){
+catch(std::exception & e2){
     return;
 }
 
@@ -452,10 +452,10 @@ try
 {
     return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
     return;
 }
-catch(std::exception e2){
+catch(std::exception & e2){
     return;
 }
 //=
@@ -488,10 +488,10 @@ try
 {
 	return;
 }
-catch(std::exception e1){
+catch(std::exception & e1){
 	return;
 }
-catch(std::exception e2){
+catch(std::exception & e2){
 	return;
 }
 
