@@ -24,7 +24,7 @@ inline int A::function()
 }
 
 
-//!TestSimpleFunctionInHeaderToInClass
+//!TestSimpleFunctionInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -43,12 +43,28 @@ inline int /*$*/A::function()/*$$*/
 #include <iostream>
 
 class A {
-	int function()
-    {
-        return 0;
-    }
-
+	int function();
 };
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+int A::function()
+{
+	return 0;
+}
 
 
 //!TestConstructorToggleInClassToInHeader
@@ -84,7 +100,7 @@ inline A::A(int x, int y)
 }
 
 
-//!TestConstructorToggleInHeaderToInClass
+//!TestConstructorToggleInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -111,12 +127,30 @@ private:
     int a;
     int b;
 public:
-    A(int x, int y)
-    :a(x), b(y)
-    {
-    }
-
+    A(int x, int y);
+    
 };
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+A::A(int x, int y)
+:a(x), b(y)
+{
+}
 
 
 //!TestNestedClassInClassToInHeader
@@ -148,7 +182,7 @@ inline void A::B::member(int a, int b)
 }
 
 
-//!TestNestedClassInHeaderToInClass
+//!TestNestedClassInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -170,13 +204,32 @@ inline void A::B::/*$*/member/*$$*/(int a, int b)
 
 class A {
 	class B {
-		void member(int a, int b)
-	    {
-	        return;
-	    }
-
+		void member(int a, int b);
 	};
 };
+
+
+//@A.cpp
+#include "A.h"
+
+int main()
+{
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main()
+{
+	return 0;
+}
+
+void A::B::member(int a, int b)
+{
+	return;
+}
 
 
 //!TestDefaultParameterInitializerInClassToInHeader
@@ -205,7 +258,7 @@ inline void A::member(int a, int b)
 }
 
 
-//!TestDefaultParameterInitializerInHeaderToInClass
+//!TestDefaultParameterInitializerInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -224,12 +277,30 @@ inline void /*$*/A::member/*$$*/(int a, int b)
 #include <iostream>
 
 class A {
-	void member(int a=0, int b=0)
-    {
-        return;
-    }
+	void member(int a=0, int b=0);
 
 };
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void A::member(int a, int b)
+{
+	return;
+}
 
 
 //!TestTryCatchFromInClassToInHeader
@@ -265,6 +336,60 @@ try
 }
 catch(std::exception e1){
     return;
+}
+
+
+//!TestTryCatchFromInHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+	void member(int a, int b);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception e1){
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+	void member(int a, int b);
+};
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void A::member(int a, int b)
+try
+{
+	return;
+}
+catch(std::exception e1){
+	return;
 }
 
 
@@ -310,44 +435,7 @@ catch(std::exception e2){
 }
 
 
-//!TestTryCatchFromInHeaderToInClass
-//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
-//@.config
-filename=A.h
-//@A.h
-#include <iostream>
-#include <exception>
-
-class A {
-	void member(int a, int b);
-};
-
-inline void /*$*/A::member/*$$*/(int a, int b)
-try
-{
-    return;
-}
-catch(std::exception e1){
-    return;
-}
-//=
-#include <iostream>
-#include <exception>
-
-class A {
-	void member(int a, int b)
-    try
-    {
-        return;
-    }
-    catch(std::exception e1){
-        return;
-    }
-
-};
-
-
-//!TestMultipleTryCatchFromInHeaderToInClass
+//!TestMultipleTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -375,19 +463,37 @@ catch(std::exception e2){
 #include <exception>
 
 class A {
-    void member(int a, int b)
-    try
-    {
-        return;
-    }
-    catch(std::exception e1){
-        return;
-    }
-    catch(std::exception e2){
-        return;
-    }
-
+    void member(int a, int b);
+    
 };
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void A::member(int a, int b)
+try
+{
+	return;
+}
+catch(std::exception e1){
+	return;
+}
+catch(std::exception e2){
+	return;
+}
 
 
 //!TestSimpleNamespaceInClassToInHeader
@@ -421,7 +527,7 @@ inline void N::A::foo()
 }
 
 
-//!TestSimpleNamespaceInHeaderToInClass
+//!TestSimpleNamespaceInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -445,12 +551,30 @@ inline void /*$*/N::A::foo/*$$*/()
 
 namespace N {
     class A {
-        void foo()
-        {
-            return;
-        }
+        void foo();
 
     };
+}
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void N::A::foo()
+{
+	return;
 }
 
 
