@@ -127,8 +127,7 @@ private:
     int a;
     int b;
 public:
-    A(int x, int y);
-    
+    A(int x, int y);   
 };
 
 
@@ -138,8 +137,6 @@ public:
 int main() {
 	return 0;
 }
-
-
 //=
 #include "A.h"
 
@@ -214,21 +211,19 @@ class A {
 
 int main()
 {
-	return 0;
+    return 0;
 }
-
-
 //=
 #include "A.h"
 
 int main()
 {
-	return 0;
+    return 0;
 }
 
 void A::B::member(int a, int b)
 {
-	return;
+    return;
 }
 
 
@@ -271,14 +266,13 @@ class A {
 
 inline void /*$*/A::member/*$$*/(int a, int b)
 {
-	return;
+    return;
 }
 //=
 #include <iostream>
 
 class A {
 	void member(int a=0, int b=0);
-
 };
 
 
@@ -286,20 +280,18 @@ class A {
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
-
-
 //=
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
 
 void A::member(int a, int b)
 {
-	return;
+    return;
 }
 
 
@@ -348,7 +340,7 @@ filename=A.h
 #include <exception>
 
 class A {
-	void member(int a, int b);
+    void member(int a, int b);
 };
 
 inline void /*$*/A::member/*$$*/(int a, int b)
@@ -364,7 +356,7 @@ catch(std::exception & e1){
 #include <exception>
 
 class A {
-	void member(int a, int b);
+    void member(int a, int b);
 };
 
 
@@ -372,24 +364,22 @@ class A {
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
-
-
 //=
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
 
 void A::member(int a, int b)
 try
 {
-	return;
+    return;
 }
 catch(std::exception & e1){
-	return;
+    return;
 }
 
 
@@ -464,7 +454,6 @@ catch(std::exception & e2){
 
 class A {
     void member(int a, int b);
-    
 };
 
 
@@ -472,27 +461,25 @@ class A {
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
-
-
 //=
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
 
 void A::member(int a, int b)
 try
 {
-	return;
+    return;
 }
 catch(std::exception & e1){
-	return;
+    return;
 }
 catch(std::exception & e2){
-	return;
+    return;
 }
 
 
@@ -552,7 +539,6 @@ inline void /*$*/N::A::foo/*$$*/()
 namespace N {
     class A {
         void foo();
-
     };
 }
 
@@ -563,8 +549,6 @@ namespace N {
 int main() {
 	return 0;
 }
-
-
 //=
 #include "A.h"
 
@@ -574,7 +558,7 @@ int main() {
 
 void N::A::foo()
 {
-	return;
+    return;
 }
 
 
@@ -610,7 +594,7 @@ template<typename T> inline T A<T>::B::member()
 }
 
 
-//!TestTemplateFunctionInHeaderTOInClass
+//!TestTemplateFunctionInHeaderToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
