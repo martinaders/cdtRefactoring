@@ -10,9 +10,9 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
@@ -27,7 +27,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	protected IASTTranslationUnit unit;
 	protected TextEditGroup infoText;
 
-	public ToggleRefactoringAbstractStrategy(CPPASTFunctionDeclarator selectedDeclaration,
+	public ToggleRefactoringAbstractStrategy(ICPPASTFunctionDeclarator selectedDeclaration,
 			IASTFunctionDefinition selectedDefinition,
 			IASTTranslationUnit unit) {
 		this.selectedDeclaration = selectedDeclaration;

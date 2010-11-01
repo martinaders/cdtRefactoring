@@ -7,6 +7,7 @@ import org.eclipse.cdt.core.dom.ILinkage;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.index.IIndex;
@@ -18,7 +19,6 @@ import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -32,7 +32,7 @@ public class ToggleFromInHeaderToImplementationStragegy extends
 	private ICProject project;
 
 	public ToggleFromInHeaderToImplementationStragegy(
-			CPPASTFunctionDeclarator selectedDeclaration,
+			ICPPASTFunctionDeclarator selectedDeclaration,
 			IASTFunctionDefinition selectedDefinition,
 			IASTTranslationUnit unit, ICProject project, IFile file) {
 		super(selectedDeclaration, selectedDefinition, unit);
@@ -45,8 +45,7 @@ public class ToggleFromInHeaderToImplementationStragegy extends
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(unit);
 		IASTTranslationUnit otherast = null;
 		try {
-			URI fileUri = getSiblingFile();
-			otherast = getTranslationUnitForFile(fileUri);
+			otherast = getTranslationUnitForFile(getSiblingFile());
 			ASTRewrite otherrewrite = modifications
 					.rewriterForTranslationUnit(otherast);
 			IASTNode toremove = selectedDefinition;
@@ -102,9 +101,8 @@ public class ToggleFromInHeaderToImplementationStragegy extends
 				.create(new Path(fileUri.getRawPath())).getCProject();
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
 				fileUri, cProject);
-		int AST_STYLE = ITranslationUnit.AST_SKIP_ALL_HEADERS;
 		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
-		otherast = tu.getAST(index, AST_STYLE);
+		otherast = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 		return otherast;
 	}
 
