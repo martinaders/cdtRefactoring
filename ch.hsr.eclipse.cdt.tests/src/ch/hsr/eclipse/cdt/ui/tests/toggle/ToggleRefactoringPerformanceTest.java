@@ -6,23 +6,27 @@ package ch.hsr.eclipse.cdt.ui.tests.toggle;
 public class ToggleRefactoringPerformanceTest extends PerformanceTestPrinter {
 
 	public void testWithIncludeStatements() throws Exception {
-		runTests("IncludeStatements.rts", 100);
+		runTests("IncludeStatements.rts");
 	}
 
 	public void testWithoutIncludeStatements() throws Exception {
-		runTests("NoIncludeStatements.rts", 100);
+		runTests("NoIncludeStatements.rts");
 	}
 
 	public void testInClassToInHeader() throws Exception {
-		runTests("InClassToInHeader.rts", 100);
+		runTests("InClassToInHeader.rts");
 	}
 
 	public void testInHeaderToInClass() throws Exception {
-		runTests("InHeaderToInClass.rts", 100);
+		runTests("InHeaderToInClass.rts");
 	}
 
 	public void testAllTests() throws Exception {
-		runTests("../ToggleRefactoring.rts");
+		runTests("../ToggleRefactoring.rts", 2);
+	}
+	
+	public void testReferenceTest() {
+		referenceTest();
 	}
 
 }

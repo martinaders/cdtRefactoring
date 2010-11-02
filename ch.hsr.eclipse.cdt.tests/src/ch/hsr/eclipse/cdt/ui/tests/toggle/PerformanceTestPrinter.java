@@ -19,7 +19,7 @@ public class PerformanceTestPrinter extends PerformanceTestCase {
 	private static final String TEST_RESULTS_FILE = "performanceResults.txt";
 	private static final String TEST_RESOURCE_DIRECTORY = "resources/refactoring/togglePerformance/";
 	private static final String EXECUTING_TEST_CLASS = "ToggleRefactoringTest";
-	private static final int DEFAULT_SAMPLE_SIZE = 1;
+	private static final int DEFAULT_SAMPLE_SIZE = 100;
 	private static PrintStream resultsFile;
 	private PrintStream outstreamBackup;
 
@@ -49,6 +49,17 @@ public class PerformanceTestPrinter extends PerformanceTestCase {
 
 	private void redirectPerformanceResultsUndo() {
 		System.setOut(outstreamBackup);
+	}
+
+	public void referenceTest() {
+		for (int i = 0; i < 10; i++) {
+			startMeasuring();
+			stopMeasuring();
+		}
+		redirectPerformanceResults();
+		commitMeasurements();
+		redirectPerformanceResultsUndo();
+		assertPerformance();
 	}
 
 	protected void runTests(String testFile) throws Exception {

@@ -1,31 +1,84 @@
 \chapter{Implementation and Solution}
 \thispagestyle{fancy}
 
+\section{Testing and Performance}
+
+This section introduces special tricks that were used to simplify testing and
+control performance.
+
+\subsection{Fuzzy whitespace recognition}
+
+As described in past theses at HSR, the refactoring testing environment
+needed an exact definition of the generated code. This was annoying because
+same-looking code samples could result in a red bar if white spaces were not the
+same. To make writing new tests easier, the comparison method was overridden to
+support fuzzy whitespace recognition.
+
+Leading tabs or whitespaces are recognized and it is assumed that the same
+indention is used for the whole file. In addition, trailing newlines that are
+added by the ASTRewriter are ignored.
+
+The changes made to the CDT test environment help writing new tests without
+having to care whether the ASTRewriter uses spaces or tabs for indention.
+Resulting code that looks the same now gives a green bar.
+
+\subsection{Performance tests}
+
+Performance was tested using the org.eclipse.test.performance plugin. Four
+different scenarios have been chosen for comparison:
+
+\begin{enumerate}
+\item testWithIncludeStatements()
+\item testWithoutIncludeStatements()
+\item testInClassToInHeader()
+\item testInHeaderToInClass()
+\end{enumerate}
+
+In addition, an all-together test has been included for quick performance
+comparison and a reference test that did nothing was run to measure the overhead
+of the performance test framework. Since in reality the refactorings are slower
+than the (repeated) measurements, resulting values should be considered relative
+to each other. The same developer laptop was used for before and after tests.
+
+\begin{tabular}[t]{l|rrr}
+ Scenario   & first draft & final result & improvement in \% \\
+ \hline
+ Scenario 1	&  364ms & --ms & --\% \\
+ Scenario 2	&  337ms & --ms & --\% \\
+ Scenario 3	&  335ms & --ms & --\% \\
+ Scenario 4	&  323ms & --ms & --\% \\
+ All tests	& 5530ms & --ms & --\% \\
+ Reference test	&    0ms & --ms & --\% \\
+\end{tabular}
+
 \section{Configuration Management}
 
 \subsection{Git}
 
-As a version control system git was used. This time it was not used like an SVN
+As a version control system, git was used. This time it was not used like an SVN
 replacement but instead to get some redundancy by storing the source code on
-multiple server. Both project developer had their ``own`` git server on which
-the developer committed. It was merged between these server and the pushed to
+multiple server. Both project developers had their ``own`` git server on which
+the developer committed. It was merged between these servers and then pushed to
 the main repository for automatic testing.
 
 \subsection{Maven and Tycho}
 
 Tycho is a plug-in for Maven to build the plug-in and the execute the tests.
-Maven3 is required for this to work. Even if Maven3 is in beta state it is
-quite stable.\newline
+Maven3 is required for this to work. Although Maven3 is beta, it was proven
+stable during the project.
+
+% eclipse-headless vs no-X-used?
 To execute the tests on a headless server with Hudson build server first a fake
-X Server is needed. Xvfb was used in our case for the job.
-Another thing is you must explicitly tell Maven which test class to execute and
-in which folder the test class is located. If this is not done properly the
-tests will fail.
+X Server was needed. Xvfb was used in our case for the job. Maven has to be
+explicitly told which test class to execute and in which folder the test class
+is located. If this is not done properly the tests will fail.
 
 \subsection{Hudson}
 
 To get the tests executed on the fake X sever, the \texttt{DISPLAY} environment
 variable must be set. If not, tests will fail with a cryptic
-SWTError.\newline
+SWTError.
+
 There is a plug-in for Hudson to set the environment variable to
 the right value. In most cases this is \textbf{:0}.
+
