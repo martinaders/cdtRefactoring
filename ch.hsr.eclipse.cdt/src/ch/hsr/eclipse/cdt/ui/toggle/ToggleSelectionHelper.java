@@ -69,7 +69,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 			return null;
 		}
 		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
-		final String selectedNodeName = new String(selectedDeclaration.getName().getSimpleID());
 		
 		unit.accept(new CPPASTVisitor() {
 			{
@@ -187,7 +186,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return filename;
 	}
 
-	public static IASTTranslationUnit getTranslationUnitForFile(URI fileUri)
+	public static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri)
 			throws CModelException, CoreException {
 		ICProject cProject = CoreModel.getDefault()
 				.create(new Path(fileUri.getRawPath())).getCProject();
@@ -197,4 +196,13 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
 
+	public static IASTTranslationUnit getGlobalTranslationUnitForFile(
+			URI fileUri) throws CoreException {
+		ICProject cProject = CoreModel.getDefault()
+				.create(new Path(fileUri.getRawPath())).getCProject();
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
+				fileUri, cProject);
+		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
+		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT | ITranslationUnit.AST_SKIP_INDEXED_HEADERS);
+	}
 }
