@@ -1,8 +1,11 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ILinkage;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -17,12 +20,24 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.core.index.IIndex;
+import org.eclipse.cdt.core.index.IIndexFile;
+import org.eclipse.cdt.core.index.IIndexInclude;
+import org.eclipse.cdt.core.index.IndexLocationFactory;
+import org.eclipse.cdt.core.model.CModelException;
+import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.model.CoreModelUtil;
+import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 
@@ -137,6 +152,49 @@ class ToggleSelectionHelper extends SelectionHelper {
 			}
 		});
 		return container.getObject();
+	}
+
+	public static URI getSiblingFile( IFile file, ICProject project) throws CoreException {
+		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(project);
+		IIndexFile thisfile = projectindex.getFile(ILinkage.CPP_LINKAGE_ID,
+				IndexLocationFactory.getWorkspaceIFL(file));
+		String filename = getFilenameWithoutExtension(file.getFullPath()
+				.toString());
+		if (file.getFileExtension().equals("h")) {
+			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
+				if (getFilenameWithoutExtension(
+						include.getIncludedBy().getLocation().getFullPath())
+						.equals(filename)) {
+					return include.getIncludedBy().getLocation().getURI();
+				}
+
+			}
+		} else if (file.getFileExtension().equals("cpp")
+				|| file.getFileExtension().equals("c")) {
+			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
+				if (getFilenameWithoutExtension(include.getFullName()).equals(
+						filename)) {
+					return include.getIncludesLocation().getURI();
+				}
+			}
+		}
+		return null;
+	}
+	
+	private static String getFilenameWithoutExtension(String filename) {
+		filename = filename.replaceAll("\\.(.)*$", "");
+		filename = filename.replaceAll("(.)*\\/", "");
+		return filename;
+	}
+
+	public static IASTTranslationUnit getTranslationUnitForFile(URI fileUri)
+			throws CModelException, CoreException {
+		ICProject cProject = CoreModel.getDefault()
+				.create(new Path(fileUri.getRawPath())).getCProject();
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
+				fileUri, cProject);
+		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
+		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
 
 }

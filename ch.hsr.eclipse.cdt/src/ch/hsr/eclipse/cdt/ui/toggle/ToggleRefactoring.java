@@ -2,9 +2,11 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.model.TranslationUnit;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.resources.IFile;
@@ -46,16 +48,30 @@ public class ToggleRefactoring extends CRefactoring {
 			strategy = new ToggleFromClassToInHeaderStrategy(selectedDeclaration, selectedDefinition, unit);
 		else if (isTemplateSituation())
 			strategy = new ToggleFromInHeaderToClassStrategy(selectedDeclaration, selectedDefinition, unit);
-		else if (isinHeaderSituation())
-			strategy = new ToggleFromInHeaderToImplementationStragegy(selectedDeclaration, selectedDefinition, unit, project, file);
-		//else if (isInImplementationSituation())
-		//	strategy = new ToggleFromImplementationToClassStragegy();
+		else if (isinHeaderSituation()) {
+			IASTTranslationUnit tu = ToggleSelectionHelper.getTranslationUnitForFile(ToggleSelectionHelper.getSiblingFile(file, project));
+			strategy = new ToggleFromInHeaderToImplementationStragegy(selectedDeclaration, selectedDefinition, unit, tu);
+		}
+//		else if (isInImplementationSituation())
+//			strategy = new ToggleFromImplementationToClassStragegy(selectedDeclaration, selectedDefinition, unit, project, file);
 		
 		if (selectedDeclaration == null || selectedDefinition == null) {
 			initStatus
 					.addFatalError("declaration AND definition needed. Cannot toggle.");
 		}
 		return initStatus;
+	}
+
+	private boolean isInImplementationSituation() {
+		String extension1 = getFileExtension(selectedDeclaration.getFileLocation().getFileName());
+		String extension2 = getFileExtension(selectedDefinition.getFileLocation().getFileName());
+		if (extension1.equals("h") && extension2.equals("cpp"))
+			return true;
+		return false;
+	}
+
+	private String getFileExtension(String fileName) {
+		return fileName.replaceAll("(.)*\\.", "");
 	}
 
 	@Override
