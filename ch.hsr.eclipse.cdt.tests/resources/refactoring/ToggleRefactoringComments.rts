@@ -1,0 +1,24 @@
+//!TestSingleLineCommentAboveInClassDefinition
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    // Single-Line-Comment here
+	int /*$*/function/*$$*/()
+	{
+		return 0;
+	}
+};
+//=
+#include <iostream>
+
+class A {
+	// Single-Line-Comment here
+	int function();
+};
+
+inline int A::function()
+{
+    return 0;
+}
