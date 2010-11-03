@@ -27,6 +27,7 @@ import org.eclipse.cdt.core.index.IndexLocationFactory;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
+import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
@@ -188,10 +189,11 @@ class ToggleSelectionHelper extends SelectionHelper {
 
 	public static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri)
 			throws CModelException, CoreException {
-		ICProject cProject = CoreModel.getDefault()
-				.create(new Path(fileUri.getRawPath())).getCProject();
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
-				fileUri, cProject);
+		System.out.println("fileuri: " + fileUri.getRawPath());
+		Path p = new Path(fileUri.getRawPath());
+		ICElement e = CoreModel.getDefault().create(p);
+		ICProject cProject = e.getCProject();
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(fileUri, cProject);
 		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
 		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
