@@ -203,6 +203,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
 				fileUri, cProject);
 		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
-		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT | ITranslationUnit.AST_SKIP_INDEXED_HEADERS);
+		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
 	}
 }

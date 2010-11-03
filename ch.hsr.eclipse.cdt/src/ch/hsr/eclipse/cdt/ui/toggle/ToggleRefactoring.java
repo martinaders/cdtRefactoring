@@ -1,9 +1,20 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.ASTNameCollector;
+import org.eclipse.cdt.core.dom.ast.DOMException;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.IBinding;
+import org.eclipse.cdt.core.dom.ast.IScope;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.core.index.IIndex;
+import org.eclipse.cdt.core.index.IIndexBinding;
+import org.eclipse.cdt.core.index.IIndexName;
+import org.eclipse.cdt.core.index.IndexFilter;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
@@ -11,11 +22,15 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import ch.hsr.ifs.redhead.helpers.IndexNameToAstNameMatcher;
+import ch.hsr.ifs.redhead.helpers.IndexToASTNameHelper;
 
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
@@ -33,27 +48,85 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
+		
 		unit = ToggleSelectionHelper.getLocalTranslationUnitForFile(file.getLocationURI());
+		if (unit == null) {
+			initStatus.addFatalError("Could not get TranslationUnit for file");
+			return initStatus;
+		}
 		
-		selectedDeclaration = ToggleSelectionHelper.getSelectedDeclaration(unit, selection);
-		selectedDefinition = ToggleSelectionHelper.getSelectedDefinition(unit, selection);
+		IASTName name = unit.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
 		
-		if (isInClassSituation())
+		System.out.println("name was selected: " + name);
+		IIndexName[] decnames = null;
+		IIndexName[] defnames = null;
+		try {
+			lockIndex();
+			IIndex index = getIndex();
+			IIndexBinding binding = getIndex().findBinding(name);
+			decnames = index.findDeclarations(binding);
+			defnames = index.findDefinitions(binding);
+			for(IIndexName iname : decnames) {
+				System.out.println("iname : " + iname.getNodeOffset() + " " + iname.getFile());
+				IASTName astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, getIndex());
+				if (astname != null) {
+					selectedDeclaration = findFunctionDeclarator(astname);
+					break;
+				}
+			}
+			for(IIndexName iname : defnames) {
+				System.out.println("iname : " + iname.getNodeOffset() + " " + iname.getFile());
+				IASTName astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, getIndex());
+				if (astname != null) {
+					selectedDefinition = findFunctionDefinition(astname);
+					break;
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			unlockIndex();
+		}
+		
+		
+		if (selectedDeclaration == null || selectedDefinition == null) {
+			initStatus
+			.addFatalError("declaration AND definition needed. Cannot toggle.");
+			return initStatus;
+		}
+		
+		if (isInClassSituation()) {
+			System.out.println("inclass");
 			strategy = new ToggleFromClassToInHeaderStrategy(selectedDeclaration, selectedDefinition, unit);
+		}
 		else if (isTemplateSituation())
 			strategy = new ToggleFromInHeaderToClassStrategy(selectedDeclaration, selectedDefinition, unit);
 		else if (isinHeaderSituation()) {
 			IASTTranslationUnit sibling_unit = ToggleSelectionHelper.getLocalTranslationUnitForFile(ToggleSelectionHelper.getSiblingFile(file, project));
 			strategy = new ToggleFromInHeaderToImplementationStragegy(selectedDeclaration, selectedDefinition, unit, sibling_unit);
-		}
-//		else if (isInImplementationSituation())
-//			strategy = new ToggleFromImplementationToClassStragegy(selectedDeclaration, selectedDefinition, unit, project, file);
-		
-		if (selectedDeclaration == null || selectedDefinition == null) {
-			initStatus
-					.addFatalError("declaration AND definition needed. Cannot toggle.");
+		} else if (isInImplementationSituation()) {
+			System.out.println("this is 4th style");
+			//strategy = new ToggleFromImplementationToClassStragegy(selectedDeclaration, selectedDefinition, unit, project, file);
 		}
 		return initStatus;
+	}
+
+	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTFunctionDefinition)
+				return (IASTFunctionDefinition) node;
+		}
+		return null;
+	}
+
+	private CPPASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTFunctionDeclarator)
+				return (CPPASTFunctionDeclarator) node;
+		}
+		return null;
 	}
 
 	private boolean isInImplementationSituation() {
@@ -93,7 +166,10 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 	
 	private boolean isInClassSituation() {
-		return selectedDefinition.getDeclarator() == selectedDeclaration;
+		System.out.println(selectedDeclaration.getFileLocation().getFileName());
+		System.out.println(selectedDefinition.getFileLocation().getFileName());
+		return selectedDefinition.getDeclarator() == selectedDeclaration && 
+		selectedDeclaration.getFileLocation().getFileName().equals(selectedDefinition.getFileLocation().getFileName());
 	}
 
 	private boolean isTemplateSituation() {
