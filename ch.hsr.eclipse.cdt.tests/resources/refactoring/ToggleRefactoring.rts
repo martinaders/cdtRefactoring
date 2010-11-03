@@ -6,7 +6,7 @@ filename=A.h
 #include <iostream>
 
 class A {
-	int /*$*/function()/*$$*/
+	int /*$*/function/*$$*/()
 	{
 		return 0;
 	}
@@ -32,18 +32,18 @@ filename=A.h
 #include <iostream>
 
 class A {
-	int function();
+    int function();
 };
 
-inline int /*$*/A::function()/*$$*/
+inline int A::/*$*/function/*$$*/()
 {
-	return 0;
+    return 0;
 }
 //=
 #include <iostream>
 
 class A {
-	int function();
+    int function();
 };
 
 
@@ -51,19 +51,18 @@ class A {
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
-
 //=
 #include "A.h"
 
 int main() {
-	return 0;
+    return 0;
 }
 
 int A::function()
 {
-	return 0;
+    return 0;
 }
 
 
@@ -127,7 +126,7 @@ private:
     int a;
     int b;
 public:
-    A(int x, int y);   
+    A(int x, int y);
 };
 
 
@@ -493,7 +492,7 @@ filename=A.h
 
 namespace N {
     class A {
-        void /*$*/foo()/*$$*/ {
+        void /*$*/foo/*$$*/() {
             return;
         }
     };
@@ -603,13 +602,10 @@ filename=A.h
 
 template <typename T>
 class A {
-  class B {
-    T member()
-    {
-    	return T();
-    }
-  };
-  
+    class B {
+        T member();
+    };
+
 };
 template<typename T> inline T A<T>::B::/*$*/member/*$$*/()
 {
@@ -620,12 +616,13 @@ template<typename T> inline T A<T>::B::/*$*/member/*$$*/()
 
 template <typename T>
 class A {
-  class B {
-    T member()
-    {
-    	return T();
-    }
-  };
-  
+    class B {
+        T member()
+        {
+            return T();
+        }
+
+    };
+
 };
 
