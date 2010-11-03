@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
@@ -17,6 +18,7 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,16 +46,27 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
-		
+
 		unit = ToggleSelectionHelper.getLocalTranslationUnitForFile(file.getLocationURI());
 		if (unit == null) {
 			initStatus.addFatalError("Could not get TranslationUnit for file");
 			return initStatus;
 		}
-		
+
 		IASTName name = unit.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
+		if (name == null) {
+			name = unit.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
+			IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(name);
+			name = fundef.getDeclarator().getName();
+		}
+		if (name == null) {
+			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
+			return initStatus;
+		}
+		System.out.println(name.getClass() + ", " + name.getRawSignature());
 		
 		System.out.println("name was selected: " + name);
+
 		IIndexName[] decnames = null;
 		IIndexName[] defnames = null;
 		IASTTranslationUnit localtu = null;
@@ -78,6 +91,7 @@ public class ToggleRefactoring extends CRefactoring {
 					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDeclaration = findFunctionDeclarator(astname);
+					System.out.println(" -> " + selectedDeclaration);
 					break;
 				}
 			}
@@ -96,6 +110,7 @@ public class ToggleRefactoring extends CRefactoring {
 					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDefinition = findFunctionDefinition(astname);
+					System.out.println(" -> " + selectedDefinition);
 					break;
 				}
 			}
@@ -105,9 +120,9 @@ public class ToggleRefactoring extends CRefactoring {
 		} finally {
 			unlockIndex();
 		}
-		
-		
+
 		if (selectedDeclaration == null || selectedDefinition == null) {
+			System.err.println("fuck");
 			initStatus
 			.addFatalError("declaration AND definition needed. Cannot toggle.");
 			return initStatus;
@@ -140,8 +155,10 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
+		System.out.print("Analyzing parents: ");
 		while(node.getParent() != null) {
 			node = node.getParent();
+			System.out.print(node.getClass() + ", ");
 			if (node instanceof ICPPASTFunctionDefinition)
 				return (IASTFunctionDefinition) node;
 		}
@@ -149,8 +166,14 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private CPPASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
+		System.out.print("Analyzing parents: " + node.getClass() + ", "); //IASTCPPTypeSpecifier
+		if (node instanceof IASTSimpleDeclaration) {
+			System.out.println("\nHell yeah :-)");
+			return (CPPASTFunctionDeclarator)((IASTSimpleDeclaration)node).getDeclarators()[0];
+		}
 		while(node.getParent() != null) {
 			node = node.getParent();
+			System.out.print(node.getClass() + ", ");
 			if (node instanceof ICPPASTFunctionDeclarator)
 				return (CPPASTFunctionDeclarator) node;
 		}
