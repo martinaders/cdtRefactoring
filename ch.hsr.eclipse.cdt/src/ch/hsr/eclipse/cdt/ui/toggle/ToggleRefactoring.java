@@ -63,9 +63,6 @@ public class ToggleRefactoring extends CRefactoring {
 			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
 			return initStatus;
 		}
-		System.out.println(name.getClass() + ", " + name.getRawSignature());
-		
-		System.out.println("name was selected: " + name);
 
 		IIndexName[] decnames = null;
 		IIndexName[] defnames = null;
@@ -78,7 +75,6 @@ public class ToggleRefactoring extends CRefactoring {
 			defnames = index.findDefinitions(binding);
 			
 			for(IIndexName iname : decnames) {
-				System.out.println("deciname : " + iname.getNodeOffset() + " " + iname.getFile());
 				IASTName astname = null;
 				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
 					try {
@@ -91,13 +87,11 @@ public class ToggleRefactoring extends CRefactoring {
 					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDeclaration = findFunctionDeclarator(astname);
-					System.out.println(" -> " + selectedDeclaration);
 					break;
 				}
 			}
 			
 			for(IIndexName iname : defnames) {
-				System.out.println("definame : " + iname.getNodeOffset() + " " + iname.getFile());
 				IASTName astname = null;
 				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
 					try {
@@ -110,7 +104,6 @@ public class ToggleRefactoring extends CRefactoring {
 					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDefinition = findFunctionDefinition(astname);
-					System.out.println(" -> " + selectedDefinition);
 					break;
 				}
 			}
@@ -122,14 +115,12 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 
 		if (selectedDeclaration == null || selectedDefinition == null) {
-			System.err.println("fuck");
 			initStatus
 			.addFatalError("declaration AND definition needed. Cannot toggle.");
 			return initStatus;
 		}
 		
 		if (isInClassSituation()) {
-			System.out.println("inclass");
 			strategy = new ToggleFromClassToInHeaderStrategy(selectedDeclaration, selectedDefinition, unit);
 		}
 		else if (isTemplateSituation())
@@ -155,10 +146,8 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
-		System.out.print("Analyzing parents: ");
 		while(node.getParent() != null) {
 			node = node.getParent();
-			System.out.print(node.getClass() + ", ");
 			if (node instanceof ICPPASTFunctionDefinition)
 				return (IASTFunctionDefinition) node;
 		}
@@ -166,14 +155,11 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private CPPASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
-		System.out.print("Analyzing parents: " + node.getClass() + ", "); //IASTCPPTypeSpecifier
 		if (node instanceof IASTSimpleDeclaration) {
-			System.out.println("\nHell yeah :-)");
 			return (CPPASTFunctionDeclarator)((IASTSimpleDeclaration)node).getDeclarators()[0];
 		}
 		while(node.getParent() != null) {
 			node = node.getParent();
-			System.out.print(node.getClass() + ", ");
 			if (node instanceof ICPPASTFunctionDeclarator)
 				return (CPPASTFunctionDeclarator) node;
 		}
@@ -217,8 +203,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 	
 	private boolean isInClassSituation() {
-		System.out.println(selectedDeclaration.getFileLocation().getFileName());
-		System.out.println(selectedDefinition.getFileLocation().getFileName());
 		return selectedDefinition.getDeclarator() == selectedDeclaration && 
 		selectedDeclaration.getFileLocation().getFileName().equals(selectedDefinition.getFileLocation().getFileName());
 	}
