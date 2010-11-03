@@ -24,7 +24,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 
 	protected IASTFunctionDeclarator selectedDeclaration;
 	protected IASTFunctionDefinition selectedDefinition;
-	protected IASTTranslationUnit unit;
+	protected IASTTranslationUnit definition_unit;
 	protected TextEditGroup infoText;
 
 	public ToggleRefactoringAbstractStrategy(ICPPASTFunctionDeclarator selectedDeclaration,
@@ -32,7 +32,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 			IASTTranslationUnit unit) {
 		this.selectedDeclaration = selectedDeclaration;
 		this.selectedDefinition = selectedDefinition;
-		this.unit = unit;
+		this.definition_unit = unit;
 		infoText = new TextEditGroup("Toggle function body placement");
 	}
 
@@ -64,10 +64,10 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper.getTemplateDeclaration(selectedDeclaration);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
-			templdecl.setParent(unit);
+			templdecl.setParent(definition_unit);
 			return templdecl;
 		} else {
-			newfunc.setParent(unit);
+			newfunc.setParent(definition_unit);
 			return newfunc;
 		}
 	}
@@ -91,7 +91,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		return newfunc;
 	}
 
-	protected IASTFunctionDefinition getInClassDefinition(IASTFunctionDefinition definition, IASTFunctionDeclarator declaration) {
+	protected IASTFunctionDefinition getInClassDefinition(IASTFunctionDefinition definition, IASTFunctionDeclarator declaration, IASTTranslationUnit unit) {
 		IASTDeclSpecifier newDeclSpec = definition.getDeclSpecifier()
 				.copy();
 		newDeclSpec.setInline(false);
@@ -111,6 +111,6 @@ public abstract class ToggleRefactoringAbstractStrategy {
 				return (ICPPASTCompositeTypeSpecifier) node;
 			}
 		}
-		return unit;
+		return definition_unit;
 	}
 }
