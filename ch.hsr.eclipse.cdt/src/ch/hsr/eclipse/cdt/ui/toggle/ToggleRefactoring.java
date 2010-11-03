@@ -1,11 +1,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.awt.datatransfer.StringSelection;
-import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTImplicitName;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
@@ -13,29 +11,22 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTImplicitName;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
-import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
-import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.internal.ui.refactoring.util.Strings;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.TextEditor;
 
 import ch.hsr.ifs.redhead.helpers.IndexToASTNameHelper;
 
@@ -75,27 +66,55 @@ public class ToggleRefactoring extends CRefactoring {
 		System.out.println(name.getClass() + ", " + name.getRawSignature());
 		
 		System.out.println("name was selected: " + name);
+
+		IIndexName[] decnames = null;
+		IIndexName[] defnames = null;
+		IASTTranslationUnit localtu = null;
 		try {
 			lockIndex();
+			IIndex index = getIndex();
 			IIndexBinding binding = getIndex().findBinding(name);
-			for(IIndexName iname : getIndex().findDeclarations(binding)) {
-				System.out.println("iname-dec : " + iname.getNodeOffset() + " " + iname.getFile());
-				IASTName astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, getIndex());
+			decnames = index.findDeclarations(binding);
+			defnames = index.findDefinitions(binding);
+			
+			for(IIndexName iname : decnames) {
+				System.out.println("deciname : " + iname.getNodeOffset() + " " + iname.getFile());
+				IASTName astname = null;
+				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
+					try {
+						localtu = ToggleSelectionHelper.getLocalTranslationUnitForFile(new URI(iname.getFileLocation().getFileName()));
+						astname = IndexToASTNameHelper.findMatchingASTName(localtu, iname, index);
+					} catch (URISyntaxException e) {
+						e.printStackTrace();
+					}
+				} else
+					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDeclaration = findFunctionDeclarator(astname);
 					System.out.println(" -> " + selectedDeclaration);
 					break;
 				}
 			}
-			for(IIndexName iname : getIndex().findDefinitions(binding)) {
-				System.out.println("iname-def : " + iname.getNodeOffset() + " " + iname.getFile());
-				IASTName astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, getIndex());
+			
+			for(IIndexName iname : defnames) {
+				System.out.println("definame : " + iname.getNodeOffset() + " " + iname.getFile());
+				IASTName astname = null;
+				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
+					try {
+						localtu = ToggleSelectionHelper.getLocalTranslationUnitForFile(new URI(iname.getFileLocation().getFileName()));
+						astname = IndexToASTNameHelper.findMatchingASTName(localtu, iname, index);
+					} catch (URISyntaxException e) {
+						e.printStackTrace();
+					}
+				} else
+					astname = IndexToASTNameHelper.findMatchingASTName(unit, iname, index);
 				if (astname != null) {
 					selectedDefinition = findFunctionDefinition(astname);
 					System.out.println(" -> " + selectedDefinition);
 					break;
 				}
 			}
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
@@ -118,9 +137,19 @@ public class ToggleRefactoring extends CRefactoring {
 		else if (isinHeaderSituation()) {
 			IASTTranslationUnit sibling_unit = ToggleSelectionHelper.getLocalTranslationUnitForFile(ToggleSelectionHelper.getSiblingFile(file, project));
 			strategy = new ToggleFromInHeaderToImplementationStragegy(selectedDeclaration, selectedDefinition, unit, sibling_unit);
-		} else if (isInImplementationSituation()) {
-			System.out.println("this is 4th style");
-			//strategy = new ToggleFromImplementationToClassStragegy(selectedDeclaration, selectedDefinition, unit, project, file);
+		} else if (isInImplementationSituation()) {			
+			IASTTranslationUnit declaration_unit = null;
+			IASTTranslationUnit definition_unit = null;
+			if (getFileExtension(unit.getFileLocation().getFileName()).equals("h"))
+				declaration_unit = unit;
+			else if (getFileExtension(localtu.getFileLocation().getFileName()).equals("h"))
+				declaration_unit = localtu;
+			if (getFileExtension(unit.getFileLocation().getFileName()).equals("cpp"))
+				definition_unit = unit;
+			else if (getFileExtension(localtu.getFileLocation().getFileName()).equals("cpp"))
+				definition_unit = localtu;
+			
+			strategy = new ToggleFromImplementationToClassStragegy(selectedDeclaration, selectedDefinition, definition_unit, declaration_unit);
 		}
 		return initStatus;
 	}

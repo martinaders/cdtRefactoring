@@ -18,11 +18,11 @@ public class ToggleFromClassToInHeaderStrategy extends
 	}
 
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(unit);
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
 
 		rewriter.replace(selectedDefinition, declaration, infoText);
-		rewriter.insertBefore(unit, null, getQualifiedNameDefinition(true),
+		rewriter.insertBefore(definition_unit, null, getQualifiedNameDefinition(true),
 				infoText);
 	}
 }

@@ -20,7 +20,7 @@ public class ToggleFromInHeaderToClassStrategy extends
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(unit);
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTNode toremove = selectedDefinition;
 		if (toremove.getParent() != null
 				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
@@ -28,7 +28,7 @@ public class ToggleFromInHeaderToClassStrategy extends
 
 		rewriter.remove(toremove, infoText);
 		rewriter.replace(selectedDeclaration.getParent(),
-				getInClassDefinition(selectedDefinition, selectedDeclaration),
+				getInClassDefinition(selectedDefinition, selectedDeclaration, definition_unit),
 				infoText);
 	}
 

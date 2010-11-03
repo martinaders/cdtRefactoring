@@ -24,7 +24,7 @@ public class ToggleFromInHeaderToImplementationStragegy extends
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(unit);
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		ASTRewrite otherrewrite = modifications
 				.rewriterForTranslationUnit(siblingfile_translation_unit);
 
