@@ -2,7 +2,9 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
@@ -16,6 +18,7 @@ import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
@@ -57,7 +60,10 @@ public class ToggleRefactoring extends CRefactoring {
 		if (name == null) {
 			name = unit.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
 			IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(name);
-			name = fundef.getDeclarator().getName();
+			if (fundef == null)
+				name = unit.getNodeSelector(null).findEnclosingName(selection.getOffset(), selection.getLength());
+			else
+				name = fundef.getDeclarator().getName();
 		}
 		if (name == null) {
 			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
