@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
@@ -17,6 +18,7 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,16 +46,24 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
-		
+
 		unit = ToggleSelectionHelper.getLocalTranslationUnitForFile(file.getLocationURI());
 		if (unit == null) {
 			initStatus.addFatalError("Could not get TranslationUnit for file");
 			return initStatus;
 		}
-		
+
 		IASTName name = unit.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
-		
-		System.out.println("name was selected: " + name);
+		if (name == null) {
+			name = unit.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
+			IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(name);
+			name = fundef.getDeclarator().getName();
+		}
+		if (name == null) {
+			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
+			return initStatus;
+		}
+
 		IIndexName[] decnames = null;
 		IIndexName[] defnames = null;
 		IASTTranslationUnit localtu = null;
@@ -65,7 +75,6 @@ public class ToggleRefactoring extends CRefactoring {
 			defnames = index.findDefinitions(binding);
 			
 			for(IIndexName iname : decnames) {
-				System.out.println("deciname : " + iname.getNodeOffset() + " " + iname.getFile());
 				IASTName astname = null;
 				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
 					try {
@@ -83,7 +92,6 @@ public class ToggleRefactoring extends CRefactoring {
 			}
 			
 			for(IIndexName iname : defnames) {
-				System.out.println("definame : " + iname.getNodeOffset() + " " + iname.getFile());
 				IASTName astname = null;
 				if (!iname.getFileLocation().getFileName().equals(unit.getFileLocation().getFileName())) {
 					try {
@@ -105,8 +113,7 @@ public class ToggleRefactoring extends CRefactoring {
 		} finally {
 			unlockIndex();
 		}
-		
-		
+
 		if (selectedDeclaration == null || selectedDefinition == null) {
 			initStatus
 			.addFatalError("declaration AND definition needed. Cannot toggle.");
@@ -114,7 +121,6 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 		
 		if (isInClassSituation()) {
-			System.out.println("inclass");
 			strategy = new ToggleFromClassToInHeaderStrategy(selectedDeclaration, selectedDefinition, unit);
 		}
 		else if (isTemplateSituation())
@@ -149,6 +155,9 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 
 	private CPPASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
+		if (node instanceof IASTSimpleDeclaration) {
+			return (CPPASTFunctionDeclarator)((IASTSimpleDeclaration)node).getDeclarators()[0];
+		}
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTFunctionDeclarator)
@@ -194,8 +203,6 @@ public class ToggleRefactoring extends CRefactoring {
 	}
 	
 	private boolean isInClassSituation() {
-		System.out.println(selectedDeclaration.getFileLocation().getFileName());
-		System.out.println(selectedDefinition.getFileLocation().getFileName());
 		return selectedDefinition.getDeclarator() == selectedDeclaration && 
 		selectedDeclaration.getFileLocation().getFileName().equals(selectedDefinition.getFileLocation().getFileName());
 	}
