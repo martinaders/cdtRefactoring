@@ -626,3 +626,96 @@ class A {
 
 };
 
+
+//!TestImplementationToClassWithDefintionSelected
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void N::A::/*$*/foo/*$$*/()
+{
+    return;
+}
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+    };
+}
+
+
+//!TestImplementationToClassWithDeclarationSelected
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void /*$*/foo/*$$*/();
+    };
+}
+
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+    };
+}
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void N::A::foo()
+{
+    return;
+}
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
