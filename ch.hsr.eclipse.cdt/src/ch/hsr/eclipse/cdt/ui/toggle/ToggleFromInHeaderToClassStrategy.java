@@ -1,9 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -12,10 +9,8 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 public class ToggleFromInHeaderToClassStrategy extends
 		ToggleRefactoringAbstractStrategy {
 
-	public ToggleFromInHeaderToClassStrategy(
-			ICPPASTFunctionDeclarator selectedDeclaration,
-			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit unit) {
-		super(selectedDeclaration, selectedDefinition, unit);
+	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
+		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
 	}
 
 	@Override

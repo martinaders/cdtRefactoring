@@ -1,6 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
@@ -10,7 +9,6 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
@@ -27,17 +25,17 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	protected IASTTranslationUnit definition_unit;
 	protected TextEditGroup infoText;
 
-	public ToggleRefactoringAbstractStrategy(ICPPASTFunctionDeclarator selectedDeclaration,
-			IASTFunctionDefinition selectedDefinition,
-			IASTTranslationUnit unit) {
-		this.selectedDeclaration = selectedDeclaration;
+	public ToggleRefactoringAbstractStrategy(
+			IASTFunctionDeclarator selectedDeclaration2,
+			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit unit) {
+		this.selectedDeclaration = selectedDeclaration2;
 		this.selectedDefinition = selectedDefinition;
 		this.definition_unit = unit;
 		infoText = new TextEditGroup("Toggle function body placement");
 	}
 
 	public abstract void run(ModificationCollector modifications);
-	
+
 	protected IASTSimpleDeclaration createDeclarationFromDefinition(
 			IASTFunctionDefinition memberdefinition) {
 		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
@@ -61,7 +59,8 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
 				newdeclspec, funcdecl);
 
-		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper.getTemplateDeclaration(selectedDeclaration);
+		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
+				.getTemplateDeclaration(selectedDeclaration);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
 			templdecl.setParent(definition_unit);
@@ -91,9 +90,10 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		return newfunc;
 	}
 
-	protected IASTFunctionDefinition getInClassDefinition(IASTFunctionDefinition definition, IASTFunctionDeclarator declaration, IASTTranslationUnit unit) {
-		IASTDeclSpecifier newDeclSpec = definition.getDeclSpecifier()
-				.copy();
+	protected IASTFunctionDefinition getInClassDefinition(
+			IASTFunctionDefinition definition,
+			IASTFunctionDeclarator declaration, IASTTranslationUnit unit) {
+		IASTDeclSpecifier newDeclSpec = definition.getDeclSpecifier().copy();
 		newDeclSpec.setInline(false);
 		IASTFunctionDeclarator newDeclaration = declaration.copy();
 
@@ -103,8 +103,9 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		newfunc.setParent(getParentInsertionPoint(definition, unit));
 		return newfunc;
 	}
-	
-	private IASTNode getParentInsertionPoint(IASTNode node, IASTTranslationUnit alternative) {
+
+	private IASTNode getParentInsertionPoint(IASTNode node,
+			IASTTranslationUnit alternative) {
 		while (node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
