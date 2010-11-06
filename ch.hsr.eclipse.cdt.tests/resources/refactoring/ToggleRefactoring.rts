@@ -22,8 +22,6 @@ inline int A::function()
 {
     return 0;
 }
-
-
 //!TestSimpleFunctionInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -97,8 +95,6 @@ inline A::A(int x, int y)
 :a(x), b(y)
 {
 }
-
-
 //!TestConstructorToggleInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -176,8 +172,6 @@ inline void A::B::member(int a, int b)
 {
     return;
 }
-
-
 //!TestNestedClassInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -250,8 +244,6 @@ inline void A::member(int a, int b)
 {
     return;
 }
-
-
 //!TestDefaultParameterInitializerInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -328,8 +320,6 @@ try
 catch(std::exception & e1){
     return;
 }
-
-
 //!TestTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -422,8 +412,6 @@ catch(std::exception & e1){
 catch(std::exception & e2){
     return;
 }
-
-
 //!TestMultipleTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -511,8 +499,6 @@ inline void N::A::foo()
 {
     return;
 }
-
-
 //!TestSimpleNamespaceInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -591,8 +577,6 @@ template<typename T> inline T A<T>::B::member()
 {
     return T();
 }
-
-
 //!TestTemplateFunctionInHeaderToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
