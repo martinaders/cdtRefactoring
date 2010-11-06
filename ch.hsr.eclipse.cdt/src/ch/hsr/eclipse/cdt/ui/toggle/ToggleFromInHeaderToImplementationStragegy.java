@@ -1,12 +1,12 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.core.runtime.CoreException;
 
 @SuppressWarnings("restriction")
 public class ToggleFromInHeaderToImplementationStragegy extends
@@ -14,12 +14,9 @@ public class ToggleFromInHeaderToImplementationStragegy extends
 
 	private IASTTranslationUnit siblingfile_translation_unit;
 
-	public ToggleFromInHeaderToImplementationStragegy(
-			ICPPASTFunctionDeclarator selectedDeclaration,
-			IASTFunctionDefinition selectedDefinition,
-			IASTTranslationUnit unit, IASTTranslationUnit other_translation_unit) {
-		super(selectedDeclaration, selectedDefinition, unit);
-		this.siblingfile_translation_unit = other_translation_unit;
+	public ToggleFromInHeaderToImplementationStragegy(ToggleRefactoringContext context) throws CModelException, CoreException {
+		super(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
+		this.siblingfile_translation_unit = context.loadTUForSiblingFile();
 	}
 
 	@Override

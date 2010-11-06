@@ -6,16 +6,12 @@ import java.util.Collections;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.ILinkage;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
@@ -29,67 +25,19 @@ import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
-import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextSelection;
 
 /**
  * Helps finding a FunctionDefinition in the parent nodes of the current selection. 
  */
 @SuppressWarnings("restriction")
 class ToggleSelectionHelper extends SelectionHelper {		
-	
-	public static CPPASTFunctionDeclarator getSelectedDeclaration(IASTTranslationUnit unit, TextSelection selection) {
-		CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
-		if (selectedDeclaration == null) {
-			return null;
-		}
-		PlainDeclarationFinder visitor = new PlainDeclarationFinder(selectedDeclaration);
-		unit.accept(visitor);
-		return visitor.result;
-	}
-
-	private static CPPASTFunctionDeclarator getSelectedDeclarator(IASTTranslationUnit unit, TextSelection selection) {
-		SelectedDeclaratorFinder visitor = new SelectedDeclaratorFinder(selection);
-		unit.accept(visitor);
-		return visitor.result;
-	}
-
-	public static IASTFunctionDefinition getSelectedDefinition(IASTTranslationUnit unit, TextSelection selection) {
-		final CPPASTFunctionDeclarator selectedDeclaration = getSelectedDeclarator(unit, selection);
-		if (selectedDeclaration == null) {
-			return null;
-		}
-		final Container<IASTFunctionDefinition> result = new Container<IASTFunctionDefinition>();
-		
-		unit.accept(new CPPASTVisitor() {
-			{
-				shouldVisitDeclarations = true;
-			}
-			public int visit(IASTDeclaration node) {
-				if (!(node instanceof IASTFunctionDefinition))
-					return super.visit(node);
-				IASTFunctionDefinition func = (IASTFunctionDefinition) node;
-
-				if (!(func.getDeclarator() instanceof CPPASTFunctionDeclarator))
-					return super.visit(node);
-				CPPASTFunctionDeclarator declarator = (CPPASTFunctionDeclarator) func.getDeclarator();
-				if (declarator.getFunctionScope().equals(selectedDeclaration.getFunctionScope())) {
-					result.setObject((IASTFunctionDefinition) func);
-				}
-				return super.visit(node);
-			}
-		});
-		return result.getObject();
-	}
 
 	public static ArrayList<IASTName> getAllQualifiedNames(IASTNode node) {
 		ArrayList<IASTName> names = new ArrayList<IASTName>();
@@ -132,29 +80,10 @@ class ToggleSelectionHelper extends SelectionHelper {
 		newdecl.setFullyQualified(true);
 		return newdecl;
 	}
-	
-	@Deprecated
-	public static IASTFunctionDefinition getFirstSelectedFunctionDefinition(final Region region, final IASTTranslationUnit unit) {
-		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
-		
-		unit.accept(new CPPASTVisitor() {
-			{
-				shouldVisitDeclarators = true;
-			}
-			public int visit(IASTDeclarator declarator) {
-				if (declarator instanceof CPPASTFunctionDeclarator) {
-					if ((declarator.getParent() instanceof ICPPASTFunctionDefinition) && isSelectionOnExpression(region, declarator)) {
-						container.setObject((IASTFunctionDefinition) declarator.getParent());
-					}
-				}
-				return super.visit(declarator);
-			}
-		});
-		return container.getObject();
-	}
 
-	public static URI getSiblingFile( IFile file, ICProject project) throws CoreException {
-		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(project);
+	public static URI getSiblingFile( IFile file) throws CoreException {
+		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
+		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		IIndexFile thisfile = projectindex.getFile(ILinkage.CPP_LINKAGE_ID,
 				IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = getFilenameWithoutExtension(file.getFullPath()

@@ -1,8 +1,8 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 
@@ -13,11 +13,17 @@ public class ToggleFromImplementationToClassStragegy extends
 	private IASTTranslationUnit declaration_unit;
 
 	public ToggleFromImplementationToClassStragegy(
-			ICPPASTFunctionDeclarator selectedDeclaration,
+			IASTFunctionDeclarator selectedDeclaration,
 			IASTFunctionDefinition selectedDefinition,
 			IASTTranslationUnit definition_unit, IASTTranslationUnit declaration_unit) {
 		super(selectedDeclaration, selectedDefinition, definition_unit);
 		this.declaration_unit = declaration_unit;
+	}
+
+	public ToggleFromImplementationToClassStragegy(
+			ToggleRefactoringContext context) {
+		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
+		this.declaration_unit = context.getDeclarationUnit();
 	}
 
 	@Override

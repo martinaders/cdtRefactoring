@@ -51,34 +51,3 @@ to each other. The same developer laptop was used for before and after tests.
  Reference test	&    0ms & --ms & --\% \\
 \end{tabular}
 
-\section{Configuration Management}
-
-\subsection{Git}
-
-As a version control system, git was used. This time it was not used like an SVN
-replacement but instead to get some redundancy by storing the source code on
-multiple server. Both project developers had their ``own`` git server on which
-the developer committed. It was merged between these servers and then pushed to
-the main repository for automatic testing.
-
-\subsection{Maven and Tycho}
-
-Tycho is a plug-in for Maven to build the plug-in and the execute the tests.
-Maven3 is required for this to work. Although Maven3 is beta, it was proven
-stable during the project.
-
-% eclipse-headless vs no-X-used?
-To execute the tests on a headless server with Hudson build server first a fake
-X Server was needed. Xvfb was used in our case for the job. Maven has to be
-explicitly told which test class to execute and in which folder the test class
-is located. If this is not done properly the tests will fail.
-
-\subsection{Hudson}
-
-To get the tests executed on the fake X sever, the \texttt{DISPLAY} environment
-variable must be set. If not, tests will fail with a cryptic
-SWTError.
-
-There is a plug-in for Hudson to set the environment variable to
-the right value. In most cases this is \textbf{:0}.
-
