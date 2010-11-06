@@ -193,6 +193,4 @@ public class ToggleRefactoringContext {
 		}
 		return null;
 	}
-
-
 }

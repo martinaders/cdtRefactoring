@@ -35,6 +35,7 @@ public class ToggleRefactoring extends CRefactoring {
 		context.findDeclaration(initStatus);
 		context.findDefinition(initStatus);
 		
+		
 		if (initStatus.hasFatalError())
 			return initStatus;
 		
