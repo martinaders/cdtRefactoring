@@ -732,7 +732,6 @@ namespace N {
 }
 
 int freefunction();
-
 //@A.cpp
 #include "A.h"
 
@@ -752,5 +751,3 @@ int freefunction()
 {
     return 42;
 }
-
-
