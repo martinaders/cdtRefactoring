@@ -72,7 +72,7 @@ public class ToggleRefactoring extends CRefactoring {
 		ModificationCollector collector = new ModificationCollector();
 		collectModifications(pm, collector);
 		CCompositeChange finalChange = collector.createFinalChange();
-		strategy.removeTrailingNewlines(finalChange);
+		strategy.removeNewlines(finalChange);
 		finalChange.setDescription(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
 		return finalChange;
 	}
