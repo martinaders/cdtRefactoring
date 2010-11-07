@@ -4,6 +4,7 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.CCompositeChange;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,6 +65,8 @@ public class ToggleRefactoring extends CRefactoring {
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (IllegalArgumentException e) {
+			CUIPlugin.log("Failed to commit changes. Building project may help.", e);
 		}
 	}
 

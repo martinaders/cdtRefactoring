@@ -43,8 +43,6 @@ inline int A::/*$*/function/*$$*/()
 class A {
     int function();
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -62,8 +60,6 @@ int A::function()
 {
     return 0;
 }
-
-
 //!TestConstructorToggleInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -153,8 +149,6 @@ private:
 public:
     A(int x, int y);
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -172,8 +166,6 @@ A::A(int x, int y)
 :a(x), b(y)
 {
 }
-
-
 //!TestNestedClassInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -226,8 +218,6 @@ class A {
 		void member(int a, int b);
 	};
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -247,8 +237,6 @@ void A::B::member(int a, int b)
 {
     return;
 }
-
-
 //!TestDefaultParameterInitializerInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -294,8 +282,6 @@ inline void /*$*/A::member/*$$*/(int a, int b)
 class A {
 	void member(int a=0, int b=0);
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -313,8 +299,6 @@ void A::member(int a, int b)
 {
     return;
 }
-
-
 //!TestTryCatchFromInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -376,8 +360,6 @@ catch(std::exception & e1){
 class A {
     void member(int a, int b);
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -399,8 +381,6 @@ try
 catch(std::exception & e1){
     return;
 }
-
-
 //!TestMultipleTryCatchFromInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -471,8 +451,6 @@ catch(std::exception & e2){
 class A {
     void member(int a, int b);
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -497,8 +475,6 @@ catch(std::exception & e1){
 catch(std::exception & e2){
     return;
 }
-
-
 //!TestSimpleNamespaceInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -555,8 +531,6 @@ namespace N {
         void foo();
     };
 }
-
-
 //@A.cpp
 #include "A.h"
 
@@ -574,8 +548,6 @@ void N::A::foo()
 {
     return;
 }
-
-
 //!TestTemplateFunctionInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -659,7 +631,6 @@ int main() {
 	return 0;
 }
 
-
 //@A.h
 #include <iostream>
 #include <exception>
@@ -679,7 +650,6 @@ namespace N {
         {
             return;
         }
-
     };
 }
 //!TestImplementationToClassWithDeclarationSelected
@@ -706,7 +676,6 @@ namespace N {
         {
             return;
         }
-
     };
 }
 
@@ -727,7 +696,6 @@ void N::A::foo()
 int main() {
 	return 0;
 }
-
 
 //!TestFreeFunctionInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
