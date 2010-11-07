@@ -669,7 +669,6 @@ namespace N {
         void foo();
     };
 }
-
 //=
 #include <iostream>
 #include <exception>
@@ -680,10 +679,9 @@ namespace N {
         {
             return;
         }
+
     };
 }
-
-
 //!TestImplementationToClassWithDeclarationSelected
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -708,6 +706,7 @@ namespace N {
         {
             return;
         }
+
     };
 }
 
@@ -740,7 +739,7 @@ filename=A.h
 
 namespace N {
     class A {
-        void member() 
+        void member()
         {
             return;
         }
@@ -749,7 +748,7 @@ namespace N {
 
 int /*$*/freefunction/*$$*/()
 {
-	return 42;
+    return 42;
 }
 //=
 #include <iostream>
@@ -765,23 +764,25 @@ namespace N {
 }
 
 int freefunction();
+
 //@A.cpp
 #include "A.h"
 
 int main() 
 {
-	return 0;
+    return 0;
 }
 //=
 #include "A.h"
 
 int main() 
 {
-	return 0;
+    return 0;
 }
 
 int freefunction()
 {
     return 42;
 }
+
 

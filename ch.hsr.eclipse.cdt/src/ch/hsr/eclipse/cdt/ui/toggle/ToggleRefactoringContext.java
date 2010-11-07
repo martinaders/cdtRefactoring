@@ -61,7 +61,7 @@ public class ToggleRefactoringContext {
 		ICProject cProject = CoreModel.getDefault().create(filepath).getCProject();
 		try {
 			ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(file.getLocationURI(), cProject);
-			localTranslation = tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
+			localTranslation = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 		} catch (CModelException e) {
 			initStatus.addFatalError("Cannot find translation unit for file");
 		} catch (CoreException e) {
@@ -105,7 +105,6 @@ public class ToggleRefactoringContext {
 		try {
 			IIndexName[] decnames = index.findDeclarations(binding);
 			for(IIndexName iname : decnames) {
-				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
@@ -123,7 +122,6 @@ public class ToggleRefactoringContext {
 		try {
 			IIndexName[] defnames = index.findDefinitions(binding);
 			for(IIndexName iname : defnames) {
-				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
