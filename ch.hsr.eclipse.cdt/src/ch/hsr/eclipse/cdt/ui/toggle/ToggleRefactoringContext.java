@@ -61,7 +61,7 @@ public class ToggleRefactoringContext {
 		ICProject cProject = CoreModel.getDefault().create(filepath).getCProject();
 		try {
 			ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(file.getLocationURI(), cProject);
-			localTranslation = tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
+			localTranslation = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 		} catch (CModelException e) {
 			initStatus.addFatalError("Cannot find translation unit for file");
 		} catch (CoreException e) {
