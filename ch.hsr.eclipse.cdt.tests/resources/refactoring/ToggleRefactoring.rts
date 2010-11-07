@@ -99,6 +99,37 @@ inline A::A(int x, int y)
 }
 
 
+//!TestDestructorToggleInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    /*$*/~A/*$$*/()
+    {}
+};
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    ~A();
+};
+
+inline A::~A()
+{
+}
+
+
 //!TestConstructorToggleInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -774,3 +805,4 @@ int freefunction()
 {
     return 42;
 }
+
