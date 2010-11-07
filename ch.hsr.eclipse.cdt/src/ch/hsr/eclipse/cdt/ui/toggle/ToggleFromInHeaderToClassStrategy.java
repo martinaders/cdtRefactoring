@@ -42,7 +42,7 @@ public class ToggleFromInHeaderToClassStrategy extends
 		String before = repEdit.getText().substring(0, repEdit.getText().lastIndexOf("\n\n"));
 		String after = repEdit.getText().substring(repEdit.getText().lastIndexOf("\n\n") + 1, repEdit.getText().length());
 		repEdit = new ReplaceEdit(repEdit.getOffset(), repEdit.getLength(), before.concat(after));
-		remEdit = new ReplaceEdit(remEdit.getOffset() - 1, remEdit.getLength() + 2, "");
+		remEdit = new ReplaceEdit(remEdit.getOffset() - 1, remEdit.getLength() + 1, "");
 		edit.removeChildren();
 		edit.addChild(repEdit);
 		edit.addChild(remEdit);

@@ -5,6 +5,10 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 @SuppressWarnings("restriction")
 public class ToggleFromImplementationToClassStragegy extends
@@ -35,5 +39,44 @@ public class ToggleFromImplementationToClassStragegy extends
 
 		implast.remove(selectedDefinition, infoText);
 		headerast.replace(selectedDeclaration.getParent(),getInClassDefinition(selectedDefinition, selectedDeclaration, declaration_unit),infoText);
+	}
+	
+	@Override
+	protected void removeNewlines(CompositeChange finalChange) {
+		CompositeChange file1 = (CompositeChange) finalChange.getChildren()[0];
+		CompositeChange file2 = (CompositeChange) finalChange.getChildren()[1];
+		TextEdit edit1 = ((TextChange) file1.getChildren()[0]).getEdit();
+		TextEdit edit2 = ((TextChange) file2.getChildren()[0]).getEdit();
+		
+		// Needed, because the order of the edits may change (usually when
+		// toggling very fast).
+		boolean variation = ((ReplaceEdit) edit2.getChildren()[0]).getText().length() == 0;
+
+		ReplaceEdit removEdit = null;
+		ReplaceEdit repEdit = null;
+		if (variation) {
+			System.out.println("case a");
+			removEdit = (ReplaceEdit) edit2.getChildren()[0];
+			repEdit = (ReplaceEdit) edit1.getChildren()[0];
+		} else {
+			System.out.println("case b");
+			removEdit = (ReplaceEdit) edit1.getChildren()[0];
+			repEdit = (ReplaceEdit) edit2.getChildren()[0];
+		}
+		
+		String before = repEdit.getText().substring(0, repEdit.getText().lastIndexOf("\n"));
+		String after = repEdit.getText().substring(repEdit.getText().lastIndexOf("\n") + 1, repEdit.getText().length());
+		repEdit = new ReplaceEdit(repEdit.getOffset(), repEdit.getLength(), before.concat(after));
+		removEdit = new ReplaceEdit(removEdit.getOffset() - 1, removEdit.getLength() + 2, "");
+
+		edit1.removeChild(0);
+		edit2.removeChild(0);
+		if (variation) {
+			edit1.addChild(repEdit);
+			edit2.addChild(removEdit);
+		} else {
+			edit2.addChild(repEdit);
+			edit1.addChild(removEdit);			
+		}
 	}
 }
