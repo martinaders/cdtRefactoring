@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
@@ -37,8 +37,8 @@ public class ToggleNodeHelper extends NodeHelper {
 
 	static void removeParameterInitializations(IASTFunctionDeclarator funcdecl) {
 		for (IASTNode child : funcdecl.getChildren()) {
-			if (child instanceof ICPPASTParameterDeclaration) {
-				ICPPASTParameterDeclaration parameter = (ICPPASTParameterDeclaration) child;
+			if (child instanceof IASTParameterDeclaration) {
+				IASTParameterDeclaration parameter = (IASTParameterDeclaration) child;
 				parameter.getDeclarator().setInitializer(null);
 			}
 		}
@@ -72,6 +72,5 @@ public class ToggleNodeHelper extends NodeHelper {
 				result.add(((ICPPASTConstructorChainInitializer) node).copy());
 		}
 		return result;
-	}
-	
+	}	
 }

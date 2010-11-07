@@ -1,14 +1,11 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
@@ -17,7 +14,6 @@ import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -35,10 +31,12 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDeclarator declaration;
 	private IASTTranslationUnit definition_unit;
 	private IASTTranslationUnit declaration_unit;
+	IIndex index = null;
 	
 	private IASTTranslationUnit localTranslation;
 	
-	public ToggleRefactoringContext() {
+	public ToggleRefactoringContext(IIndex index) {
+		this.index = index;
 	}
 	
 	public IASTFunctionDeclarator getDeclaration() {
@@ -57,25 +55,18 @@ public class ToggleRefactoringContext {
 		return definition_unit;
 	}
 
-	IIndex index = null;
 	public void findFileUnitTranslation(IFile file, RefactoringStatus initStatus) {
 		origin_file = file;
 		IPath filepath =  new Path(file.getLocationURI().getRawPath());
 		ICProject cProject = CoreModel.getDefault().create(filepath).getCProject();
 		try {
 			ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(file.getLocationURI(), cProject);
-			index = CCorePlugin.getIndexManager().getIndex(cProject);
-			index.acquireReadLock();
-			localTranslation = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+			localTranslation = tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
 		} catch (CModelException e) {
 			initStatus.addFatalError("Cannot find translation unit for file");
 		} catch (CoreException e) {
 			initStatus.addFatalError("Cannot find ast translation for file");
-		} catch (InterruptedException e) {
-			initStatus.addFatalError("Cannot acquireReadlock in Index");
-		} finally {
-			index.releaseReadLock();
-		}
+		} 
 		if (localTranslation == null) {
 			initStatus.addFatalError("Could not get TranslationUnit for file");
 		}
@@ -99,13 +90,10 @@ public class ToggleRefactoringContext {
 	
 	public void findBinding(RefactoringStatus initStatus) {
 		try {
-			index.acquireReadLock();
 			binding = index.findBinding(element_name);
 			if (binding == null) {
 				initStatus.addFatalError("Cannot find binding for name: " + element_name);
 			}
-		} catch (InterruptedException e) {
-			initStatus.addFatalError("Cannot acquire Readlock for Index");
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
 		} finally {
@@ -115,8 +103,9 @@ public class ToggleRefactoringContext {
 
 	public void findDeclaration(RefactoringStatus initStatus) {
 		try {
-			IIndexName[] dname = index.findDeclarations(binding);
-			for(IIndexName iname : dname) {
+			IIndexName[] decnames = index.findDeclarations(binding);
+			for(IIndexName iname : decnames) {
+				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
@@ -134,6 +123,7 @@ public class ToggleRefactoringContext {
 		try {
 			IIndexName[] defnames = index.findDefinitions(binding);
 			for(IIndexName iname : defnames) {
+				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
@@ -158,11 +148,19 @@ public class ToggleRefactoringContext {
 	private IASTTranslationUnit loadTUForNameinFile(
 			IIndexName iname) throws CModelException, CoreException {
 		if (!isSameFileAsInTU(iname)) {
-			IASTTranslationUnit asttu;
+			IASTTranslationUnit asttu = null;
 			IPath path = new Path(iname.getFileLocation().getFileName());
 			ICProject cProject = CoreModel.getDefault().create(path).getCProject();
 			ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(iname.getFile().getLocation(), cProject);
-			asttu = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+			try {
+				index.acquireReadLock();
+				asttu = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				index.releaseReadLock();
+			}
 			return asttu;
 		}
 		return localTranslation;
@@ -172,14 +170,14 @@ public class ToggleRefactoringContext {
 		return iname.getFileLocation().getFileName().equals(localTranslation.getFileLocation().getFileName());
 	}
 	
-	private CPPASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
+	private IASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
 		if (node instanceof IASTSimpleDeclaration) {
-			return (CPPASTFunctionDeclarator)((IASTSimpleDeclaration)node).getDeclarators()[0];
+			return (IASTFunctionDeclarator)((IASTSimpleDeclaration)node).getDeclarators()[0];
 		}
 		while(node.getParent() != null) {
 			node = node.getParent();
-			if (node instanceof ICPPASTFunctionDeclarator)
-				return (CPPASTFunctionDeclarator) node;
+			if (node instanceof IASTFunctionDeclarator)
+				return (IASTFunctionDeclarator) node;
 		}
 		return null;
 	}
@@ -188,7 +186,7 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
 		while(node.getParent() != null) {
 			node = node.getParent();
-			if (node instanceof ICPPASTFunctionDefinition)
+			if (node instanceof IASTFunctionDefinition )
 				return (IASTFunctionDefinition) node;
 		}
 		return null;

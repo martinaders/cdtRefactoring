@@ -81,10 +81,12 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return newdecl;
 	}
 
-	public static URI getSiblingFile( IFile file) throws CoreException {
+	public static URI getSiblingFile(IFile file) throws CoreException {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
-		IIndexFile thisfile = projectindex.getFile(ILinkage.CPP_LINKAGE_ID,
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnit(file);
+		IASTTranslationUnit asttu = tu.getAST(projectindex, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
+		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
 				IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = getFilenameWithoutExtension(file.getFullPath()
 				.toString());
