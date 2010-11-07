@@ -43,8 +43,6 @@ inline int A::/*$*/function/*$$*/()
 class A {
     int function();
 };
-
-
 //@A.cpp
 #include "A.h"
 
@@ -93,6 +91,35 @@ public:
 
 inline A::A(int x, int y)
 :a(x), b(y)
+{
+}
+//!TestDestructorToggleInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    /*$*/~A/*$$*/()
+    {}
+};
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    ~A();
+};
+
+inline A::~A()
 {
 }
 //!TestConstructorToggleInHeaderToImplementation
@@ -758,3 +785,4 @@ int freefunction()
 {
     return 42;
 }
+

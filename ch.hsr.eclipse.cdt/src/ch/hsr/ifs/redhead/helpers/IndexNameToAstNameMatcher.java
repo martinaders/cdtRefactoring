@@ -3,17 +3,18 @@ package ch.hsr.ifs.redhead.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
-import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.index.IIndex;
+import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.parser.util.CharArrayUtils;
 import org.eclipse.core.runtime.CoreException;
 
-public class IndexNameToAstNameMatcher extends CPPASTVisitor {
+public class IndexNameToAstNameMatcher extends ASTVisitor {
 	private IASTName result;
 	private IBinding bindingToFind;
 	private char[] charNameToFind;
@@ -46,8 +47,11 @@ public class IndexNameToAstNameMatcher extends CPPASTVisitor {
 	private boolean isEquivalent(IASTName candidate) {
 		if (!matchesIndexName(candidate))
 			return false;
-		if (!(bindingToFind.equals(index.adaptBinding(candidate.resolveBinding()))))
-			return false;
+//		IBinding binding = candidate.resolveBinding();
+//		IIndexBinding indexbinding = index.adaptBinding(binding);
+//		boolean eq = bindingToFind.equals(indexbinding);
+//		if (!(eq))
+//			return false;
 		return true;
 	}
 
@@ -69,7 +73,7 @@ public class IndexNameToAstNameMatcher extends CPPASTVisitor {
 	}
 }
 
-class BindingToAstNameMatcher extends CPPASTVisitor {
+class BindingToAstNameMatcher extends ASTVisitor {
 
 	private List<IASTName> results = new ArrayList<IASTName>();
 	private IBinding bindingToFind;

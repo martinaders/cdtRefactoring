@@ -51,8 +51,9 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isInClassSituation() {
-		return context.getDefinition().getDeclarator() == context.getDeclaration() && 
-		context.getDeclaration().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
+		boolean samefile = context.getDeclaration().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
+		boolean samenode = context.getDefinition().getDeclarator() == context.getDeclaration();
+		return samefile && samenode;
 	}
 
 	private boolean isTemplateSituation() {
@@ -68,7 +69,7 @@ public class ToggleStrategyFactory {
 	private boolean isInImplementationSituation() {
 		String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
 		String extension2 = getFileExtension(context.getDefinitionUnit().getFileLocation().getFileName());
-		if (extension1.equals("h") && extension2.equals("cpp"))
+		if (extension1.equals("h") && (extension2.equals("cpp") || extension2.equals("c")))
 			return true;
 		return false;
 	}

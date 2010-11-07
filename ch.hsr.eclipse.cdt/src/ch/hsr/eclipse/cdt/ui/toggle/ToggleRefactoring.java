@@ -30,12 +30,20 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
-		context = new ToggleRefactoringContext();
-		context.findFileUnitTranslation(file, initStatus);
-		context.findASTNodeName(selection, initStatus);
-		context.findBinding(initStatus);
-		context.findDeclaration(initStatus);
-		context.findDefinition(initStatus);
+		try {
+			lockIndex();
+			context = new ToggleRefactoringContext(getIndex());
+			context.findFileUnitTranslation(file, initStatus);
+			context.findASTNodeName(selection, initStatus);
+			context.findBinding(initStatus);
+			context.findDeclaration(initStatus);
+			context.findDefinition(initStatus);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			unlockIndex();
+		}
 
 		if (initStatus.hasFatalError())
 			return initStatus;
