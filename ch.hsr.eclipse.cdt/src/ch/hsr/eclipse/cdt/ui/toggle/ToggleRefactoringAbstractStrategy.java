@@ -14,6 +14,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
+import org.eclipse.cdt.internal.ui.refactoring.CCompositeChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -113,5 +114,12 @@ public abstract class ToggleRefactoringAbstractStrategy {
 			}
 		}
 		return definition_unit;
+	}
+
+	/**
+	 * Removes annoying newlines after changes have been generated. Don't remove
+	 * anything by default.
+	 */
+	protected void removeTrailingNewlines(CCompositeChange finalChange) {
 	}
 }

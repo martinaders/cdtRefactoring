@@ -193,4 +193,8 @@ public class ToggleRefactoringContext {
 		}
 		return null;
 	}
+
+	public IFile getFile() {
+		return origin_file;
+	}
 }

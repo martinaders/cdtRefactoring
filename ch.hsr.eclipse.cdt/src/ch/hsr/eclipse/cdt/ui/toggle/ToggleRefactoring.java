@@ -1,6 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.ui.refactoring.CCompositeChange;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.resources.IFile;
@@ -9,6 +10,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -33,13 +36,11 @@ public class ToggleRefactoring extends CRefactoring {
 		context.findBinding(initStatus);
 		context.findDeclaration(initStatus);
 		context.findDefinition(initStatus);
-		
-		
+
 		if (initStatus.hasFatalError())
 			return initStatus;
 		
 		strategy = new ToggleStrategyFactory(context).getAppropriatedStategy(initStatus);
-		
 		return initStatus;
 	}
 
@@ -56,6 +57,16 @@ public class ToggleRefactoring extends CRefactoring {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	@Override
+	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+		ModificationCollector collector = new ModificationCollector();
+		collectModifications(pm, collector);
+		CCompositeChange finalChange = collector.createFinalChange();
+		strategy.removeTrailingNewlines(finalChange);
+		finalChange.setDescription(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
+		return finalChange;
 	}
 
 	@Override
