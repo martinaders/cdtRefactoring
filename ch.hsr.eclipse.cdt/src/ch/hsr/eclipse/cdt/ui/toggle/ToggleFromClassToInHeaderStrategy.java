@@ -16,7 +16,9 @@ public class ToggleFromClassToInHeaderStrategy extends
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
 
-		rewriter.replace(selectedDefinition, declaration, infoText);
+		
+		rewriter.insertBefore(selectedDefinition.getParent(),null, declaration, infoText);
+		rewriter.remove(selectedDefinition, infoText);
 		rewriter.insertBefore(definition_unit, null, getQualifiedNameDefinition(true),
 				infoText);
 	}
