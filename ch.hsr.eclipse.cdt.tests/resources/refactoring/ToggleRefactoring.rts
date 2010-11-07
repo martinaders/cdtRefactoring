@@ -180,6 +180,33 @@ A::A(int x, int y)
 }
 
 
+//!TestCandDTorNoInterfeeringWithEmptyArgumentList
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+    /*$*/A/*$$*/()
+    {}
+    ~A()
+    {}
+};
+//=
+#include <iostream>
+
+class A {
+    A();
+    ~A()
+    {}
+};
+
+inline A::A()
+{
+}
+
+
 //!TestNestedClassInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
