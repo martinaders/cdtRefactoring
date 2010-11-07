@@ -40,8 +40,6 @@ public class ToggleRefactoring extends CRefactoring {
 			context.findDeclaration(initStatus);
 			context.findDefinition(initStatus);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
 			unlockIndex();
 		}
@@ -49,7 +47,7 @@ public class ToggleRefactoring extends CRefactoring {
 		if (initStatus.hasFatalError())
 			return initStatus;
 		
-		strategy = new ToggleStrategyFactory(context).getAppropriatedStategy(initStatus);
+		strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
 		return initStatus;
 	}
 

@@ -11,12 +11,12 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 @SuppressWarnings("restriction")
-public class ToggleFromImplementationToClassStragegy extends
+public class ToggleFromImplementationToClassStrategy extends
 		ToggleRefactoringAbstractStrategy {
 
 	private IASTTranslationUnit declaration_unit;
 
-	public ToggleFromImplementationToClassStragegy(
+	public ToggleFromImplementationToClassStrategy(
 			IASTFunctionDeclarator selectedDeclaration,
 			IASTFunctionDefinition selectedDefinition,
 			IASTTranslationUnit definition_unit, IASTTranslationUnit declaration_unit) {
@@ -24,7 +24,7 @@ public class ToggleFromImplementationToClassStragegy extends
 		this.declaration_unit = declaration_unit;
 	}
 
-	public ToggleFromImplementationToClassStragegy(
+	public ToggleFromImplementationToClassStrategy(
 			ToggleRefactoringContext context) {
 		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
 		this.declaration_unit = context.getDeclarationUnit();

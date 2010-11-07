@@ -14,7 +14,7 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringAbstractStrategy getAppropriatedStategy(RefactoringStatus initStatus) {
+	public ToggleRefactoringAbstractStrategy getAppropriateStategy(RefactoringStatus initStatus) {
 		if (isFreeFunction() && 
 				getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
 				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h"))
@@ -29,14 +29,14 @@ public class ToggleStrategyFactory {
 			return new ToggleFromInHeaderToClassStrategy(context);
 		else if (isinHeaderSituation()) {
 			try {
-				return new ToggleFromInHeaderToImplementationStragegy(context);
+				return new ToggleFromInHeaderToImplementationStrategy(context);
 			} catch (CModelException e) {
 				initStatus.addFatalError(e.getMessage());
 			} catch (CoreException e) {
 				initStatus.addFatalError(e.getMessage());
 			}
 		} else if (isInImplementationSituation()) 	
-			return new ToggleFromImplementationToClassStragegy(context);
+			return new ToggleFromImplementationToClassStrategy(context);
 		return null;
 	}
 	

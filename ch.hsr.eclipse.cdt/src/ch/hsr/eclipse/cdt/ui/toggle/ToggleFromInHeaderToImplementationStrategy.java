@@ -14,12 +14,12 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 @SuppressWarnings("restriction")
-public class ToggleFromInHeaderToImplementationStragegy extends
+public class ToggleFromInHeaderToImplementationStrategy extends
 		ToggleRefactoringAbstractStrategy {
 
 	private IASTTranslationUnit siblingfile_translation_unit;
 
-	public ToggleFromInHeaderToImplementationStragegy(ToggleRefactoringContext context) throws CModelException, CoreException {
+	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) throws CModelException, CoreException {
 		super(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 		this.siblingfile_translation_unit = context.loadTUForSiblingFile();
 	}
