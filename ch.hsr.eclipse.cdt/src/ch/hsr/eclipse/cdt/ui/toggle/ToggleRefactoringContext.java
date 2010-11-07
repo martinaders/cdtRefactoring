@@ -76,11 +76,12 @@ public class ToggleRefactoringContext {
 	public void findASTNodeName(TextSelection selection,
 			RefactoringStatus initStatus) {
 		element_name = localTranslation.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
-		if (element_name == null) {
-			element_name = localTranslation.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
-			IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(element_name);
+		if (element_name != null)
+			return;
+		element_name = localTranslation.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
+		IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(element_name);
+		if (fundef != null)
 			element_name = fundef.getDeclarator().getName();
-		}
 		if (element_name == null) {
 			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
 		}
@@ -113,6 +114,8 @@ public class ToggleRefactoringContext {
 					break;
 				}
 			}
+			if (declaration == null)
+				initStatus.addFatalError("Could not determine selection. Select a function name.");
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
 		}
@@ -130,6 +133,8 @@ public class ToggleRefactoringContext {
 					break;
 				}
 			}
+			if (definition == null)
+				initStatus.addFatalError("Could not determine selection. Select a function name.");
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
 		}
