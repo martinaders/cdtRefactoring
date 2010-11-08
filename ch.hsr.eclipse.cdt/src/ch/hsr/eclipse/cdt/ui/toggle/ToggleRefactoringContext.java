@@ -79,40 +79,27 @@ public class ToggleRefactoringContext {
 
 		IASTNode node = localTranslation.getNodeSelector(null).findFirstContainedNode(selection.getOffset(), selection.getLength());
 		IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
-		if (fundef != null)
+		if (fundef != null) {
 			element_name = fundef.getDeclarator().getName();
-		if (element_name != null) {
-//			System.out.println("1" + element_name.getClass());
 			return;
 		}
 
 		node = localTranslation.getNodeSelector(null).findEnclosingNode(selection.getOffset(), selection.getLength());
 		fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
-		if (fundef != null)
+		if (fundef != null) {
 			element_name = fundef.getDeclarator().getName();
-		if (element_name != null) {
-//			System.out.println("2" + element_name.getClass());
 			return;
 		}
 
 		node = localTranslation.getNodeSelector(null).findEnclosingName(selection.getOffset(), selection.getLength());
 		IASTFunctionDeclarator fundec = findFunctionDeclarationInAncestors(node);
-		if (fundec != null)
+		if (fundec != null) {
 			element_name = fundec.getName();
-//		System.out.println("3" + element_name);
-
-		node = localTranslation.getNodeSelector(null).findNode(selection.getOffset(), selection.getLength());
-//		System.out.println("node: " + node);
-		fundec = findFunctionDeclarationInAncestors(node);
-		if (fundec != null)
-			element_name = fundec.getName();
-		if (element_name != null) {
-//			System.out.println("4" + element_name.getClass());
 			return;
 		}
 		
 		if (element_name == null) {
-			initStatus.addFatalError("*Problems determining the selected function, aborting. Choose another selection.");
+			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
 		}
 	}
 	

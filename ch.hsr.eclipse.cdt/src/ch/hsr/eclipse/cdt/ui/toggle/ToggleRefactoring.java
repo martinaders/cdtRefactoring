@@ -26,6 +26,7 @@ public class ToggleRefactoring extends CRefactoring {
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
 		if (selection == null || file == null || project == null) {
+			System.err.println("no selection found");
 			initStatus.addFatalError("Preconditions for this refactoring not fulfilled, aborting.");
 			return;
 		}
