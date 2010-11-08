@@ -32,6 +32,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 /**
@@ -84,6 +85,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 
 	public static URI getSiblingFile(IFile file) throws CoreException {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
+		cProject.save(new NullProgressMonitor(), true);
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnit(file);
 		IASTTranslationUnit asttu = tu.getAST(projectindex, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);

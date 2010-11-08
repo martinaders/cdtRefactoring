@@ -2,8 +2,14 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNullStatement;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 
 @SuppressWarnings("restriction")
@@ -34,6 +40,21 @@ public class ToggleFromImplementationToClassStragegy extends
 				.rewriterForTranslationUnit(declaration_unit);
 
 		implast.remove(selectedDefinition, infoText);
-		headerast.replace(selectedDeclaration.getParent(),getInClassDefinition(selectedDefinition, selectedDeclaration, declaration_unit),infoText);
+		//IASTFunctionDefinition function = getInClassDefinition(selectedDefinition, selectedDeclaration, declaration_unit);
+		IASTFunctionDefinition function = new CPPASTFunctionDefinition();
+		function.setBody(selectedDefinition.getBody().copy());
+		
+		IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
+		declarator.setParent(function);
+		function.setDeclarator(declarator);
+		System.out.println("name: " + selectedDeclaration.getName());
+		function.setDeclSpecifier(selectedDefinition.getDeclSpecifier().copy());
+		function.setParent(selectedDeclaration.getParent().getParent());
+		
+		
+	
+		headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, function, infoText);
+		headerast.remove(selectedDeclaration.getParent(), infoText);
+		//headerast.replace(selectedDeclaration.getParent(),getInClassDefinition(selectedDefinition, selectedDeclaration, declaration_unit),infoText);
 	}
 }
