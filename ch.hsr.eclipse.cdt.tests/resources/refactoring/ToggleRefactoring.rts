@@ -166,8 +166,6 @@ A::A(int x, int y)
 :a(x), b(y)
 {
 }
-
-
 //!TestCandDTorNoInterfeeringWithEmptyArgumentList
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -177,24 +175,26 @@ filename=A.h
 
 class A {
     /*$*/A/*$$*/()
-    {}
+    {
+    }
     ~A()
-    {}
+    {
+    }
 };
 //=
 #include <iostream>
 
 class A {
-    A();
     ~A()
-    {}
+    {
+    }
+
+    A();
 };
 
 inline A::A()
 {
 }
-
-
 //!TestNestedClassInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
