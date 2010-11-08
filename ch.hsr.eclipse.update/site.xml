@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <description name="Toggle Refactoring" url="http://sinv-56042.edu.hsr.ch/updatesite">
+Function declarations and the corresponding code may be written at different locations. Toggle Refactoring enables you to switch between different possible locations of the function body easily. Creating a separate source file just to add a definition you've declared in your header file? Just toggle and put your function body wherever you want it to be.
+   </description>
    <feature url="features/ch.hsr.eclipse.cdt.feature_1.0.0.qualifier.jar" id="ch.hsr.eclipse.cdt.feature" version="1.0.0.qualifier"/>
 </site>

@@ -15,6 +15,7 @@ import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -77,16 +78,56 @@ public class ToggleRefactoringContext {
 	IASTName element_name;
 	public void findASTNodeName(TextSelection selection,
 			RefactoringStatus initStatus) {
-		element_name = localTranslation.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
-		if (element_name == null) {
-			element_name = localTranslation.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
-			IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(element_name);
+
+		IASTNode node = localTranslation.getNodeSelector(null).findFirstContainedNode(selection.getOffset(), selection.getLength());
+		IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
+		if (fundef != null)
 			element_name = fundef.getDeclarator().getName();
+		if (element_name != null) {
+//			System.out.println("1" + element_name.getClass());
+			return;
 		}
+
+		node = localTranslation.getNodeSelector(null).findEnclosingNode(selection.getOffset(), selection.getLength());
+		fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
+		if (fundef != null)
+			element_name = fundef.getDeclarator().getName();
+		if (element_name != null) {
+//			System.out.println("2" + element_name.getClass());
+			return;
+		}
+
+		node = localTranslation.getNodeSelector(null).findEnclosingName(selection.getOffset(), selection.getLength());
+		IASTFunctionDeclarator fundec = findFunctionDeclarationInAncestors(node);
+		if (fundec != null)
+			element_name = fundec.getName();
+//		System.out.println("3" + element_name);
+
+		node = localTranslation.getNodeSelector(null).findNode(selection.getOffset(), selection.getLength());
+//		System.out.println("node: " + node);
+		fundec = findFunctionDeclarationInAncestors(node);
+		if (fundec != null)
+			element_name = fundec.getName();
+		if (element_name != null) {
+//			System.out.println("4" + element_name.getClass());
+			return;
+		}
+		
 		if (element_name == null) {
-			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
+			initStatus.addFatalError("*Problems determining the selected function, aborting. Choose another selection.");
 		}
 	}
+	
+	private IASTFunctionDeclarator findFunctionDeclarationInAncestors(IASTNode node) {
+		while(node != null){
+			if (node instanceof IASTFunctionDeclarator) {
+				return (IASTFunctionDeclarator) node;
+			}
+			node = node.getParent();
+		}
+		return null;
+	}
+	
 	IIndexBinding binding = null;
 	private IFile origin_file;
 	
@@ -107,7 +148,6 @@ public class ToggleRefactoringContext {
 		try {
 			IIndexName[] decnames = index.findDeclarations(binding);
 			for(IIndexName iname : decnames) {
-				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
@@ -116,6 +156,8 @@ public class ToggleRefactoringContext {
 					break;
 				}
 			}
+			if (declaration == null)
+				initStatus.addFatalError("Could not determine selection. Select a function name.");
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
 		}
@@ -125,7 +167,6 @@ public class ToggleRefactoringContext {
 		try {
 			IIndexName[] defnames = index.findDefinitions(binding);
 			for(IIndexName iname : defnames) {
-				System.out.println("iname: " + iname.getFileLocation().getFileName() + " " + iname.getNodeOffset());
 				localTranslation = loadTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
 				if (astname != null) {
@@ -134,6 +175,8 @@ public class ToggleRefactoringContext {
 					break;
 				}
 			}
+			if (definition == null)
+				initStatus.addFatalError("Could not determine selection. Select a function name.");
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
 		}
@@ -158,8 +201,7 @@ public class ToggleRefactoringContext {
 				index.acquireReadLock();
 				asttu = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				CUIPlugin.log("Interruption during index locking.", e);
 			} finally {
 				index.releaseReadLock();
 			}
@@ -192,5 +234,9 @@ public class ToggleRefactoringContext {
 				return (IASTFunctionDefinition) node;
 		}
 		return null;
+	}
+
+	public IFile getFile() {
+		return origin_file;
 	}
 }
