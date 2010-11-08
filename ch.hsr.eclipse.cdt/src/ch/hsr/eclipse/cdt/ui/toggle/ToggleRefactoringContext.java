@@ -15,6 +15,7 @@ import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -75,17 +76,43 @@ public class ToggleRefactoringContext {
 	IASTName element_name;
 	public void findASTNodeName(TextSelection selection,
 			RefactoringStatus initStatus) {
-		element_name = localTranslation.getNodeSelector(null).findName(selection.getOffset(), selection.getLength());
-		if (element_name != null)
-			return;
-		element_name = localTranslation.getNodeSelector(null).findFirstContainedName(selection.getOffset(), selection.getLength());
-		IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(element_name);
+
+		IASTNode node = localTranslation.getNodeSelector(null).findFirstContainedNode(selection.getOffset(), selection.getLength());
+		IASTFunctionDefinition fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
 		if (fundef != null)
 			element_name = fundef.getDeclarator().getName();
+		if (element_name != null)
+			return;
+
+		node = localTranslation.getNodeSelector(null).findEnclosingNode(selection.getOffset(), selection.getLength());
+		fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
+		if (fundef != null)
+			element_name = fundef.getDeclarator().getName();
+		if (element_name != null)
+			return;
+
+		element_name = localTranslation.getNodeSelector(null).findEnclosingName(selection.getOffset(), selection.getLength());
+		IASTFunctionDeclarator fundec = findFunctionDeclarationInAncestors(element_name);
+		if (fundec != null)
+			element_name = fundec.getName();
+		
+		
+
 		if (element_name == null) {
-			initStatus.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
+			initStatus.addFatalError("*Problems determining the selected function, aborting. Choose another selection.");
 		}
 	}
+	
+	private IASTFunctionDeclarator findFunctionDeclarationInAncestors(IASTNode node) {
+		while(node != null){
+			if (node instanceof IASTFunctionDeclarator) {
+				return (IASTFunctionDeclarator) node;
+			}
+			node = node.getParent();
+		}
+		return null;
+	}
+	
 	IIndexBinding binding = null;
 	private IFile origin_file;
 	
@@ -159,8 +186,7 @@ public class ToggleRefactoringContext {
 				index.acquireReadLock();
 				asttu = tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				CUIPlugin.log("Interruption during index locking.", e);
 			} finally {
 				index.releaseReadLock();
 			}
