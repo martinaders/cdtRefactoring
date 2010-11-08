@@ -25,6 +25,10 @@ public class ToggleRefactoring extends CRefactoring {
 	
 	public ToggleRefactoring(IFile file, ISelection selection, ICProject proj) {
 		super(file, selection, null, proj);
+		if (selection == null || file == null || project == null) {
+			initStatus.addFatalError("Preconditions for this refactoring not fulfilled, aborting.");
+			return;
+		}
 		this.selection = (TextSelection) selection;
 	}
 
