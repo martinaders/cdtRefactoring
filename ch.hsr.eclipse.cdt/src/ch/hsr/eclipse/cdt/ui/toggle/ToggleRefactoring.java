@@ -1,8 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.internal.ui.refactoring.CCompositeChange;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.ui.CUIPlugin;
@@ -14,8 +12,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -34,7 +30,7 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 		this.selection = (TextSelection) selection;
 		try {
-			ResourcesPlugin.getWorkspace().save(false, new NullProgressMonitor());
+			ResourcesPlugin.getWorkspace().save(true, new NullProgressMonitor());
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -78,16 +74,6 @@ public class ToggleRefactoring extends CRefactoring {
 		} catch (IllegalArgumentException e) {
 			CUIPlugin.log("Failed to commit changes. Building project may help.", e);
 		}
-	}
-
-	@Override
-	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		ModificationCollector collector = new ModificationCollector();
-		collectModifications(pm, collector);
-		CCompositeChange finalChange = collector.createFinalChange();
-		strategy.removeNewlines(finalChange);
-		finalChange.setDescription(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
-		return finalChange;
 	}
 
 	@Override

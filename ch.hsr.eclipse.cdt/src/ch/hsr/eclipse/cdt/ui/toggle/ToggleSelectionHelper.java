@@ -88,6 +88,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 		cProject.save(new NullProgressMonitor(), true);
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnit(file);
+		tu.save(new NullProgressMonitor(), true);
 		IASTTranslationUnit asttu = tu.getAST(projectindex, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
 		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
 				IndexLocationFactory.getWorkspaceIFL(file));

@@ -54,43 +54,5 @@ public class ToggleFromImplementationToClassStrategy extends
 		headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, function, infoText);
 		headerast.remove(selectedDeclaration.getParent(), infoText);
 	}
-	
-	@Override
-	protected void removeNewlines(CompositeChange finalChange) {
-		CompositeChange file1 = (CompositeChange) finalChange.getChildren()[0];
-		CompositeChange file2 = (CompositeChange) finalChange.getChildren()[1];
-		TextEdit edit1 = ((TextChange) file1.getChildren()[0]).getEdit();
-		TextEdit edit2 = ((TextChange) file2.getChildren()[0]).getEdit();
 
-		// Needed, because the order of the edits may change (usually when
-		// toggling very fast).
-		boolean variation = ((ReplaceEdit) edit2.getChildren()[0]).getText().length() == 0;
-
-		ReplaceEdit removEdit = null;
-		ReplaceEdit repEdit = null;
-		if (variation) {
-			removEdit = (ReplaceEdit) edit2.getChildren()[0];
-			repEdit = (ReplaceEdit) edit1.getChildren()[0];
-		} else {
-			removEdit = (ReplaceEdit) edit1.getChildren()[0];
-			repEdit = (ReplaceEdit) edit2.getChildren()[0];
-		}
-
-		String before = repEdit.getText().substring(0, repEdit.getText().lastIndexOf("\n"));
-		String after = repEdit.getText().substring(repEdit.getText().lastIndexOf("\n") + 1, repEdit.getText().length());
-		repEdit = new ReplaceEdit(repEdit.getOffset(), repEdit.getLength(), before.concat(after));
-
-		// must be +1 to leave a newline at end of file
-		removEdit = new ReplaceEdit(removEdit.getOffset() - 1, removEdit.getLength() + 1, "");
-
-		edit1.removeChild(0);
-		edit2.removeChild(0);
-		if (variation) {
-			edit1.addChild(repEdit);
-			edit2.addChild(removEdit);
-		} else {
-			edit2.addChild(repEdit);
-			edit1.addChild(removEdit);			
-		}
-	}
 }

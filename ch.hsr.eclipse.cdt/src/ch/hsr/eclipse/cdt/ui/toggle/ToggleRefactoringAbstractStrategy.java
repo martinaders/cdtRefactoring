@@ -116,10 +116,5 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		return definition_unit;
 	}
 
-	/**
-	 * Removes annoying newlines after changes have been generated. Don't remove
-	 * anything by default.
-	 */
-	protected void removeNewlines(CompositeChange finalChange) {
-	}
+
 }
