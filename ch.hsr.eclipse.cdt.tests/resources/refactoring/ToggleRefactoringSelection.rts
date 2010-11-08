@@ -163,10 +163,55 @@ void A::member()
 }
 //=
 #include "A.h"
-//!TestCppFileSelection
+//!TestCppFileSelectionFullyQualified
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
-filename=A.h
+filename=A.cpp
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+    };
+}
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+void /*$*/N::A::foo/*$$*/()
+{
+    return;
+}
+//=
+#include "A.h"
+
+int main() {
+	return 0;
+}
+
+//!TestCppFileSelectionNameOnly
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
 //@A.h
 #include <iostream>
 #include <exception>
@@ -207,3 +252,4 @@ void N::A::/*$*/foo/*$$*/()
 int main() {
 	return 0;
 }
+

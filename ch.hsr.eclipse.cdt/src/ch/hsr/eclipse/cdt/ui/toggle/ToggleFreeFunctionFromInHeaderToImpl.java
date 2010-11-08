@@ -43,32 +43,6 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 		CompositeChange file2 = (CompositeChange) finalChange.getChildren()[1];
 		TextEdit edit1 = ((TextChange) file1.getChildren()[0]).getEdit();
 		TextEdit edit2 = ((TextChange) file2.getChildren()[0]).getEdit();
-
-		for (TextEdit e : edit1.getChildren()) {
-			System.out.println("off: " + e.getOffset());
-			System.out.println("len: " + e.getLength());
-			System.out.println("ini: " + e.getInclusiveEnd());
-			System.out.println("ine: " + e.getExclusiveEnd());
-			System.out.println("chi: " + e.getChildrenSize());
-			if (e instanceof ReplaceEdit) {
-				System.out.println("Rep: " + ((ReplaceEdit)e).getText().length() + "---" + ((ReplaceEdit)e).getText() + "---");
-			} else if (e instanceof InsertEdit) {
-				System.out.println("Ins: " + ((InsertEdit)e).getText().length() + "---" + ((InsertEdit)e).getText() + "---");
-			}
-		}
-
-		for (TextEdit e : edit2.getChildren()) {
-			System.out.println("off: " + e.getOffset());
-			System.out.println("len: " + e.getLength());
-			System.out.println("ini: " + e.getInclusiveEnd());
-			System.out.println("ine: " + e.getExclusiveEnd());
-			System.out.println("chi: " + e.getChildrenSize());
-			if (e instanceof ReplaceEdit) {
-				System.out.println("Rep: " + ((ReplaceEdit)e).getText().length() + "---" + ((ReplaceEdit)e).getText() + "---");
-			} else if (e instanceof InsertEdit) {
-				System.out.println("Ins: " + ((InsertEdit)e).getText().length() + "---" + ((InsertEdit)e).getText() + "---");
-			}
-		}
 		
 		boolean variation = edit2.getChildren()[0] instanceof ReplaceEdit;
 

@@ -122,7 +122,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 
 	public static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri)
 			throws CModelException, CoreException {
-		System.out.println("fileuri: " + fileUri.getRawPath());
 		Path p = new Path(fileUri.getRawPath());
 		ICElement e = CoreModel.getDefault().create(p);
 		ICProject cProject = e.getCProject();
