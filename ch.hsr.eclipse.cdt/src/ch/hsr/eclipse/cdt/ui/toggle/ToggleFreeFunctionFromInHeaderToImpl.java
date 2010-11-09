@@ -41,7 +41,6 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 			
 			String nl = System.getProperty("line.separator", "\n");
 			String sep = System.getProperty("file.separator", "/");
-			System.out.println(sep);
 			String headerFile = definition_unit.getFilePath().substring(definition_unit.getFilePath().lastIndexOf(sep) + 1, definition_unit.getFilePath().length());
 			String filename = definition_unit.getFilePath().substring(definition_unit.getFilePath().lastIndexOf(sep) + 1, definition_unit.getFilePath().lastIndexOf('.')) + ".cpp";
 			String path = definition_unit.getFilePath().substring(definition_unit.getFilePath().indexOf(project.getPath().toString()), definition_unit.getFilePath().lastIndexOf(sep) + 1);
