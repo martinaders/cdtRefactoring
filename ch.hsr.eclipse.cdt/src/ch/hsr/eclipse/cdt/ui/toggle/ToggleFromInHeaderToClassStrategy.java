@@ -31,20 +31,5 @@ public class ToggleFromInHeaderToClassStrategy extends
 				infoText);
 	}
 	
-	@Override
-	protected void removeNewlines(CompositeChange finalChange) {
-		CompositeChange cc = (CompositeChange) finalChange.getChildren()[0];
-		TextEdit edit = ((CTextFileChange) cc.getChildren()[0]).getEdit();
-		
-		ReplaceEdit repEdit = (ReplaceEdit) edit.getChildren()[0];
-		ReplaceEdit remEdit = (ReplaceEdit) edit.getChildren()[1];
-		
-		String before = repEdit.getText().substring(0, repEdit.getText().lastIndexOf("\n\n"));
-		String after = repEdit.getText().substring(repEdit.getText().lastIndexOf("\n\n") + 1, repEdit.getText().length());
-		repEdit = new ReplaceEdit(repEdit.getOffset(), repEdit.getLength(), before.concat(after));
-		remEdit = new ReplaceEdit(remEdit.getOffset() - 1, remEdit.getLength() + 1, "");
-		edit.removeChildren();
-		edit.addChild(repEdit);
-		edit.addChild(remEdit);
-	}
+	
 }
