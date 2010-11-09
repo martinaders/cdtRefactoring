@@ -1,5 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.net.URI;
+
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
@@ -174,7 +176,11 @@ public class ToggleRefactoringContext {
 	}
 	
 	public IASTTranslationUnit loadTUForSiblingFile() throws CModelException, CoreException {
-		return ToggleSelectionHelper.getLocalTranslationUnitForFile(ToggleSelectionHelper.getSiblingFile(origin_file));
+		URI siblingFile = ToggleSelectionHelper.getSiblingFile(origin_file);
+		if (siblingFile == null) {
+			return null;
+		}
+		return ToggleSelectionHelper.getLocalTranslationUnitForFile(siblingFile);
 	}
 
 	private IASTTranslationUnit loadTUForNameinFile(
