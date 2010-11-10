@@ -133,14 +133,11 @@ class A {
     {
         return;
     }
-    catch(std::exception & e1)
-    {
+    catch(std::exception & e1){
         return;
     }
-    
+
 };
-
-
 //!TestMultipleTryCatchFromInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
