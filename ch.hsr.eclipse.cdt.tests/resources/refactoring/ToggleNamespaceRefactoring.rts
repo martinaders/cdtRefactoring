@@ -77,3 +77,48 @@ void N::A::foo()
 }
 
 
+//!TestSimpleNamespaceFromImplementationToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+void /*$*/N::A::foo/*$$*/()
+{
+    return;
+}
+
+int main()
+{
+    return 0;
+}
+//=
+#include "A.h"
+
+
+
+int main()
+{
+    return 0;
+}
+//@A.h
+#include <iostream>
+
+namespace N {
+    class A {
+        void foo();
+    }
+}
+//=
+#include <iostream>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+
+    }
+}

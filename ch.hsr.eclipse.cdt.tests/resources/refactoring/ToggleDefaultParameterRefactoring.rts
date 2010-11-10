@@ -66,3 +66,44 @@ void A::member(int a, int b)
 }
 
 
+//!TestDefaultParameterInitializerInImplementationToClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+void A::/*$*/member/*$$*/(int a, int b)
+{
+    return;
+}
+
+int main()
+{
+    return 0;
+}
+//=
+#include "A.h"
+
+
+
+int main()
+{
+    return 0;
+}
+//@A.h
+#include <iostream>
+
+class A {
+    void member(int a = 0, int b = 0);
+};
+//=
+#include <iostream>
+
+class A {
+    void member(int a = 0, int b = 0) 
+    {
+        return;
+    }
+    
+};

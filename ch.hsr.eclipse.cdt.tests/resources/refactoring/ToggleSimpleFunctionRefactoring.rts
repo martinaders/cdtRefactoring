@@ -8,7 +8,7 @@ filename=A.h
 class A {
 	int /*$*/function/*$$*/()
 	{
-		return 0;
+    	return 0;
 	}
 };
 //=
@@ -66,3 +66,44 @@ int A::function()
 }
 
 
+//!TestSimpleFunctionInImplementationToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+int A::/*$*/function/*$$*/()
+{
+   return 0;
+}
+
+int main()
+{
+    return 0;
+}
+//=
+#include "A.h"
+
+
+
+int main()
+{
+    return 0;
+}
+//@A.h
+#include <iostream>
+
+class A {
+    int function();
+};
+//=
+#include <iostream>
+
+class A {
+    int function()
+    {
+        return 0;
+    }
+
+};
