@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.dom.ILinkage;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
@@ -32,7 +31,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 /**
@@ -85,10 +83,8 @@ class ToggleSelectionHelper extends SelectionHelper {
 
 	public static URI getSiblingFile(IFile file) throws CoreException {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
-		cProject.save(new NullProgressMonitor(), true);
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnit(file);
-		tu.save(new NullProgressMonitor(), true);
 		IASTTranslationUnit asttu = tu.getAST(projectindex, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
 		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
 				IndexLocationFactory.getWorkspaceIFL(file));
@@ -96,12 +92,9 @@ class ToggleSelectionHelper extends SelectionHelper {
 				.toString());
 		if (file.getFileExtension().equals("h")) {
 			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
-				if (getFilenameWithoutExtension(
-						include.getIncludedBy().getLocation().getFullPath())
-						.equals(filename)) {
+				if (getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
 					return include.getIncludedBy().getLocation().getURI();
 				}
-
 			}
 		} else if (file.getFileExtension().equals("cpp")
 				|| file.getFileExtension().equals("c")) {
@@ -115,7 +108,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return null;
 	}
 	
-	private static String getFilenameWithoutExtension(String filename) {
+	public static String getFilenameWithoutExtension(String filename) {
 		filename = filename.replaceAll("\\.(.)*$", "");
 		filename = filename.replaceAll("(.)*\\/", "");
 		return filename;
@@ -138,6 +131,6 @@ class ToggleSelectionHelper extends SelectionHelper {
 		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
 				fileUri, cProject);
 		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
-		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
+		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT | ITranslationUnit.AST_SKIP_INDEXED_HEADERS);
 	}
 }

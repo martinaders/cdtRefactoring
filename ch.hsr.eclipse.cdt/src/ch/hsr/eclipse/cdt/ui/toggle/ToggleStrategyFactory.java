@@ -15,7 +15,9 @@ public class ToggleStrategyFactory {
 	}
 	
 	public ToggleRefactoringAbstractStrategy getAppropriateStategy(RefactoringStatus initStatus) {
-		if (isFreeFunction() && 
+		if (isInImplementationSituation()) 	
+			return new ToggleFromImplementationToClassStrategy(context);
+		else if (isFreeFunction() && 
 				getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
 				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h"))
 			try {
@@ -35,13 +37,12 @@ public class ToggleStrategyFactory {
 			} catch (CoreException e) {
 				initStatus.addFatalError(e.getMessage());
 			}
-		} else if (isInImplementationSituation()) 	
-			return new ToggleFromImplementationToClassStrategy(context);
+		} 
 		return null;
 	}
 	
 	private boolean isFreeFunction() {
-		if (ToggleSelectionHelper.getAllQualifiedNames(context.getDeclaration()).isEmpty())
+		if (context.getDeclaration() != null && ToggleSelectionHelper.getAllQualifiedNames(context.getDeclaration()).isEmpty())
 			return true;
 		return false;
 	}
@@ -67,9 +68,9 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isInImplementationSituation() {
-		String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
+		//String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
 		String extension2 = getFileExtension(context.getDefinitionUnit().getFileLocation().getFileName());
-		if (extension1.equals("h") && (extension2.equals("cpp") || extension2.equals("c")))
+		if ((extension2.equals("cpp") || extension2.equals("c")))
 			return true;
 		return false;
 	}

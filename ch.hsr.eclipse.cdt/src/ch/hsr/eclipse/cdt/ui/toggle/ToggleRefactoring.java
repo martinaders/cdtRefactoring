@@ -5,15 +5,16 @@ import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ui.ide.IDE;
 
 @SuppressWarnings("restriction")
 public class ToggleRefactoring extends CRefactoring {
@@ -29,11 +30,7 @@ public class ToggleRefactoring extends CRefactoring {
 			return;
 		}
 		this.selection = (TextSelection) selection;
-		try {
-			ResourcesPlugin.getWorkspace().save(true, new NullProgressMonitor());
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
+		IDE.saveAllEditors(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}, false);
 	}
 
 	@Override
@@ -80,6 +77,7 @@ public class ToggleRefactoring extends CRefactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
 		return super.checkFinalConditions(pm);
+		
 	}
 
 	@Override
