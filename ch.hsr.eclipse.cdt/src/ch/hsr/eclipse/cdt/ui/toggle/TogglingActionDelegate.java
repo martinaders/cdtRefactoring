@@ -20,20 +20,34 @@ import org.eclipse.ui.editors.text.TextEditor;
 /**
  * Responsible for starting the ToggleRefactoring when the user invokes the
  * refactoring.
+ * 
+ * Order of execution is: constructor, init, selectionChanged, run
  */
 public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow window;
 	private TextSelection selection;
-	private TextEditor editor;
 	private ICProject project;
 	private IFile file;
-
-	public TogglingActionDelegate() {
+	
+	@Override
+	public void init(IWorkbenchWindow window) {
+		this.window = window;
+		assert (window != null);
+	}
+	
+	@Override
+	public void selectionChanged(IAction action, ISelection selection) {
+		boolean isTextSelection = selection instanceof TextSelection;
+		action.setEnabled(isTextSelection);
+		if (!isTextSelection)
+			return;
+		this.selection = (TextSelection) selection;
 	}
 
 	@Override
 	public void run(IAction action) {
+		System.out.println("run");
 		if (!initialize()) {
 			MessageDialog.openInformation(window.getShell(), "Information",
 					"Toggling function body is not available.");
@@ -59,7 +73,7 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 	private boolean initialize() {
 		if (window.getActivePage() == null)
 			return false;
-		editor = (TextEditor) window.getActivePage().getActiveEditor();
+		TextEditor editor = (TextEditor) window.getActivePage().getActiveEditor();
 		if (editor == null || editor.getEditorInput() == null)
 			return false;
 		IWorkingCopy wc = CUIPlugin.getDefault().getWorkingCopyManager()
@@ -70,20 +84,6 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 	}
 
 	@Override
-	public void selectionChanged(IAction action, ISelection selection) {
-		if (!(selection instanceof TextSelection))
-			return;
-		this.selection = (TextSelection) selection;
-		action.setEnabled(!selection.isEmpty());
-	}
-
-	@Override
 	public void dispose() {
-	}
-
-	@Override
-	public void init(IWorkbenchWindow window) {
-		this.window = window;
-		assert (window != null);
 	}
 }
