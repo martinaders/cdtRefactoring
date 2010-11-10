@@ -67,7 +67,7 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() {
+	private boolean isInImplementationSituation() { 
 		//String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
 		String extension2 = getFileExtension(context.getDefinitionUnit().getFileLocation().getFileName());
 		if ((extension2.equals("cpp") || extension2.equals("c")))
