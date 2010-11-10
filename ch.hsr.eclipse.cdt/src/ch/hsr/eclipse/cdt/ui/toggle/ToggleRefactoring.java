@@ -1,8 +1,10 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.util.EditorUtility;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -14,6 +16,7 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 
 @SuppressWarnings("restriction")
@@ -83,5 +86,15 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
 		return new EmptyRefactoringDescription();
+	}
+
+	public void openEditorIfNeeded() {
+		if (strategy.shouldOpenFile == null)
+			return;
+		try {
+			CEditor editor = (CEditor) EditorUtility.openInEditor(strategy.shouldOpenFile, null);
+			editor.setSelection(strategy.sourceRangeToBeShown, true);
+		} catch (PartInitException e) {
+		}
 	}
 }
