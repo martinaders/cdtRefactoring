@@ -133,13 +133,12 @@ class A {
     ~A()
     {
     }
-    
+
     A(int x, int y)
     :a(x), b(y)
     {
     }
 };
-
 //!TestDestructorToggleInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config

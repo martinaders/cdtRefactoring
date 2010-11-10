@@ -80,7 +80,8 @@ public class ToggleFromImplementationToClassStrategy extends
 			IASTFunctionDefinition function = new CPPASTFunctionDefinition();
 			function.setBody(selectedDefinition.getBody().copy());
 			
-			IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
+			//IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
+			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
 			System.out.println("name: " + selectedDeclaration.getName());
