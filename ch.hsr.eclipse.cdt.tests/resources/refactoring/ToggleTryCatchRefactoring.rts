@@ -1,0 +1,188 @@
+//!TestTryCatchFromInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void /*$*/member/*$$*/(int a, int b)
+    try 
+    {
+        return;
+    } catch (std::exception & e1) 
+    {
+        return;
+    }
+};
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+
+
+//!TestTryCatchFromInHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+
+
+//!TestMultipleTryCatchFromInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void /*$*/member/*$$*/(int a, int b)
+    try 
+    {
+        return;
+    } catch (std::exception & e1) 
+    {
+        return;
+    } catch (std::exception & e2)
+    {
+        return;
+    }
+};
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+catch(std::exception & e2){
+    return;
+}
+
+
+//!TestMultipleTryCatchFromInHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+inline void /*$*/A::member/*$$*/(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+catch(std::exception & e2){
+    return;
+}
+//=
+#include <iostream>
+#include <exception>
+
+class A {
+    void member(int a, int b);
+};
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+void A::member(int a, int b)
+try
+{
+    return;
+}
+catch(std::exception & e1){
+    return;
+}
+catch(std::exception & e2){
+    return;
+}
+
+

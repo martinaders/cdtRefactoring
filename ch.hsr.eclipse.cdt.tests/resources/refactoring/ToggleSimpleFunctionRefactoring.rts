@@ -1,0 +1,68 @@
+//!TestSimpleFunctionInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+	int /*$*/function/*$$*/()
+	{
+		return 0;
+	}
+};
+//=
+#include <iostream>
+
+class A {
+	int function();
+};
+
+inline int A::function()
+{
+    return 0;
+}
+
+
+//!TestSimpleFunctionInHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+    int function();
+};
+
+inline int A::/*$*/function/*$$*/()
+{
+    return 0;
+}
+//=
+#include <iostream>
+
+class A {
+    int function();
+};
+
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+int A::function()
+{
+    return 0;
+}
+
+

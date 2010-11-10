@@ -1,0 +1,77 @@
+//!TestNestedClassInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+    class B {
+        void /*$*/member/*$$*/(int a, int b) {
+            return;
+        }
+    };
+};
+//=
+#include <iostream>
+
+class A {
+    class B {
+        void member(int a, int b);
+    };
+};
+
+inline void A::B::member(int a, int b)
+{
+    return;
+}
+
+
+//!TestNestedClassInHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+    class B {
+        void member(int a, int b);
+    };
+};
+
+inline void A::B::/*$*/member/*$$*/(int a, int b)
+{
+    return;
+}
+//=
+#include <iostream>
+
+class A {
+    class B {
+        void member(int a, int b);
+    };
+};
+
+
+//@A.cpp
+#include "A.h"
+
+int main()
+{
+    return 0;
+}
+//=
+#include "A.h"
+
+int main()
+{
+    return 0;
+}
+
+void A::B::member(int a, int b)
+{
+    return;
+}
+
+

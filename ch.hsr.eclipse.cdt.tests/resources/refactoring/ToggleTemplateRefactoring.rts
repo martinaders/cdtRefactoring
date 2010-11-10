@@ -1,0 +1,65 @@
+//!TestTemplateFunctionInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+template <typename T>
+class A {
+  class B {
+    T /*$*/member/*$$*/()
+    {
+        return T();
+    }
+  };
+};
+//=
+#include <iostream>
+
+template <typename T>
+class A {
+  class B {
+    T member();
+  };
+};
+
+template<typename T> inline T A<T>::B::member()
+{
+    return T();
+}
+
+
+//!TestTemplateFunctionInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+template <typename T>
+class A {
+    class B {
+        T member();
+    };
+
+};
+template<typename T> inline T A<T>::B::/*$*/member/*$$*/()
+{
+    return T();
+}
+//=
+#include <iostream>
+
+template <typename T>
+class A {
+    class B {
+        T member()
+        {
+            return T();
+        }
+
+    };
+
+};
+
