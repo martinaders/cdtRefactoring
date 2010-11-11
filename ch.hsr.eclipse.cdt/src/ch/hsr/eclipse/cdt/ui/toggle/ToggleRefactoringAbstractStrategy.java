@@ -17,7 +17,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
@@ -76,7 +75,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		}
 	}
 
-	private ICPPASTFunctionDefinition assembleFunctionDefinitionWithBody(
+	protected ICPPASTFunctionDefinition assembleFunctionDefinitionWithBody(
 			IASTDeclSpecifier newdeclspec, IASTFunctionDeclarator funcdecl) {
 		IASTStatement newbody = selectedDefinition.getBody().copy();
 		ICPPASTFunctionDefinition newfunc = null;

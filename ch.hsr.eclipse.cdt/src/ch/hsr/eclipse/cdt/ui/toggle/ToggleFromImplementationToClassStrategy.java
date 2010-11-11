@@ -77,18 +77,20 @@ public class ToggleFromImplementationToClassStrategy extends
 			ASTRewrite headerast = modifications
 			.rewriterForTranslationUnit(declaration_unit);
 			
-			
 			IASTFunctionDefinition function = new CPPASTFunctionDefinition();
 			function.setBody(selectedDefinition.getBody().copy());
 			
-			IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
+			//IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
+			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
 			System.out.println("name: " + selectedDeclaration.getName());
-			function.setDeclSpecifier(selectedDefinition.getDeclSpecifier().copy());
-			function.setParent(selectedDeclaration.getParent().getParent());
+			IASTDeclSpecifier declspec = selectedDefinition.getDeclSpecifier().copy();
+			function.setDeclSpecifier(declspec);
+			IASTFunctionDefinition finalfunc = assembleFunctionDefinitionWithBody(declspec, function.getDeclarator());
+			finalfunc.setParent(selectedDeclaration.getParent().getParent());
 			
-			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, function, infoText);
+			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
 			headerast.remove(selectedDeclaration.getParent(), infoText);			
 		}
 	}
