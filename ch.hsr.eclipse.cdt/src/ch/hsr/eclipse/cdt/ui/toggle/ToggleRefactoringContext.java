@@ -18,9 +18,7 @@ import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
-import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
-import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -84,33 +82,21 @@ public class ToggleRefactoringContext {
 		IASTNode node = localTranslation.getNodeSelector(null)
 				.findFirstContainedNode(selection.getOffset(),
 						selection.getLength());
-		IASTFunctionDefinition fundef = NodeHelper
-				.findFunctionDefinitionInAncestors(node);
-		if (fundef != null) {
-			element_name = fundef.getDeclarator().getName();
+		IASTFunctionDeclarator declarator = findFunctionDeclarationInAncestors(node);
+
+		if (declarator == null) {
+			node = localTranslation.getNodeSelector(null).findEnclosingName(
+					selection.getOffset(), selection.getLength());
+			declarator = findFunctionDeclarationInAncestors(node);
+		}
+
+		if (declarator != null) {
+			element_name = declarator.getName();
 			return;
 		}
 
-		node = localTranslation.getNodeSelector(null).findEnclosingNode(
-				selection.getOffset(), selection.getLength());
-		fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
-		if (fundef != null) {
-			element_name = fundef.getDeclarator().getName();
-			return;
-		}
-
-		node = localTranslation.getNodeSelector(null).findEnclosingName(
-				selection.getOffset(), selection.getLength());
-		IASTFunctionDeclarator fundec = findFunctionDeclarationInAncestors(node);
-		if (fundec != null) {
-			element_name = fundec.getName();
-			return;
-		}
-
-		if (element_name == null) {
-			initStatus
-					.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
-		}
+		initStatus
+				.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
 	}
 
 	private IASTFunctionDeclarator findFunctionDeclarationInAncestors(
@@ -131,12 +117,10 @@ public class ToggleRefactoringContext {
 		try {
 			binding = index.findBinding(element_name);
 			if (binding == null) {
-				System.out.println("binding is null");
+				initStatus.addFatalError("could not find the selected node binding.");
 			}
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
-		} finally {
-			index.releaseReadLock();
 		}
 	}
 
@@ -259,15 +243,8 @@ public class ToggleRefactoringContext {
 		if (!isSameFileAsInTU(iname)) {
 			IASTTranslationUnit asttu = null;
 			IPath path = new Path(iname.getFileLocation().getFileName());
-			try {
-				index.acquireReadLock();
-				asttu = TranslationUnitHelper.loadTranslationUnit(
-						path.toString(), true);
-			} catch (InterruptedException e) {
-				CUIPlugin.log("Interruption during index locking.", e);
-			} finally {
-				index.releaseReadLock();
-			}
+			asttu = TranslationUnitHelper.loadTranslationUnit(path.toString(),
+					true);
 			return asttu;
 		}
 		return localTranslation;

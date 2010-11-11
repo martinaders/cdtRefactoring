@@ -7,7 +7,6 @@ import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.internal.ui.util.EditorUtility;
-import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -67,9 +66,17 @@ public class ToggleRefactoring extends CRefactoring {
 	private void initContext() {
 		context = new ToggleRefactoringContext(getIndex());
 		context.findFileUnitTranslation(file, initStatus);
+		if (initStatus.hasFatalError())
+			return;
 		context.findASTNodeName(selection, initStatus);
+		if (initStatus.hasFatalError())
+			return;
 		context.findBinding(initStatus);
+		if (initStatus.hasFatalError())
+			return;
 		context.findDeclaration(initStatus);
+		if (initStatus.hasFatalError())
+			return;
 		context.findDefinition(initStatus);
 	}
 

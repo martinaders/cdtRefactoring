@@ -11,6 +11,7 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -75,7 +76,10 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 		try {
 			RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-				System.err.println("Conditions not met, cannot toggle here.");
+				System.err.println("Conditions not met, cannot toggle here:");
+				for (RefactoringStatusEntry e : status.getEntries()) {
+					System.err.println(" -> " + e.getMessage());
+				}
 				return;
 			}
 			Change change = refactoring.createChange(new NullProgressMonitor());
