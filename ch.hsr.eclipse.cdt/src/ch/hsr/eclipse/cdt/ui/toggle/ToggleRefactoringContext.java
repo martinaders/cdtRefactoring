@@ -20,7 +20,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
-import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -37,7 +36,11 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDeclarator declaration;
 	private IASTTranslationUnit definition_unit;
 	private IASTTranslationUnit declaration_unit;
-	IIndex index = null;
+
+	private IIndex index = null;
+	private IIndexBinding binding = null;
+
+	private IFile origin_file;
 
 	private IASTTranslationUnit localTranslation;
 
@@ -66,8 +69,6 @@ public class ToggleRefactoringContext {
 		try {
 			localTranslation = TranslationUnitHelper.loadTranslationUnit(file,
 					true);
-		} catch (CModelException e) {
-			initStatus.addFatalError("Cannot find translation unit for file");
 		} catch (CoreException e) {
 			initStatus.addFatalError("Cannot find ast translation for file");
 		}
@@ -90,7 +91,6 @@ public class ToggleRefactoringContext {
 			element_name = fundef.getDeclarator().getName();
 			return;
 		}
-
 		node = localTranslation.getNodeSelector(null).findEnclosingNode(
 				selection.getOffset(), selection.getLength());
 		fundef = NodeHelper.findFunctionDefinitionInAncestors(node);
@@ -124,23 +124,64 @@ public class ToggleRefactoringContext {
 		return null;
 	}
 
-	IIndexBinding binding = null;
-	private IFile origin_file;
-
 	public void findBinding(RefactoringStatus initStatus) {
 		try {
 			binding = index.findBinding(element_name);
-			if (binding == null) {
-				System.out.println("binding is null");
-			}
 		} catch (CoreException e) {
 			initStatus.addFatalError(e.getMessage());
-		} finally {
-			index.releaseReadLock();
 		}
 	}
 
-	private IASTFunctionDefinition definitiontryfallbackwithast(final IASTName element_name2) {
+	public void findDeclaration(RefactoringStatus initStatus) {
+		if (binding == null) {
+			declaration = fallbackDeclarationFinder(element_name);
+			if (declaration != null)
+				declaration_unit = localTranslation;
+			return;
+		}
+		try {
+			IASTName astname = null;
+			IIndexName[] decnames = index.findDeclarations(binding);
+			for (IIndexName iname : decnames) {
+				localTranslation = loadTUForNameinFile(iname);
+				astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
+				if (astname != null) {
+					declaration = findFunctionDeclarator(astname);
+					declaration_unit = localTranslation;
+					return;
+				}
+			}
+		} catch (CoreException e) {
+			initStatus.addFatalError(e.getMessage());
+		}
+	}
+
+	public void findDefinition(RefactoringStatus initStatus) {
+		if (binding == null) {
+			definition = fallbackDefinitionFinder(element_name);
+			if (definition != null)
+					definition_unit = localTranslation;
+			return;
+		}
+		try {
+			IASTName astname = null;
+			IIndexName[] defnames = index.findDefinitions(binding);
+			for (IIndexName iname : defnames) {
+				localTranslation = loadTUForNameinFile(iname);
+				astname = IndexToASTNameHelper.findMatchingASTName(localTranslation, iname, index);
+				if (astname != null) {
+					definition = findFunctionDefinition(astname);
+					definition_unit = localTranslation;
+					return;
+				}
+			}
+		} catch (CoreException e) {
+			initStatus.addFatalError(e.getMessage());
+		}
+	}
+
+	private IASTFunctionDefinition fallbackDefinitionFinder(
+			final IASTName element_name2) {
 		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
 		localTranslation.accept(new CPPASTVisitor(true) {
 			{
@@ -164,7 +205,8 @@ public class ToggleRefactoringContext {
 		return container.getObject();
 	}
 
-	private IASTFunctionDeclarator declarationtryfallbackwithast(final IASTName element_name2) {
+	private IASTFunctionDeclarator fallbackDeclarationFinder(
+			final IASTName element_name2) {
 		final Container<IASTFunctionDeclarator> container = new Container<IASTFunctionDeclarator>();
 		localTranslation.accept(new CPPASTVisitor(true) {
 			{
@@ -176,7 +218,7 @@ public class ToggleRefactoringContext {
 				if (declaration instanceof IASTFunctionDeclarator) {
 					CPPASTFunctionDeclarator decl = (CPPASTFunctionDeclarator) declaration;
 					IASTName name = decl.getName();
-					
+
 					if (name.equals(element_name2)) {
 						System.out.println("got it");
 						container.setObject(decl);
@@ -187,59 +229,6 @@ public class ToggleRefactoringContext {
 			}
 		});
 		return container.getObject();
-	}
-	
-	public void findDeclaration(RefactoringStatus initStatus) {
-		if (binding == null) {
-			declaration = declarationtryfallbackwithast(element_name);
-			declaration_unit = null;
-			return;
-		}
-		try {
-			IIndexName[] decnames = index.findDeclarations(binding);
-			for (IIndexName iname : decnames) {
-				localTranslation = loadTUForNameinFile(iname);
-				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
-						localTranslation, iname, index);
-				if (astname != null) {
-					declaration = findFunctionDeclarator(astname);
-					declaration_unit = localTranslation;
-					break;
-				}
-			}
-			if (declaration == null)
-				initStatus
-						.addFatalError("Could not determine selection. Select a function name.");
-		} catch (CoreException e) {
-			initStatus.addFatalError(e.getMessage());
-		}
-	}
-
-	public void findDefinition(RefactoringStatus initStatus) {
-		// fallback
-		if (binding == null) {
-			definition = definitiontryfallbackwithast(element_name);
-			definition_unit = localTranslation;
-			return;
-		}
-		try {
-			IIndexName[] defnames = index.findDefinitions(binding);
-			for (IIndexName iname : defnames) {
-				localTranslation = loadTUForNameinFile(iname);
-				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
-						localTranslation, iname, index);
-				if (astname != null) {
-					definition = findFunctionDefinition(astname);
-					definition_unit = localTranslation;
-					break;
-				}
-			}
-			if (definition == null)
-				initStatus
-						.addFatalError("Could not determine selection. Select a function name.");
-		} catch (CoreException e) {
-			initStatus.addFatalError(e.getMessage());
-		}
 	}
 
 	public IFile getOriginFile() {
@@ -259,15 +248,8 @@ public class ToggleRefactoringContext {
 		if (!isSameFileAsInTU(iname)) {
 			IASTTranslationUnit asttu = null;
 			IPath path = new Path(iname.getFileLocation().getFileName());
-			try {
-				index.acquireReadLock();
-				asttu = TranslationUnitHelper.loadTranslationUnit(
-						path.toString(), true);
-			} catch (InterruptedException e) {
-				CUIPlugin.log("Interruption during index locking.", e);
-			} finally {
-				index.releaseReadLock();
-			}
+			asttu = TranslationUnitHelper.loadTranslationUnit(path.toString(),
+					true);
 			return asttu;
 		}
 		return localTranslation;

@@ -4,10 +4,6 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.cdt.ui.refactoring.CTextFileChange;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
 
 @SuppressWarnings("restriction")
 public class ToggleFromInHeaderToClassStrategy extends

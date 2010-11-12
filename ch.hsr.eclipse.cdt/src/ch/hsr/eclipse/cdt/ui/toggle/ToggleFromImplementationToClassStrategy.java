@@ -5,9 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -69,10 +67,25 @@ public class ToggleFromImplementationToClassStrategy extends
 			try {
 				change = new CreateFileChange(filename, new
 				Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getFile().getCharset());
-				modifications.addFileChange(change);			
+				modifications.addFileChange(change);
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
+//			Path p = new Path(definition_unit.getFileLocation().getFileName());
+//			ICElement e = CoreModel.getDefault().create(p);
+//			ICProject cProject = e.getCProject();
+//			ITranslationUnit tu;
+//			try {
+//				tu = CoreModelUtil.findTranslationUnitForLocation(p, cProject);
+//				InsertEdit edit = new InsertEdit(0, "#include \"" + filename + "\"");
+//				CTextFileChange insertchange = new CTextFileChange("achange", tu);
+//				insertchange.setEdit(edit);
+//				insertchange.perform(new NullProgressMonitor());
+//			} catch (CModelException e1) {
+//				e1.printStackTrace();
+//			} catch (CoreException e2) {
+//				e2.printStackTrace();
+//			}			
 		} else {
 			ASTRewrite headerast = modifications
 			.rewriterForTranslationUnit(declaration_unit);
@@ -80,7 +93,6 @@ public class ToggleFromImplementationToClassStrategy extends
 			IASTFunctionDefinition function = new CPPASTFunctionDefinition();
 			function.setBody(selectedDefinition.getBody().copy());
 			
-			//IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
 			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
@@ -121,4 +133,5 @@ public class ToggleFromImplementationToClassStrategy extends
 		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "\n";
 		return result;
 	}
+	
 }

@@ -1,6 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.core.pdom.indexer.IndexerPreferences;
 import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -41,6 +42,7 @@ public class ToggleRefactoring extends CRefactoring {
 			throws CoreException, OperationCanceledException {
 		try {
 			lockIndex();
+			IndexerPreferences.set(project.getProject(), IndexerPreferences.KEY_INDEX_UNUSED_HEADERS_WITH_DEFAULT_LANG, Boolean.TRUE.toString());
 			context = new ToggleRefactoringContext(getIndex());
 			context.findFileUnitTranslation(file, initStatus);
 			context.findASTNodeName(selection, initStatus);
