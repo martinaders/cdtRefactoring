@@ -42,11 +42,32 @@ public class ToggleRefactoring extends CRefactoring {
 		IDE.saveAllEditors(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}, false);
 	}
 
+	/**
+	 * indexer not available? use TU instead. (make an adapter?)
+	 * 
+	 *  search first contained node
+	 *  	look at its type:
+	 *  	1) ICPPASTTemplateDeclaration
+	 *  	2) ICPPASTFunctionDefinition
+	 *  	3) IASTSimpleDeclaration+child(ICPPASTFunctionDeclarator)
+	 *    -> result found but IASTDeclarationStatement as parent -> drop reference and continue search.
+	 *  if null do search the first enclosing node the same way
+	 *  
+	 *  => Abort if nothing found.
+	 *  
+	 *  extract a binding that can be searched by index.findDeclarations + index.findDefinitions (directly? Name-node?)
+	 *  
+	 * Selection is inside			other.cpp		Class.cpp		Class.h		sys_library.h	N/A
+	 * Declaration found			other.cpp		Class.cpp		Class.h		sys_library.h	N/A
+	 * Definition found				other.cpp		Class.cpp		Class.h		sys_library.h	N/A
+	 * Occurrences					def_only		decl_only		def_decl	multi_declaration	multi_definition
+	 * 
+	 */
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
 		try {
-			waitForIndexer();
+			//waitForIndexer();
 			if (initStatus.hasFatalError())
 				return initStatus;
 			lockIndex();
@@ -83,7 +104,7 @@ public class ToggleRefactoring extends CRefactoring {
 	private void waitForIndexer() {
 		final IIndexManager im = CCorePlugin.getIndexManager();
 		System.out.println("before Join");
-		im.joinIndexer(1500, new NullProgressMonitor());
+		im.joinIndexer(1, new NullProgressMonitor());
 		if (!im.isProjectIndexed(project))
 			initStatus.addFatalError("Indexer not yet finished. Be patient and then try again.");
 		System.out.println("after Join");

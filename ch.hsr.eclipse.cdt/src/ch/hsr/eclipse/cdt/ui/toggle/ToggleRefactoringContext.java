@@ -94,7 +94,7 @@ public class ToggleRefactoringContext {
 			element_name = declarator.getName();
 			return;
 		}
-
+		
 		initStatus
 				.addFatalError("Problems determining the selected function, aborting. Choose another selection.");
 	}
