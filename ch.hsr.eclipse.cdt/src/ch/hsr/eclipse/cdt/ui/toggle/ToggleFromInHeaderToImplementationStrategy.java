@@ -26,18 +26,18 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) throws CModelException, CoreException {
 		super(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 		this.context = context;
-		this.siblingfile_translation_unit = context.loadTUForSiblingFile();
+		this.siblingfile_translation_unit = context.getTUForSiblingFile();
 		if (this.siblingfile_translation_unit == null) {
-			path = context.getFile().getFullPath().toString();
+			path = context.getSelectionFile().getFullPath().toString();
 			System.out.println("path: " + path);
 			filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
 			path = path.replaceAll("(\\w)*\\.(\\w)*", "");
 			System.out.println("filename " + filename);
-			if (context.getFile().getFileExtension().equals("h")) {
+			if (context.getSelectionFile().getFileExtension().equals("h")) {
 				origin_filename = filename + ".h";
 				filename += ".cpp";
 			}
-			if (context.getFile().getFileExtension().equals("cpp")) {
+			if (context.getSelectionFile().getFileExtension().equals("cpp")) {
 				origin_filename = filename + ".cpp";
 				filename += ".h";
 			}
@@ -68,7 +68,7 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 			CreateFileChange change;
 			try {
 				change = new CreateFileChange(filename, new
-				Path(path+filename), "#include " + "\"" + origin_filename + "\"\n\n" + declaration, context.getFile().getCharset());
+				Path(path+filename), "#include " + "\"" + origin_filename + "\"\n\n" + declaration, context.getSelectionFile().getCharset());
 				modifications.addFileChange(change);			
 			} catch (CoreException e) {
 				e.printStackTrace();

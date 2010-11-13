@@ -32,17 +32,17 @@ public class ToggleFromImplementationToClassStrategy extends
 		
 		this.declaration_unit = context.getDeclarationUnit();
 		if (this.declaration_unit == null) {
-			path = context.getFile().getFullPath().toString();
+			path = context.getSelectionFile().getFullPath().toString();
 			System.out.println("path: " + path);
 			filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
 			path = path.replaceAll("(\\w)*\\.(\\w)*", "");
 			System.out.println("filename " + filename);
 			this.filename_without_extension = filename;
-			if (context.getFile().getFileExtension().equals("h")) {
+			if (context.getSelectionFile().getFileExtension().equals("h")) {
 				origin_filename = filename + ".h";
 				filename += ".cpp";
 			}
-			if (context.getFile().getFileExtension().equals("cpp")) {
+			if (context.getSelectionFile().getFileExtension().equals("cpp")) {
 				origin_filename = filename + ".cpp";
 				filename += ".h";
 			}
@@ -68,7 +68,7 @@ public class ToggleFromImplementationToClassStrategy extends
 			CreateFileChange change;
 			try {
 				change = new CreateFileChange(filename, new
-				Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getFile().getCharset());
+				Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getSelectionFile().getCharset());
 				modifications.addFileChange(change);			
 			} catch (CoreException e) {
 				e.printStackTrace();

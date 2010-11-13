@@ -33,35 +33,13 @@ public class ToggleRefactoring extends CRefactoring {
 	
 	public ToggleRefactoring(IFile file, TextSelection selection, ICProject proj) {
 		super(file, selection, null, proj);
-		if (selection == null || file == null || project == null) {
-			initStatus.addFatalError("Preconditions for this refactoring not fulfilled, aborting.");
-			return;
-		}
+		if (selection == null || file == null || project == null)
+			initStatus.addFatalError("Invalid selection");
+		if (!IDE.saveAllEditors(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}, false))
+			initStatus.addFatalError("Cannot save files");
 		this.selection = selection;
-		IDE.saveAllEditors(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}, false);
 	}
 
-	/**
-	 * indexer not available? use TU instead. (make an adapter?)
-	 * 
-	 *  search first contained node
-	 *  	look at its type:
-	 *  	1) ICPPASTTemplateDeclaration
-	 *  	2) ICPPASTFunctionDefinition
-	 *  	3) IASTSimpleDeclaration+child(ICPPASTFunctionDeclarator)
-	 *    -> result found but IASTDeclarationStatement as parent -> drop reference and continue search.
-	 *  if null do search the first enclosing node the same way
-	 *  
-	 *  => Abort if nothing found.
-	 *  
-	 *  extract a binding that can be searched by index.findDeclarations + index.findDefinitions (directly? Name-node?)
-	 *  
-	 * Selection is inside			other.cpp		Class.cpp		Class.h		sys_library.h	N/A
-	 * Declaration found			other.cpp		Class.cpp		Class.h		sys_library.h	N/A
-	 * Definition found				other.cpp		Class.cpp		Class.h		sys_library.h	N/A
-	 * Occurrences					def_only		decl_only		def_decl	multi_declaration	multi_definition
-	 * 
-	 */
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
@@ -71,7 +49,10 @@ public class ToggleRefactoring extends CRefactoring {
 				throw new NotSupportedException("not able to work without the indexer");
 			lockIndex();
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
+			strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
+			return initStatus;
 		} catch (InterruptedException e) {
+			return initStatus;
 		} catch (NotSupportedException e) {
 			System.err.println("not implemented: " + e.getMessage());
 			initStatus.addFatalError("fatal");
@@ -79,9 +60,6 @@ public class ToggleRefactoring extends CRefactoring {
 		} finally {
 			unlockIndex();
 		}
-
-		strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
-		return initStatus;
 	}
 
 	@Override

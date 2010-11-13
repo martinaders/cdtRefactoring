@@ -85,7 +85,7 @@ public class DeclaratorFinder {
 					.getDeclarators();
 			if (declarators.length == 1
 					&& declarators[0] instanceof IASTFunctionDeclarator)
-				return (IASTFunctionDeclarator) node;
+				return (IASTFunctionDeclarator) declarators[0];
 		}
 		return null;
 	}
