@@ -12,7 +12,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -67,47 +66,22 @@ public class ToggleRefactoring extends CRefactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
 		try {
-			//waitForIndexer();
-			if (initStatus.hasFatalError())
-				return initStatus;
+			IIndexManager im = CCorePlugin.getIndexManager();
+			if (!im.isProjectIndexed(project))
+				throw new NotSupportedException("not able to work without the indexer");
 			lockIndex();
-			initContext();
+			context = new ToggleRefactoringContext(getIndex(), file, selection);
 		} catch (InterruptedException e) {
+		} catch (NotSupportedException e) {
+			System.err.println("not implemented: " + e.getMessage());
+			initStatus.addFatalError("fatal");
+			return initStatus;
 		} finally {
 			unlockIndex();
 		}
 
-		if (initStatus.hasFatalError())
-			return initStatus;
-		
 		strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
 		return initStatus;
-	}
-
-	private void initContext() {
-		context = new ToggleRefactoringContext(getIndex());
-		context.findFileUnitTranslation(file, initStatus);
-		if (initStatus.hasFatalError())
-			return;
-		context.findASTNodeName(selection, initStatus);
-		if (initStatus.hasFatalError())
-			return;
-		context.findBinding(initStatus);
-		if (initStatus.hasFatalError())
-			return;
-		context.findDeclaration(initStatus);
-		if (initStatus.hasFatalError())
-			return;
-		context.findDefinition(initStatus);
-	}
-
-	private void waitForIndexer() {
-		final IIndexManager im = CCorePlugin.getIndexManager();
-		System.out.println("before Join");
-		im.joinIndexer(1, new NullProgressMonitor());
-		if (!im.isProjectIndexed(project))
-			initStatus.addFatalError("Indexer not yet finished. Be patient and then try again.");
-		System.out.println("after Join");
 	}
 
 	@Override
