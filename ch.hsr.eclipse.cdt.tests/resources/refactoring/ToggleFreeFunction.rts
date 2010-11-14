@@ -1,0 +1,124 @@
+//!TestFreeFunctionToggleFromHeaderToImplementation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+int /*$*/freeFunction/*$$*/(int *a, int &b) {
+    return 42;
+}
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+int freeFunction(int *a, int & b);
+
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+int freeFunction(int *a, int & b)
+{
+    return 42;
+}
+
+
+//!TestFreeFunctionToggleFromImplementationToHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+int /*$*/freeFunction/*$$*/(int *a, int & b)
+{
+    return 42;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+int freeFunction(int *a, int & b);
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+
+
+int freeFunction(int *a, int & b)
+{
+    return 42;
+}
+
+

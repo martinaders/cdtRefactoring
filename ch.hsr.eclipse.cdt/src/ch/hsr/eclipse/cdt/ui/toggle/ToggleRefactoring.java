@@ -3,6 +3,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.internal.core.pdom.indexer.IndexerPreferences;
 import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -48,6 +49,7 @@ public class ToggleRefactoring extends CRefactoring {
 			if (!im.isProjectIndexed(project))
 				throw new NotSupportedException("not able to work without the indexer");
 			lockIndex();
+			IndexerPreferences.set(project.getProject(), IndexerPreferences.KEY_INDEX_UNUSED_HEADERS_WITH_DEFAULT_LANG, Boolean.TRUE.toString());
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
 			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {

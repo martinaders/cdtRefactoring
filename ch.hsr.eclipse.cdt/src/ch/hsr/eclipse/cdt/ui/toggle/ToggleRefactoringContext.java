@@ -54,11 +54,11 @@ public class ToggleRefactoringContext {
 			throw new NotSupportedException(
 					"not able to work without translation unit");
 	}
-	
+
 	public void findSelectedFunctionDeclarator(TextSelection selection) throws NotSupportedException {
 		selectionName = new DeclaratorFinder(selection, selectionUnit).getName();
 	}
-	
+
 	public void findBinding() throws NotSupportedException {
 		try {
 			binding = index.findBinding(selectionName);
@@ -67,7 +67,7 @@ public class ToggleRefactoringContext {
 		if (binding == null)
 			throw new NotSupportedException("not able to work without a binding");
 	}
-	
+
 	// Declaration may still be null afterwards, but thats ok.
 	public void findDeclaration() throws NotSupportedException {
 //		if (binding == null) {

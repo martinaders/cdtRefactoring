@@ -68,6 +68,21 @@ public class ToggleFromImplementationToClassStrategy extends
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
+//			Path p = new Path(definition_unit.getFileLocation().getFileName());
+//			ICElement e = CoreModel.getDefault().create(p);
+//			ICProject cProject = e.getCProject();
+//			ITranslationUnit tu;
+//			try {
+//				tu = CoreModelUtil.findTranslationUnitForLocation(p, cProject);
+//				InsertEdit edit = new InsertEdit(0, "#include \"" + filename + "\"");
+//				CTextFileChange insertchange = new CTextFileChange("achange", tu);
+//				insertchange.setEdit(edit);
+//				insertchange.perform(new NullProgressMonitor());
+//			} catch (CModelException e1) {
+//				e1.printStackTrace();
+//			} catch (CoreException e2) {
+//				e2.printStackTrace();
+//			}			
 		} else {
 			ASTRewrite headerast = modifications
 			.rewriterForTranslationUnit(declaration_unit);
@@ -75,7 +90,6 @@ public class ToggleFromImplementationToClassStrategy extends
 			IASTFunctionDefinition function = new CPPASTFunctionDefinition();
 			function.setBody(selectedDefinition.getBody().copy());
 			
-			//IASTFunctionDeclarator declarator = new CPPASTFunctionDeclarator(new CPPASTName(selectedDeclaration.getName().copy().toCharArray()));
 			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
@@ -116,4 +130,5 @@ public class ToggleFromImplementationToClassStrategy extends
 		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "\n";
 		return result;
 	}
+	
 }
