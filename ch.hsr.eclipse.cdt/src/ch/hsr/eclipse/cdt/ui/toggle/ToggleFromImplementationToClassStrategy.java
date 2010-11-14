@@ -5,9 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -21,7 +19,6 @@ public class ToggleFromImplementationToClassStrategy extends
 	private IASTTranslationUnit declaration_unit;
 	private String path;
 	private String filename;
-	private String origin_filename;
 	private ToggleRefactoringContext context;
 	private String filename_without_extension;
 
@@ -39,11 +36,9 @@ public class ToggleFromImplementationToClassStrategy extends
 			System.out.println("filename " + filename);
 			this.filename_without_extension = filename;
 			if (context.getSelectionFile().getFileExtension().equals("h")) {
-				origin_filename = filename + ".h";
 				filename += ".cpp";
 			}
 			if (context.getSelectionFile().getFileExtension().equals("cpp")) {
-				origin_filename = filename + ".cpp";
 				filename += ".h";
 			}
 			

@@ -1,6 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
@@ -31,6 +30,9 @@ public class ToggleStrategyFactory {
 		}
 		if (isInClassSituation()) {
 			System.out.println("ToggleFromClassToInHeaderStrategy");
+			System.out.println(context.getDefinition() + ", " + context.getDeclaration());
+			if (isWrappedInsideAClass(context.getDefinition()) && isWrappedInsideAClass(context.getDeclaration()))
+				throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
 			return new ToggleFromClassToInHeaderStrategy(context);
 		}
 		if (isTemplateSituation()) {
@@ -44,7 +46,7 @@ public class ToggleStrategyFactory {
 			} catch (Exception e) {
 				throw new NotSupportedException("move FromInHeaderToImplementation was not possible.");
 			}
-		} 
+		}
 		return null;
 	}
 	
@@ -72,13 +74,12 @@ public class ToggleStrategyFactory {
 		return isWrappedInsideAClass(context.getDefinition()) && context.getDeclaration() == null;
 	}
 
-	// structs?
-	private boolean isWrappedInsideAClass(IASTFunctionDefinition definition) {
-		IASTNode node = context.getDefinition();
-		while (node.getParent() != null) {
-			node = node.getParent();
+	private boolean isWrappedInsideAClass(IASTNode definition) {
+		IASTNode node = definition;
+		while (node != null) {
 			if (node instanceof ICPPASTCompositeTypeSpecifier)
 				return true;
+			node = node.getParent();
 		}
 		return false;
 	}
