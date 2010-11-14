@@ -1,7 +1,10 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 
 @SuppressWarnings("restriction")
@@ -14,13 +17,15 @@ public class ToggleFromClassToInHeaderStrategy extends
 
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
+		CPPNodeFactory factory = new CPPNodeFactory();
+		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
+		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
+		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
+		simpledec.addDeclarator(funcdecl);
+		simpledec.setParent(selectedDefinition.getParent());
 
-		rewriter.insertBefore(selectedDefinition.getParent(),null, declaration, infoText);
-		rewriter.remove(selectedDefinition, infoText);
-		rewriter.insertBefore(definition_unit, null, getQualifiedNameDefinition(true),
-				infoText);
+		rewriter.replace(selectedDefinition, simpledec, infoText);
+		rewriter.insertBefore(definition_unit, null, getQualifiedNameDefinition(true),infoText);
 	}
 
-	
 }

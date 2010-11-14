@@ -9,6 +9,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.ISourceRange;
@@ -43,22 +44,21 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	protected IASTSimpleDeclaration createDeclarationFromDefinition(
 			IASTFunctionDefinition memberdefinition) {
 		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier()
-				.copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
 	}
 
 	protected IASTNode getQualifiedNameDefinition(boolean inline) {
-		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier()
-				.copy();
+		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
+		newdeclspec.setVirtual(false);
 		newdeclspec.setInline(inline);
 		// was: declaration
 		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
 
-		funcdecl.setName(ToggleSelectionHelper
-				.getQualifiedName(selectedDefinition));
+		// TODO: your (Thomas's) version used selectedDefinition
+		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition.getDeclarator()));
 		ToggleNodeHelper.removeParameterInitializations(funcdecl);
 
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(

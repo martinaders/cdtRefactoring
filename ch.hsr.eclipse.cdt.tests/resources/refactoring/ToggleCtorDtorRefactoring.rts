@@ -25,11 +25,10 @@ private:
     int a;
     int b;
 public:
+    A(int x, int y);
     ~A()
     {
     }
-
-    A(int x, int y);
 };
 
 inline A::A(int x, int y)
@@ -130,12 +129,12 @@ class A {
 #include <iostream>
 
 class A {
-    ~A()
+    A(int x, int y)
+    :a(x), b(y)
     {
     }
 
-    A(int x, int y)
-    :a(x), b(y)
+    ~A()
     {
     }
 };

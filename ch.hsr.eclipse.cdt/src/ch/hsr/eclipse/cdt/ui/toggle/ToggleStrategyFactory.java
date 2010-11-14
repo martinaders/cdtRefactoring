@@ -1,7 +1,10 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 
 public class ToggleStrategyFactory {
@@ -18,8 +21,7 @@ public class ToggleStrategyFactory {
 			System.out.println("ToggleFromImplementationToClassStrategy");
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
-		if (isFreeFunction() && 
-				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h")) {
+		if (isFreeFunction() && isAllInHeader()) {
 			try {
 				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
 				return new ToggleFreeFunctionFromInHeaderToImpl(context);
@@ -50,10 +52,16 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isFreeFunction() {
-		// TODO: isEmpty is not sufficient to cover all cases
-		if (context.getDeclaration() == null && ToggleSelectionHelper.getAllQualifiedNames(context.getDefinition()).isEmpty())
+		// TODO: size == 1 is not sufficient to cover all cases
+		ICPPASTQualifiedName name = ToggleSelectionHelper.getQualifiedName(context.getDefinition().getDeclarator());
+		int size = name.getNames().length;
+		if (context.getDeclaration() == null && size == 1)
 			return true;
 		return false;
+	}
+	
+	private boolean isAllInHeader() {
+		return getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h");
 	}
 
 	private boolean isinHeaderSituation() {
@@ -94,10 +102,13 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() { 
-		//String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
-		String extension2 = getFileExtension(context.getDefinitionUnit().getFileLocation().getFileName());
-		if ((extension2.equals("cpp") || extension2.equals("c")))
+	private boolean isInImplementationSituation() {
+		IASTTranslationUnit unit = context.getDefinitionUnit();
+		IASTFileLocation location = unit.getFileLocation();
+		String filename = location.getFileName();
+		String extension = getFileExtension(filename);
+		
+		if ((extension.equals("cpp") || extension.equals("c")))
 			return true;
 		return false;
 	}

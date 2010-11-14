@@ -5,7 +5,7 @@ filename=A.h
 //@A.h
 #include <iostream>
 
-template <typename T>
+template <typename T, typename U>
 class A {
   class B {
     T /*$*/member/*$$*/()
@@ -17,14 +17,14 @@ class A {
 //=
 #include <iostream>
 
-template <typename T>
+template <typename T, typename U>
 class A {
   class B {
     T member();
   };
 };
 
-template<typename T> inline T A<T>::B::member()
+template<typename T, typename U> inline T A<T,U>::B::member()
 {
     return T();
 }
@@ -44,6 +44,7 @@ class A {
     };
 
 };
+
 template<typename T> inline T A<T>::B::/*$*/member/*$$*/()
 {
     return T();
@@ -62,4 +63,5 @@ class A {
     };
 
 };
+
 
