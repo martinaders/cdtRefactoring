@@ -41,7 +41,7 @@ public class ToggleRefactoringContext {
 		findSelectedFunctionDeclarator(selection); System.out.print("complete\nStage 3: ");
 		findBinding();						System.out.print("complete\nStage 4: ");
 		findDeclaration();					System.out.print("complete\nStage 5: ");
-		findDefinition();					System.out.print("complete\n");
+		findDefinition();					System.out.print("complete\n\nStrategy: ");
 	}
 	
 	private void findSelectionUnit() throws NotSupportedException {
@@ -68,7 +68,7 @@ public class ToggleRefactoringContext {
 			throw new NotSupportedException("not able to work without a binding");
 	}
 	
-	// Declaration may be null afterwards, but thats ok.
+	// Declaration may still be null afterwards, but thats ok.
 	public void findDeclaration() throws NotSupportedException {
 //		if (binding == null) {
 //			declaration = declarationtryfallbackwithast(selectionName);
@@ -77,6 +77,8 @@ public class ToggleRefactoringContext {
 //		}
 		try {
 			IIndexName[] decnames = index.findNames(binding, IIndex.FIND_DECLARATIONS);
+			if (decnames.length > 1)
+				throw new NotSupportedException("multiple declarations would result in ambiguous results");
 			for (IIndexName iname : decnames) {
 				selectionUnit = getTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
@@ -90,7 +92,7 @@ public class ToggleRefactoringContext {
 		} catch (CoreException e) {
 		}
 		if (targetDeclaration == null)
-			System.out.println("no declaration found -> create one if possible.");
+			System.out.print("(no declaration found) ");
 	}
 	
 	public void findDefinition() throws NotSupportedException {
@@ -102,6 +104,8 @@ public class ToggleRefactoringContext {
 //		}
 		try {
 			IIndexName[] defnames = index.findNames(binding, IIndex.FIND_DEFINITIONS);
+			if (defnames.length > 1)
+				throw new NotSupportedException("one-definition-rule broken");
 			for (IIndexName iname : defnames) {
 				IASTTranslationUnit unit = getTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(

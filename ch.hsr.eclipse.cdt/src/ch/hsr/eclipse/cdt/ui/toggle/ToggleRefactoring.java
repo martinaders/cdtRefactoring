@@ -49,17 +49,15 @@ public class ToggleRefactoring extends CRefactoring {
 				throw new NotSupportedException("not able to work without the indexer");
 			lockIndex();
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
-			strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
-			return initStatus;
+			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {
-			return initStatus;
 		} catch (NotSupportedException e) {
 			System.err.println("not implemented: " + e.getMessage());
 			initStatus.addFatalError("fatal");
-			return initStatus;
 		} finally {
 			unlockIndex();
 		}
+		return initStatus;
 	}
 
 	@Override

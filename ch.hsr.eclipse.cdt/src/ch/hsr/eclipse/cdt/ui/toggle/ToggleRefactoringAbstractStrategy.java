@@ -30,11 +30,11 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	public ISourceRange sourceRangeToBeShown = null;
 
 	public ToggleRefactoringAbstractStrategy(
-			IASTFunctionDeclarator selectedDeclaration2,
-			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit unit) {
-		this.selectedDeclaration = selectedDeclaration2;
+			IASTFunctionDeclarator selectedDeclaration,
+			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit definition_unit) {
+		this.selectedDeclaration = selectedDeclaration;
 		this.selectedDefinition = selectedDefinition;
-		this.definition_unit = unit;
+		this.definition_unit = definition_unit;
 		infoText = new TextEditGroup("Toggle function body placement");
 	}
 
@@ -54,7 +54,8 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		IASTDeclSpecifier newdeclspec = selectedDefinition.getDeclSpecifier()
 				.copy();
 		newdeclspec.setInline(inline);
-		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
+		// was: declaration
+		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
 
 		funcdecl.setName(ToggleSelectionHelper
 				.getQualifiedName(selectedDefinition));
@@ -64,7 +65,8 @@ public abstract class ToggleRefactoringAbstractStrategy {
 				newdeclspec, funcdecl);
 
 		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
-				.getTemplateDeclaration(selectedDeclaration);
+		// was: declaration
+				.getTemplateDeclaration(selectedDefinition);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
 			templdecl.setParent(definition_unit);

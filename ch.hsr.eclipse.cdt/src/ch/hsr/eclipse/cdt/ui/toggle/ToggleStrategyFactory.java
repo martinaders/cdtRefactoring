@@ -1,10 +1,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
-import org.eclipse.cdt.core.model.CModelException;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ToggleStrategyFactory {
 	
@@ -14,28 +13,36 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringAbstractStrategy getAppropriateStategy(RefactoringStatus initStatus) {
-		if (isInImplementationSituation()) 	
+	public ToggleRefactoringAbstractStrategy getAppropriateStategy() throws NotSupportedException {
+		assert(context.getDefinition() != null);
+		if (isInImplementationSituation()) {
+			System.out.println("ToggleFromImplementationToClassStrategy");
 			return new ToggleFromImplementationToClassStrategy(context);
-		else if (isFreeFunction() && 
+		}
+		if (isFreeFunction() && 
 				getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
-				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h"))
+				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h")) {
 			try {
+				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
 				return new ToggleFreeFunctionFromInHeaderToImpl(context);
-			} catch (Exception e1) {
-				initStatus.addFatalError("could not create strategy from header to implementation");
-			} 
-		else if (isInClassSituation())
+			} catch (Exception e) {
+				throw new NotSupportedException("move FreeFunctionFromInHeaderToImplementation was not possible");
+			}
+		}
+		if (isInClassSituation()) {
+			System.out.println("ToggleFromClassToInHeaderStrategy");
 			return new ToggleFromClassToInHeaderStrategy(context);
-		else if (isTemplateSituation())
+		}
+		if (isTemplateSituation()) {
+			System.out.println("ToggleFromInHeaderToClassStrategy");
 			return new ToggleFromInHeaderToClassStrategy(context);
-		else if (isinHeaderSituation()) {
+		}
+		if (isinHeaderSituation()) {
 			try {
+				System.out.println("ToggleFromInHeaderToImplementationStrategy");
 				return new ToggleFromInHeaderToImplementationStrategy(context);
-			} catch (CModelException e) {
-				initStatus.addFatalError(e.getMessage());
-			} catch (CoreException e) {
-				initStatus.addFatalError(e.getMessage());
+			} catch (Exception e) {
+				throw new NotSupportedException("move FromInHeaderToImplementation was not possible.");
 			}
 		} 
 		return null;
@@ -48,13 +55,32 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isinHeaderSituation() {
-		return context.getDeclaration().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
+		boolean declarationAndDefinitionExist = context.getDefinition() != null && context.getDeclaration() != null;
+		return declarationAndDefinitionExist && isInHeaderFile() && isInSamFile();
 	}
-	
+
+	private boolean isInSamFile() {
+		return context.getDefinition().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
+	}
+
+	private boolean isInHeaderFile() {
+		return context.getDefinition().getFileLocation().getFileName().endsWith(".h") || context.getDefinition().getFileLocation().getFileName().endsWith(".hpp");
+	}
+
+	// special: Don't support decl AND def inside the class definition
 	private boolean isInClassSituation() {
-		boolean samefile = context.getDeclaration().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
-		boolean samenode = context.getDefinition().getDeclarator() == context.getDeclaration();
-		return samefile && samenode;
+		return isWrappedInsideAClass(context.getDefinition()) && context.getDeclaration() == null;
+	}
+
+	// structs?
+	private boolean isWrappedInsideAClass(IASTFunctionDefinition definition) {
+		IASTNode node = context.getDefinition();
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier)
+				return true;
+		}
+		return false;
 	}
 
 	private boolean isTemplateSituation() {

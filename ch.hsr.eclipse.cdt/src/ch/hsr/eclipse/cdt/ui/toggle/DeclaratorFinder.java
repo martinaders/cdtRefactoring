@@ -45,7 +45,7 @@ public class DeclaratorFinder {
 
 		if (result == null) {
 			firstNodeInsideSelection = unit.getNodeSelector(null)
-					.findEnclosingName(selection.getOffset(),
+					.findEnclosingNode(selection.getOffset(),
 							selection.getLength());
 			result = findDeclaratorInAncestors(firstNodeInsideSelection);
 		}
