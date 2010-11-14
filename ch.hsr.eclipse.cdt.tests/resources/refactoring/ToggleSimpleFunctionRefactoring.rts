@@ -6,16 +6,22 @@ filename=A.h
 #include <iostream>
 
 class A {
+public:
 	int /*$*/function/*$$*/()
 	{
     	return 0;
 	}
+private:
+    int a;
 };
 //=
 #include <iostream>
 
 class A {
+public:
 	int function();
+private:
+    int a;
 };
 
 inline int A::function()
@@ -32,7 +38,10 @@ filename=A.h
 #include <iostream>
 
 class A {
+public:
     int function();
+private:
+    int a;
 };
 
 inline int A::/*$*/function/*$$*/()
@@ -43,7 +52,10 @@ inline int A::/*$*/function/*$$*/()
 #include <iostream>
 
 class A {
+public:
     int function();
+private:
+    int a;
 };
 
 
@@ -95,15 +107,21 @@ int main()
 #include <iostream>
 
 class A {
+public:
     int function();
+private:
+    int a;
 };
 //=
 #include <iostream>
 
 class A {
+public:
     int function()
     {
         return 0;
     }
 
+private:
+    int a;
 };

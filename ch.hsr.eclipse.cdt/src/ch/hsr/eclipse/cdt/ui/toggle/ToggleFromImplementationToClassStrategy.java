@@ -3,7 +3,10 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
@@ -79,13 +82,19 @@ public class ToggleFromImplementationToClassStrategy extends
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
 			System.out.println("name: " + selectedDeclaration.getName());
-			IASTDeclSpecifier declspec = selectedDefinition.getDeclSpecifier().copy();
+			ICPPASTSimpleDeclSpecifier declspec = (ICPPASTSimpleDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
+			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) selectedDeclaration.getParent();
+			ICPPASTSimpleDeclSpecifier olddeclspec = (ICPPASTSimpleDeclSpecifier) dec.getDeclSpecifier();
+			if (olddeclspec.isVirtual())
+				declspec.setVirtual(true);
+			//how to get to the declaration specifier of the function declarator?
 			function.setDeclSpecifier(declspec);
 			IASTFunctionDefinition finalfunc = assembleFunctionDefinitionWithBody(declspec, function.getDeclarator());
 			finalfunc.setParent(selectedDeclaration.getParent().getParent());
 			
-			headerast.remove(selectedDeclaration.getParent(), infoText);			
-			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
+			headerast.replace(selectedDeclaration.getParent(), finalfunc, infoText);
+//			headerast.remove(selectedDeclaration.getParent(), infoText);			
+//			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
 		}
 	}
 

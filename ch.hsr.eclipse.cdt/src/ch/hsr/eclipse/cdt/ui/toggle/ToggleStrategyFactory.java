@@ -1,6 +1,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.CModelException;
@@ -74,10 +77,13 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() { 
-		//String extension1 = getFileExtension(context.getDeclarationUnit().getFileLocation().getFileName());
-		String extension2 = getFileExtension(context.getDefinitionUnit().getFileLocation().getFileName());
-		if ((extension2.equals("cpp") || extension2.equals("c")))
+	private boolean isInImplementationSituation() {
+		IASTTranslationUnit unit = context.getDefinitionUnit();
+		IASTFileLocation location = unit.getFileLocation();
+		String filename = location.getFileName();
+		String extension = getFileExtension(filename);
+		
+		if ((extension.equals("cpp") || extension.equals("c")))
 			return true;
 		return false;
 	}
