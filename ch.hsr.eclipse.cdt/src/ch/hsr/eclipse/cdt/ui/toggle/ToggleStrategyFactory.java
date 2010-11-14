@@ -1,6 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.core.runtime.CoreException;
@@ -17,9 +18,7 @@ public class ToggleStrategyFactory {
 	public ToggleRefactoringAbstractStrategy getAppropriateStategy(RefactoringStatus initStatus) {
 		if (isInImplementationSituation()) 	
 			return new ToggleFromImplementationToClassStrategy(context);
-		else if (isFreeFunction() && 
-				getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
-				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h"))
+		else if (isFreeFunction() && isAllInHeader())
 			try {
 				return new ToggleFreeFunctionFromInHeaderToImpl(context);
 			} catch (Exception e1) {
@@ -42,9 +41,17 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isFreeFunction() {
-		if (context.getDeclaration() != null && ToggleSelectionHelper.getAllQualifiedNames(context.getDeclaration()).isEmpty())
+		ICPPASTQualifiedName name = ToggleSelectionHelper.getQualifiedName(context.getDeclaration());
+		int size = name.getNames().length;
+		System.out.println("size: " + size);
+		if (context.getDeclaration() != null && size == 1)
 			return true;
 		return false;
+	}
+	
+	private boolean isAllInHeader() {
+		return getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
+		getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h");
 	}
 
 	private boolean isinHeaderSituation() {

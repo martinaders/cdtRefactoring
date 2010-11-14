@@ -17,6 +17,7 @@ public class ToggleRefactoringTestSuite extends TestSuite {
 		suite.addTest(ExternalRefactoringTester.suite("ToggleNestedRefactoringTest", "resources/refactoring/ToggleNestedRefactoring.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleDifferentSelectionsTest", "resources/refactoring/ToggleDifferentSelections.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleFreeFunctionTest", "resources/refactoring/ToggleFreeFunction.rts"));
+		suite.addTest(ExternalRefactoringTester.suite("ToggleVirtualFunctionTest", "resources/refactoring/ToggleVirtualFunction.rts"));
 		return suite;
 	}
 

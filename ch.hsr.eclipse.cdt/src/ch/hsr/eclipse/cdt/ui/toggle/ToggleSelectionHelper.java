@@ -1,13 +1,12 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Stack;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
-import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
@@ -15,6 +14,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
@@ -25,9 +25,10 @@ import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -39,46 +40,68 @@ import org.eclipse.core.runtime.Path;
 @SuppressWarnings("restriction")
 class ToggleSelectionHelper extends SelectionHelper {		
 
-	public static ArrayList<IASTName> getAllQualifiedNames(IASTNode node) {
-		ArrayList<IASTName> names = new ArrayList<IASTName>();
+	private static ICPPASTTemplateId getTemplateParameter(IASTNode node, IASTName name) {
+		ICPPASTTemplateId templateid = new CPPASTTemplateId();
+		templateid.setTemplateName(name.copy());
 		
+		for(IASTNode child : node.getChildren()) {
+			if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
+				ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
+
+				CPPASTNamedTypeSpecifier namedTypeSpecifier = new CPPASTNamedTypeSpecifier();
+				namedTypeSpecifier.setName(tempcild.getName().copy());
+				
+				CPPASTTypeId id = new CPPASTTypeId();
+				id.setDeclSpecifier(namedTypeSpecifier);
+				templateid.addTemplateArgument(id);
+			}
+		}
+		return templateid;
+	}
+
+	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator) {
+		IASTNode node = declarator;
+		Stack<IASTNode> nodes = new Stack<IASTNode>();
+		IASTName lastname = declarator.getName();
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
+				nodes.push(((ICPPASTCompositeTypeSpecifier) node).copy());
+				lastname = ((ICPPASTCompositeTypeSpecifier) node).getName();
 			}
 			else if (node instanceof ICPPASTNamespaceDefinition) {
-				names.add(((ICPPASTNamespaceDefinition) node).getName());
+				nodes.push(((ICPPASTNamespaceDefinition) node).copy());
+				lastname = ((ICPPASTNamespaceDefinition) node).getName();
 			}
 			else if (node instanceof ICPPASTTemplateDeclaration) {
-				for(IASTNode child : node.getChildren()) {
-					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
-						IASTName name = names.remove(names.size()-1);
-						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
-						names.add(toadd);
-					}
-				}
+				if (!nodes.isEmpty())
+					nodes.pop();
+				ICPPASTTemplateId templateid = getTemplateParameter(node, lastname);
+				nodes.add(templateid);
+			} 
+			else //not any of these, go on
+				continue;
+		}
+		
+		CPPASTQualifiedName result = new CPPASTQualifiedName();
+		IASTName name;
+		while(!nodes.isEmpty()) {
+			IASTNode nnode = nodes.pop();
+			if (nnode instanceof ICPPASTCompositeTypeSpecifier) {
+				name = ((ICPPASTCompositeTypeSpecifier) nnode).getName();
+				result.addName(name);
+			}
+			else if (nnode instanceof ICPPASTNamespaceDefinition) {
+				name = ((ICPPASTNamespaceDefinition) nnode).getName(); 
+				result.addName(name);
+			}
+			else if (nnode instanceof ICPPASTTemplateId) {
+				ICPPASTTemplateId id = (ICPPASTTemplateId) nnode;
+				result.addName(id);
 			}
 		}
-		Collections.reverse(names);
-		return names;
-	}
-
-	private static IASTName getTemplateParameterName(IASTNode child) {
-		ICPPASTSimpleTypeTemplateParameter tempcild = (ICPPASTSimpleTypeTemplateParameter) child;
-		IASTNamedTypeSpecifier t = new CPPASTNamedTypeSpecifier(tempcild.getName().copy());
-		IASTName templname = t.getName();
-		return templname;
-	}
-
-	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDefinition memberdefinition) {
-		ICPPASTQualifiedName newdecl = new CPPASTQualifiedName();
-		for (IASTName name : getAllQualifiedNames(memberdefinition)) {
-			newdecl.addName(name.copy());
-		}
-		newdecl.addName(memberdefinition.getDeclarator().getName().copy());
-		newdecl.setFullyQualified(true);
-		return newdecl;
+		result.addName(declarator.getName().copy());
+		return result;
 	}
 
 	public static URI getSiblingFile(IFile file) throws CoreException {
