@@ -42,9 +42,11 @@ class ToggleSelectionHelper extends SelectionHelper {
 	public static ArrayList<IASTName> getAllQualifiedNames(IASTNode node) {
 		ArrayList<IASTName> names = new ArrayList<IASTName>();
 		
+		boolean isInsideAClass = false;
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				isInsideAClass = true;
 				names.add(((ICPPASTCompositeTypeSpecifier) node).getName());
 			}
 			else if (node instanceof ICPPASTNamespaceDefinition) {
@@ -53,9 +55,13 @@ class ToggleSelectionHelper extends SelectionHelper {
 			else if (node instanceof ICPPASTTemplateDeclaration) {
 				for(IASTNode child : node.getChildren()) {
 					if (child instanceof ICPPASTSimpleTypeTemplateParameter) {
-						IASTName name = names.remove(names.size()-1);
-						IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
-						names.add(toadd);
+						if (isInsideAClass) {
+							IASTName name = names.remove(names.size()-1);
+							IASTName toadd = new CPPASTName((name + "<" + getTemplateParameterName(child) + ">").toCharArray());
+							names.add(toadd);
+						} else {
+							names.add(getTemplateParameterName(child));
+						}
 					}
 				}
 			}

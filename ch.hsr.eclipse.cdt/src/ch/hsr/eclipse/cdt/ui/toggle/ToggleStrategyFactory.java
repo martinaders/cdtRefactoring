@@ -19,7 +19,6 @@ public class ToggleStrategyFactory {
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
 		if (isFreeFunction() && 
-				getFileExtension(context.getDeclaration().getFileLocation().getFileName()).equals("h") &&
 				getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h")) {
 			try {
 				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
@@ -51,7 +50,8 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isFreeFunction() {
-		if (context.getDeclaration() != null && ToggleSelectionHelper.getAllQualifiedNames(context.getDeclaration()).isEmpty())
+		// TODO: isEmpty is not sufficient to cover all cases
+		if (context.getDeclaration() == null && ToggleSelectionHelper.getAllQualifiedNames(context.getDefinition()).isEmpty())
 			return true;
 		return false;
 	}

@@ -29,7 +29,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
-		astrewriter.replace(selectedDeclaration.getParent(), declaration, infoText);
+		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		if (siblingfile_translation_unit == null) {
 			ICProject project = CoreModel.getDefault().create(context.getSelectionFile().getLocation()).getCProject();
