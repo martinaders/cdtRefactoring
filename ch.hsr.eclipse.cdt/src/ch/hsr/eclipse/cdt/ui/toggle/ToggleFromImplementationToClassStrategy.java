@@ -62,7 +62,16 @@ public class ToggleFromImplementationToClassStrategy extends
 		implast.remove(selectedDefinition, infoText);
 		
 		if (this.declaration_unit == null) {
-			writeNewFile(modifications);
+			try {
+				declaration_unit = ToggleSelectionHelper.getSiblingFile(context.getSelectionFile(), definition_unit);
+				IASTFunctionDefinition function = selectedDefinition.copy();
+				ASTRewrite classast = modifications.rewriterForTranslationUnit(declaration_unit);
+				classast.insertBefore(declaration_unit, null, function, infoText);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+			if (declaration_unit == null)
+				writeNewFile(modifications);
 		} else {
 			ASTRewrite headerast = modifications
 			.rewriterForTranslationUnit(declaration_unit);
@@ -78,7 +87,6 @@ public class ToggleFromImplementationToClassStrategy extends
 			ICPPASTSimpleDeclSpecifier olddeclspec = (ICPPASTSimpleDeclSpecifier) dec.getDeclSpecifier();
 			if (olddeclspec.isVirtual())
 				declspec.setVirtual(true);
-			//how to get to the declaration specifier of the function declarator?
 			function.setDeclSpecifier(declspec);
 			IASTFunctionDefinition finalfunc = assembleFunctionDefinitionWithBody(declspec, function.getDeclarator());
 			finalfunc.setParent(selectedDeclaration.getParent().getParent());

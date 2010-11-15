@@ -21,7 +21,6 @@ import org.eclipse.cdt.core.index.IndexLocationFactory;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
-import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
@@ -31,7 +30,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
 import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 /**
  * Helps finding a FunctionDefinition in the parent nodes of the current selection. 

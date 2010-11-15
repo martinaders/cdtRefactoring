@@ -1,15 +1,21 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.model.CModelException;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -32,16 +38,23 @@ public class ToggleRefactoringContext {
 	private IIndexBinding binding;
 	private IASTName selectionName;
 
-	public ToggleRefactoringContext(IIndex index, IFile file, TextSelection selection) throws NotSupportedException {
+	public ToggleRefactoringContext(IIndex index, IFile file,
+			TextSelection selection) throws NotSupportedException {
 		this.index = index;
-		this.selectionFile = file; 			System.out.print("Stage 1: ");
-		findSelectionUnit();				System.out.print("complete\nStage 2: ");
-		findSelectedFunctionDeclarator(selection); System.out.print("complete\nStage 3: ");
-		findBinding();						System.out.print("complete\nStage 4: ");
-		findDeclaration();					System.out.print("complete\nStage 5: ");
-		findDefinition();					System.out.print("complete\n\nStrategy: ");
+		this.selectionFile = file;
+		System.out.print("Stage 1: ");
+		findSelectionUnit();
+		System.out.print("complete\nStage 2: ");
+		findSelectedFunctionDeclarator(selection);
+		System.out.print("complete\nStage 3: ");
+		findBinding();
+		System.out.print("complete\nStage 4: ");
+		findDeclaration();
+		System.out.print("complete\nStage 5: ");
+		findDefinition();
+		System.out.print("complete\n\nStrategy: ");
 	}
-	
+
 	private void findSelectionUnit() throws NotSupportedException {
 		try {
 			selectionUnit = TranslationUnitHelper.loadTranslationUnit(
@@ -53,8 +66,10 @@ public class ToggleRefactoringContext {
 					"not able to work without translation unit");
 	}
 
-	public void findSelectedFunctionDeclarator(TextSelection selection) throws NotSupportedException {
-		selectionName = new DeclaratorFinder(selection, selectionUnit).getName();
+	public void findSelectedFunctionDeclarator(TextSelection selection)
+			throws NotSupportedException {
+		selectionName = new DeclaratorFinder(selection, selectionUnit)
+				.getName();
 	}
 
 	public void findBinding() throws NotSupportedException {
@@ -63,20 +78,22 @@ public class ToggleRefactoringContext {
 		} catch (CoreException e) {
 		}
 		if (binding == null)
-			throw new NotSupportedException("not able to work without a binding");
+			System.err.println("no binding was found, hopefully falling back to visitors");
 	}
 
 	// Declaration may still be null afterwards, but thats ok.
 	public void findDeclaration() throws NotSupportedException {
-//		if (binding == null) {
-//			declaration = declarationtryfallbackwithast(selectionName);
-//			declaration_unit = null;
-//			return;
-//		}
+		if (binding == null) {
+			targetDeclaration = findDeclarationWithVisitor(selectionName);
+			targetDefinition = null;
+			return;
+		}
 		try {
-			IIndexName[] decnames = index.findNames(binding, IIndex.FIND_DECLARATIONS);
+			IIndexName[] decnames = index.findNames(binding,
+					IIndex.FIND_DECLARATIONS);
 			if (decnames.length > 1)
-				throw new NotSupportedException("multiple declarations would result in ambiguous results");
+				throw new NotSupportedException(
+						"multiple declarations would result in ambiguous results");
 			for (IIndexName iname : decnames) {
 				selectionUnit = getTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
@@ -92,16 +109,17 @@ public class ToggleRefactoringContext {
 		if (targetDeclaration == null)
 			System.out.print("(no declaration found) ");
 	}
-	
+
 	public void findDefinition() throws NotSupportedException {
 		// fallback
-//		if (binding == null) {
-//			definition = definitiontryfallbackwithast(selectionName);
-//			definition_unit = selectionUnit;
-//			return;
-//		}
+		if (binding == null) {
+			targetDefinition = findDefinitionWithVisitor(selectionName);
+			targetDefinitionUnit = selectionUnit;
+			return;
+		}
 		try {
-			IIndexName[] defnames = index.findNames(binding, IIndex.FIND_DEFINITIONS);
+			IIndexName[] defnames = index.findNames(binding,
+					IIndex.FIND_DEFINITIONS);
 			if (defnames.length > 1)
 				throw new NotSupportedException("one-definition-rule broken");
 			for (IIndexName iname : defnames) {
@@ -142,7 +160,8 @@ public class ToggleRefactoringContext {
 
 	public IASTTranslationUnit getTUForSiblingFile() throws CModelException,
 			CoreException {
-		return ToggleSelectionHelper.getSiblingFile(getSelectionFile(), getDeclarationUnit());
+		return ToggleSelectionHelper.getSiblingFile(getSelectionFile(),
+				getDeclarationUnit());
 	}
 
 	private IASTTranslationUnit getTUForNameinFile(IIndexName iname)
@@ -151,8 +170,8 @@ public class ToggleRefactoringContext {
 			return selectionUnit;
 		IASTTranslationUnit asttu = null;
 		IPath path = new Path(iname.getFileLocation().getFileName());
-		asttu = TranslationUnitHelper.loadTranslationUnit(path.toString(),
-				true);
+		asttu = TranslationUnitHelper
+				.loadTranslationUnit(path.toString(), true);
 		return asttu;
 	}
 
@@ -182,4 +201,58 @@ public class ToggleRefactoringContext {
 		}
 		return null;
 	}
+
+	private IASTFunctionDefinition findDefinitionWithVisitor(
+			final IASTName element_name2) {
+		System.err.println("fallback with visitor for definition");
+		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
+		selectionUnit.accept(new CPPASTVisitor(true) {
+			{
+				shouldVisitDeclarations = true;
+			}
+
+			@Override
+			public int visit(IASTDeclaration declaration) {
+				if (declaration instanceof ICPPASTFunctionDefinition) {
+					CPPASTFunctionDefinition func = (CPPASTFunctionDefinition) declaration;
+					IASTName name = func.getDeclarator().getName();
+					if (name.equals(element_name2)) {
+						System.out.println("got it");
+						container.setObject(func);
+						return PROCESS_ABORT;
+					}
+				}
+				return super.visit(declaration);
+			}
+		});
+		return container.getObject();
+	}
+
+	private IASTFunctionDeclarator findDeclarationWithVisitor(
+			final IASTName element_name2) {
+		System.err.println("fallback with vistitor for declaration");
+		final Container<IASTFunctionDeclarator> container = new Container<IASTFunctionDeclarator>();
+		selectionUnit.accept(new CPPASTVisitor(true) {
+			{
+				shouldVisitDeclarations = true;
+			}
+
+			@Override
+			public int visit(IASTDeclaration declaration) {
+				if (declaration instanceof IASTFunctionDeclarator) {
+					CPPASTFunctionDeclarator decl = (CPPASTFunctionDeclarator) declaration;
+					IASTName name = decl.getName();
+
+					if (name.equals(element_name2)) {
+						System.out.println("got it");
+						container.setObject(decl);
+						return PROCESS_ABORT;
+					}
+				}
+				return super.visit(declaration);
+			}
+		});
+		return container.getObject();
+	}
+
 }

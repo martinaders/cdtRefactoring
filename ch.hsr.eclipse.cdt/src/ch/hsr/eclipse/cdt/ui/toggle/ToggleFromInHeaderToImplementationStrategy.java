@@ -73,6 +73,7 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 			.rewriterForTranslationUnit(siblingfile_translation_unit);
 			otherrewrite.insertBefore(siblingfile_translation_unit.getTranslationUnit(), null,
 					getQualifiedNameDefinition(false), infoText);
+			//TODO: maybe not using qualified name because we already have it...
 		}
 	}
 	
