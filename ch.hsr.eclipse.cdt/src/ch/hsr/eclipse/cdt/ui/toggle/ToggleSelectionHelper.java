@@ -56,14 +56,15 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return templateid;
 	}
 	
-	public static boolean isInsideAClass(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
+	public static boolean isInsideAClass(IASTFunctionDeclarator declarator,
+			IASTFunctionDeclarator backup) {
 		if (declarator.getName() instanceof ICPPASTQualifiedName)
 			declarator = backup;
 		IASTNode node = declarator;
-		while(node.getParent() != null) {
-			node = node.getParent();
+		while (node != null) {
 			if (node instanceof IASTCompositeTypeSpecifier)
 				return true;
+			node = node.getParent();
 		}
 		return false;
 	}
