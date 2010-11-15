@@ -119,13 +119,14 @@ class ToggleSelectionHelper extends SelectionHelper {
 		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
 				IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = getFilenameWithoutExtension(file.getFullPath().toString());
-		if (file.getFileExtension().equals("h")) {
+		if (file.getFileExtension().equals("h")
+				|| file.getFileExtension().equals("hpp")) {
 			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
 				if (getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
 					return getLocalTranslationUnitForFile(include.getIncludedBy().getLocation().getURI(), cProject, projectindex);
 				}
 			}
-		} else if (file.getFileExtension().equals("cpp")
+		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("cxx")
 				|| file.getFileExtension().equals("c")) {
 			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
 				if (getFilenameWithoutExtension(include.getFullName()).equals(

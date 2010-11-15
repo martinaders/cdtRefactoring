@@ -182,7 +182,8 @@ int freeFunction(int *a, int & b)
 
 
 
-//!TestTemplatedFreeFunction
+
+//!TestFreeFunction
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
