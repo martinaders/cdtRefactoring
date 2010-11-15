@@ -66,9 +66,8 @@ public class DeclaratorFinder {
 
 	private IASTFunctionDeclarator extractDeclaratorFromTemplate(
 			ICPPASTTemplateDeclaration node) {
-		IASTFunctionDeclarator result;
-		for (IASTNode n : node.getChildren()) {
-			result = extractDeclarator(n);
+		for (IASTNode childnode : node.getChildren()) {
+			IASTFunctionDeclarator result = extractDeclarator(childnode);
 			if (result != null)
 				return result;
 		}

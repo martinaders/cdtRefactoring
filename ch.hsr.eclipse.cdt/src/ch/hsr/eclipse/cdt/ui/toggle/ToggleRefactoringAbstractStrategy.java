@@ -32,7 +32,8 @@ public abstract class ToggleRefactoringAbstractStrategy {
 
 	public ToggleRefactoringAbstractStrategy(
 			IASTFunctionDeclarator selectedDeclaration,
-			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit definition_unit) {
+			IASTFunctionDefinition selectedDefinition,
+			IASTTranslationUnit definition_unit) {
 		this.selectedDeclaration = selectedDeclaration;
 		this.selectedDefinition = selectedDefinition;
 		this.definition_unit = definition_unit;
@@ -44,31 +45,36 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	protected IASTSimpleDeclaration createDeclarationFromDefinition(
 			IASTFunctionDefinition memberdefinition) {
 		IASTDeclarator declarator = memberdefinition.getDeclarator().copy();
-		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier().copy();
+		IASTDeclSpecifier specifier = memberdefinition.getDeclSpecifier()
+				.copy();
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
 	}
 
 	protected IASTNode getQualifiedNameDefinition(boolean inline) {
-		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
+		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) selectedDefinition
+				.getDeclSpecifier().copy();
 		newdeclspec.setVirtual(false);
 		newdeclspec.setInline(inline);
 		// was: declaration
-		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
+		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator()
+				.copy();
 
 		// TODO: rethink correctness of this statement
 		if (selectedDeclaration != null)
-			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDeclaration));
+			funcdecl.setName(ToggleSelectionHelper
+					.getQualifiedName(selectedDeclaration));
 		else
-			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition.getDeclarator()));
+			funcdecl.setName(ToggleSelectionHelper
+					.getQualifiedName(selectedDefinition.getDeclarator()));
 		ToggleNodeHelper.removeParameterInitializations(funcdecl);
 
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
 				newdeclspec, funcdecl);
 
-		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
 		// was: declaration
+		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
 				.getTemplateDeclaration(selectedDefinition);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
@@ -123,6 +129,5 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		}
 		return definition_unit;
 	}
-
 
 }
