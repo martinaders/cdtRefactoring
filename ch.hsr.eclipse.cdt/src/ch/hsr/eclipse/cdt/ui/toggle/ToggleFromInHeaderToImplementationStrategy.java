@@ -29,10 +29,8 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 		this.siblingfile_translation_unit = context.loadTUForSiblingFile();
 		if (this.siblingfile_translation_unit == null) {
 			path = context.getFile().getFullPath().toString();
-			System.out.println("path: " + path);
 			filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
 			path = path.replaceAll("(\\w)*\\.(\\w)*", "");
-			System.out.println("filename " + filename);
 			if (context.getFile().getFileExtension().equals("h")) {
 				origin_filename = filename + ".h";
 				filename += ".cpp";
@@ -41,15 +39,12 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 				origin_filename = filename + ".cpp";
 				filename += ".h";
 			}
-			
-			System.out.println("filename after all: " + path + filename);
 		}
 	}
 
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
-
 		IASTNode toremove = selectedDefinition;
 		if (toremove.getParent() != null
 				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)

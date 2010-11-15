@@ -104,19 +104,17 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return result;
 	}
 
-	public static URI getSiblingFile(IFile file) throws CoreException {
+	public static IASTTranslationUnit getSiblingFile(IFile file, IASTTranslationUnit asttu) throws CoreException {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnit(file);
-		IASTTranslationUnit asttu = tu.getAST(projectindex, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT);
+		
 		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
 				IndexLocationFactory.getWorkspaceIFL(file));
-		String filename = getFilenameWithoutExtension(file.getFullPath()
-				.toString());
+		String filename = getFilenameWithoutExtension(file.getFullPath().toString());
 		if (file.getFileExtension().equals("h")) {
 			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
 				if (getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
-					return include.getIncludedBy().getLocation().getURI();
+					return getLocalTranslationUnitForFile(include.getIncludedBy().getLocation().getURI(), cProject, projectindex);
 				}
 			}
 		} else if (file.getFileExtension().equals("cpp")
@@ -124,7 +122,7 @@ class ToggleSelectionHelper extends SelectionHelper {
 			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
 				if (getFilenameWithoutExtension(include.getFullName()).equals(
 						filename)) {
-					return include.getIncludesLocation().getURI();
+					return getLocalTranslationUnitForFile(include.getIncludesLocation().getURI(), cProject, projectindex);
 				}
 			}
 		}
@@ -137,23 +135,9 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return filename;
 	}
 
-	public static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri)
+	private static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri, ICProject project, IIndex index)
 			throws CModelException, CoreException {
-		Path p = new Path(fileUri.getRawPath());
-		ICElement e = CoreModel.getDefault().create(p);
-		ICProject cProject = e.getCProject();
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(fileUri, cProject);
-		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(fileUri, project);
 		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
-	}
-
-	public static IASTTranslationUnit getGlobalTranslationUnitForFile(
-			URI fileUri) throws CoreException {
-		ICProject cProject = CoreModel.getDefault()
-				.create(new Path(fileUri.getRawPath())).getCProject();
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(
-				fileUri, cProject);
-		IIndex index = CCorePlugin.getIndexManager().getIndex(cProject);
-		return tu.getAST(index, ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT | ITranslationUnit.AST_SKIP_INDEXED_HEADERS);
 	}
 }

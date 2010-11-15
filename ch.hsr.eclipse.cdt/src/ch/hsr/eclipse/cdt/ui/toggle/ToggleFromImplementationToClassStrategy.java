@@ -48,10 +48,8 @@ public class ToggleFromImplementationToClassStrategy extends
 
 	private void createNewFilename(ToggleRefactoringContext context) {
 		path = context.getFile().getFullPath().toString();
-		System.out.println("path: " + path);
 		filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
 		path = path.replaceAll("(\\w)*\\.(\\w)*", "");
-		System.out.println("filename " + filename);
 		this.filename_without_extension = filename;
 		if (context.getFile().getFileExtension().equals("h")) {
 			origin_filename = filename + ".h";
@@ -61,7 +59,6 @@ public class ToggleFromImplementationToClassStrategy extends
 			origin_filename = filename + ".cpp";
 			filename += ".h";
 		}
-		System.out.println("filename after all: " + path + filename);
 	}
 
 	@Override
@@ -81,7 +78,6 @@ public class ToggleFromImplementationToClassStrategy extends
 			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
 			declarator.setParent(function);
 			function.setDeclarator(declarator);
-			System.out.println("name: " + selectedDeclaration.getName());
 			ICPPASTSimpleDeclSpecifier declspec = (ICPPASTSimpleDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
 			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) selectedDeclaration.getParent();
 			ICPPASTSimpleDeclSpecifier olddeclspec = (ICPPASTSimpleDeclSpecifier) dec.getDeclSpecifier();
@@ -137,7 +133,6 @@ public class ToggleFromImplementationToClassStrategy extends
 	
 	private String getPureDeclaration(String declaration) {
 		String result = declaration.replaceAll("(\\w)*::", "");
-		System.out.println("pure declaration: " + result);
 		return result;
 	}
 
@@ -145,7 +140,6 @@ public class ToggleFromImplementationToClassStrategy extends
 		String tmp = definition.replaceAll("::.*", "");
 		tmp += " {";
 		String result = "class " + tmp;
-		System.out.println("class: " + result);
 		return result;
 	}
 

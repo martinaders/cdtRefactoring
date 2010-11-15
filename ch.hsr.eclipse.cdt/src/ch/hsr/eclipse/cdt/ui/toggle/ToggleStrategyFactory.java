@@ -33,7 +33,8 @@ public class ToggleStrategyFactory {
 			return new ToggleFromInHeaderToClassStrategy(context);
 		else if (isinHeaderSituation()) {
 			try {
-				return new ToggleFromInHeaderToImplementationStrategy(context);
+				ToggleFromInHeaderToImplementationStrategy stategy = new ToggleFromInHeaderToImplementationStrategy(context);
+				return stategy;
 			} catch (CModelException e) {
 				initStatus.addFatalError(e.getMessage());
 			} catch (CoreException e) {
@@ -46,7 +47,6 @@ public class ToggleStrategyFactory {
 	private boolean isFreeFunction() {
 		ICPPASTQualifiedName name = ToggleSelectionHelper.getQualifiedName(context.getDeclaration());
 		int size = name.getNames().length;
-		System.out.println("size: " + size);
 		if (context.getDeclaration() != null && size == 1)
 			return true;
 		return false;

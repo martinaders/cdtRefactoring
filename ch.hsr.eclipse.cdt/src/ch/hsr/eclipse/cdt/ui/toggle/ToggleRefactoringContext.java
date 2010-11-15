@@ -2,6 +2,8 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
 
+import javax.xml.crypto.NodeSetData;
+
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -18,7 +20,9 @@ import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
+import org.eclipse.cdt.internal.ui.refactoring.utils.FileHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
+import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -194,7 +198,6 @@ public class ToggleRefactoringContext {
 					CPPASTFunctionDefinition func = (CPPASTFunctionDefinition) declaration;
 					IASTName name = func.getDeclarator().getName();
 					if (name.equals(element_name2)) {
-						System.out.println("got it");
 						container.setObject(func);
 						return PROCESS_ABORT;
 					}
@@ -220,7 +223,6 @@ public class ToggleRefactoringContext {
 					IASTName name = decl.getName();
 
 					if (name.equals(element_name2)) {
-						System.out.println("got it");
 						container.setObject(decl);
 						return PROCESS_ABORT;
 					}
@@ -237,10 +239,7 @@ public class ToggleRefactoringContext {
 
 	public IASTTranslationUnit loadTUForSiblingFile() throws CModelException,
 			CoreException {
-		URI uri = ToggleSelectionHelper.getSiblingFile(origin_file);
-		if (uri == null)
-			return null;
-		return ToggleSelectionHelper.getLocalTranslationUnitForFile(uri);
+		return ToggleSelectionHelper.getSiblingFile(origin_file, declaration_unit);
 	}
 
 	private IASTTranslationUnit loadTUForNameinFile(IIndexName iname)

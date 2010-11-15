@@ -56,7 +56,6 @@ public class ToggleRefactoring extends CRefactoring {
 
 		if (initStatus.hasFatalError())
 			return initStatus;
-		
 		strategy = new ToggleStrategyFactory(context).getAppropriateStategy(initStatus);
 		return initStatus;
 	}
