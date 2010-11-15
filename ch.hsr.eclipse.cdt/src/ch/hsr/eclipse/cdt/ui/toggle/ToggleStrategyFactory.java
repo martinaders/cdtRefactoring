@@ -21,6 +21,8 @@ public class ToggleStrategyFactory {
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
 		if (isFreeFunction() && isAllInHeader()) {
+			if (isScopedFreeFunction())
+				throw new NotSupportedException("namespaced+templated free functions not supported yet");
 			try {
 				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
 				return new ToggleFreeFunctionFromInHeaderToImpl(context);
@@ -50,6 +52,10 @@ public class ToggleStrategyFactory {
 		return null;
 	}
 	
+	private boolean isScopedFreeFunction() {
+		return ToggleSelectionHelper.isNamespacedOrTemplated(context.getDefinition().getDeclarator(), context.getDeclaration());
+	}
+
 	private boolean isFreeFunction() {
 		return !ToggleSelectionHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}

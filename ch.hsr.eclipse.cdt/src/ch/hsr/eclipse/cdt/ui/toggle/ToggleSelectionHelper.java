@@ -69,6 +69,20 @@ class ToggleSelectionHelper extends SelectionHelper {
 		return false;
 	}
 	
+	public static boolean isNamespacedOrTemplated(
+			IASTFunctionDeclarator declarator,
+			IASTFunctionDeclarator backup) {
+		if (declarator.getName() instanceof ICPPASTQualifiedName)
+			declarator = backup;
+		IASTNode node = declarator;
+		while (node != null) {
+			if (node instanceof ICPPASTNamespaceDefinition || node instanceof ICPPASTTemplateDeclaration)
+				return true;
+			node = node.getParent();
+		}
+		return false;
+	}
+	
 	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator) {
 		IASTNode node = declarator;
 		Stack<IASTNode> nodes = new Stack<IASTNode>();
