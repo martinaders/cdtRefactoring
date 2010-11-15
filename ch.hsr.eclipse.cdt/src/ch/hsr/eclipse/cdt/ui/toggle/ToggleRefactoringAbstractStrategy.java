@@ -57,8 +57,11 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		// was: declaration
 		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
 
-		// TODO: your (Thomas's) version used selectedDefinition
-		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition.getDeclarator()));
+		// TODO: rethink correctness of this statement
+		if (selectedDeclaration != null)
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDeclaration));
+		else
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition.getDeclarator()));
 		ToggleNodeHelper.removeParameterInitializations(funcdecl);
 
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(

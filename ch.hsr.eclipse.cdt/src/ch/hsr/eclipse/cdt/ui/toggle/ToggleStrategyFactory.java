@@ -4,7 +4,6 @@ import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 
 public class ToggleStrategyFactory {
@@ -52,14 +51,9 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isFreeFunction() {
-		// TODO: size == 1 is not sufficient to cover all cases
-		ICPPASTQualifiedName name = ToggleSelectionHelper.getQualifiedName(context.getDefinition().getDeclarator());
-		int size = name.getNames().length;
-		if (context.getDeclaration() == null && size == 1)
-			return true;
-		return false;
+		return !ToggleSelectionHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
-	
+
 	private boolean isAllInHeader() {
 		return getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h");
 	}
