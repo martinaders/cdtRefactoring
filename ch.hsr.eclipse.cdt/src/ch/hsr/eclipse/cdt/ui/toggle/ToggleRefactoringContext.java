@@ -160,8 +160,11 @@ public class ToggleRefactoringContext {
 
 	public IASTTranslationUnit getTUForSiblingFile() throws CModelException,
 			CoreException {
+		IASTTranslationUnit unit = getDeclarationUnit();
+		if (unit == null)
+			unit = getDefinitionUnit();
 		return ToggleSelectionHelper.getSiblingFile(getSelectionFile(),
-				getDeclarationUnit());
+				unit);
 	}
 
 	private IASTTranslationUnit getTUForNameinFile(IIndexName iname)
