@@ -18,6 +18,8 @@ public class ToggleStrategyFactory {
 		assert(context.getDefinition() != null);
 		if (isInImplementationSituation()) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
+			if (context.getDeclarationUnit() == context.getDefinitionUnit())
+				throw new NotSupportedException("Definition+declaration both in a cpp file -> not clear where to move the function body.");
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
 		if (isFreeFunction() && isAllInHeader()) {
@@ -108,7 +110,7 @@ public class ToggleStrategyFactory {
 		String filename = location.getFileName();
 		String extension = getFileExtension(filename);
 		
-		if ((extension.equals("cpp") || extension.equals("c")))
+		if ((extension.equals("cpp") || extension.equals("c") || extension.equals("cxx")))
 			return true;
 		return false;
 	}
