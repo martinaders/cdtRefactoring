@@ -4,12 +4,11 @@ import java.net.URI;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
@@ -58,16 +57,28 @@ class ToggleSelectionHelper extends SelectionHelper {
 		}
 		return templateid;
 	}
-
+	
+	public static boolean isInsideAClass(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
+		if (declarator.getName() instanceof ICPPASTQualifiedName)
+			declarator = backup;
+		IASTNode node = declarator;
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof IASTCompositeTypeSpecifier)
+				return true;
+		}
+		return false;
+	}
+	
 	public static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator) {
 		IASTNode node = declarator;
 		Stack<IASTNode> nodes = new Stack<IASTNode>();
 		IASTName lastname = declarator.getName();
 		while(node.getParent() != null) {
 			node = node.getParent();
-			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				nodes.push(((ICPPASTCompositeTypeSpecifier) node).copy());
-				lastname = ((ICPPASTCompositeTypeSpecifier) node).getName();
+			if (node instanceof IASTCompositeTypeSpecifier) {
+				nodes.push(((IASTCompositeTypeSpecifier) node).copy());
+				lastname = ((IASTCompositeTypeSpecifier) node).getName();
 			}
 			else if (node instanceof ICPPASTNamespaceDefinition) {
 				nodes.push(((ICPPASTNamespaceDefinition) node).copy());
@@ -79,16 +90,14 @@ class ToggleSelectionHelper extends SelectionHelper {
 				ICPPASTTemplateId templateid = getTemplateParameter(node, lastname);
 				nodes.add(templateid);
 			} 
-			else //not any of these, go on
-				continue;
 		}
 		
 		CPPASTQualifiedName result = new CPPASTQualifiedName();
 		IASTName name;
 		while(!nodes.isEmpty()) {
 			IASTNode nnode = nodes.pop();
-			if (nnode instanceof ICPPASTCompositeTypeSpecifier) {
-				name = ((ICPPASTCompositeTypeSpecifier) nnode).getName();
+			if (nnode instanceof IASTCompositeTypeSpecifier) {
+				name = ((IASTCompositeTypeSpecifier) nnode).getName();
 				result.addName(name);
 			}
 			else if (nnode instanceof ICPPASTNamespaceDefinition) {

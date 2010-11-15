@@ -11,7 +11,6 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.ISourceRange;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
@@ -32,11 +31,11 @@ public abstract class ToggleRefactoringAbstractStrategy {
 	public ISourceRange sourceRangeToBeShown = null;
 
 	public ToggleRefactoringAbstractStrategy(
-			IASTFunctionDeclarator selectedDeclaration2,
-			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit unit) {
-		this.selectedDeclaration = selectedDeclaration2;
+			IASTFunctionDeclarator selectedDeclaration,
+			IASTFunctionDefinition selectedDefinition, IASTTranslationUnit definition_unit) {
+		this.selectedDeclaration = selectedDeclaration;
 		this.selectedDefinition = selectedDefinition;
-		this.definition_unit = unit;
+		this.definition_unit = definition_unit;
 		infoText = new TextEditGroup("Toggle function body placement");
 	}
 
@@ -55,16 +54,22 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
 		newdeclspec.setVirtual(false);
 		newdeclspec.setInline(inline);
-		IASTFunctionDeclarator funcdecl = selectedDeclaration.copy();
+		// was: declaration
+		IASTFunctionDeclarator funcdecl = selectedDefinition.getDeclarator().copy();
 
-		funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDeclaration));
+		// TODO: rethink correctness of this statement
+		if (selectedDeclaration != null)
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDeclaration));
+		else
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(selectedDefinition.getDeclarator()));
 		ToggleNodeHelper.removeParameterInitializations(funcdecl);
 
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
 				newdeclspec, funcdecl);
 
 		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
-				.getTemplateDeclaration(selectedDeclaration);
+		// was: declaration
+				.getTemplateDeclaration(selectedDefinition);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
 			templdecl.setParent(definition_unit);

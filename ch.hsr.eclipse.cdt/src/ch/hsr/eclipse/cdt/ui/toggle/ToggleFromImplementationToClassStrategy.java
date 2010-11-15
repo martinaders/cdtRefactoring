@@ -5,7 +5,6 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
@@ -31,7 +30,6 @@ public class ToggleFromImplementationToClassStrategy extends
 	private IASTTranslationUnit declaration_unit;
 	private String path;
 	private String filename;
-	private String origin_filename;
 	private ToggleRefactoringContext context;
 	private String filename_without_extension;
 
@@ -41,22 +39,19 @@ public class ToggleFromImplementationToClassStrategy extends
 		this.context = context;
 		
 		this.declaration_unit = context.getDeclarationUnit();
-		if (this.declaration_unit == null) {
+		if (this.declaration_unit == null)
 			createNewFilename(context);
-		}
 	}
 
 	private void createNewFilename(ToggleRefactoringContext context) {
-		path = context.getFile().getFullPath().toString();
+		path = context.getSelectionFile().getFullPath().toString();
 		filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
 		path = path.replaceAll("(\\w)*\\.(\\w)*", "");
 		this.filename_without_extension = filename;
-		if (context.getFile().getFileExtension().equals("h")) {
-			origin_filename = filename + ".h";
+		if (context.getSelectionFile().getFileExtension().equals("h")) {
 			filename += ".cpp";
 		}
-		if (context.getFile().getFileExtension().equals("cpp")) {
-			origin_filename = filename + ".cpp";
+		if (context.getSelectionFile().getFileExtension().equals("cpp")) {
 			filename += ".h";
 		}
 	}
@@ -105,7 +100,7 @@ public class ToggleFromImplementationToClassStrategy extends
 		CreateFileChange change;
 		try {
 			change = new CreateFileChange(filename, new
-			Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getFile().getCharset());
+			Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getSelectionFile().getCharset());
 			modifications.addFileChange(change);
 		} catch (CoreException e) {
 			e.printStackTrace();

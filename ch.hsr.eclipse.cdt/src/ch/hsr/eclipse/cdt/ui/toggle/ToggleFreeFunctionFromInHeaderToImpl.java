@@ -21,7 +21,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 
 	public ToggleFreeFunctionFromInHeaderToImpl(ToggleRefactoringContext context) throws CModelException, CoreException {
 		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
-		this.siblingfile_translation_unit = context.loadTUForSiblingFile();
+		this.siblingfile_translation_unit = context.getTUForSiblingFile();
 		this.context = context;
 	}
 
@@ -29,10 +29,10 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
-		astrewriter.replace(selectedDeclaration.getParent(), declaration, infoText);
+		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		if (siblingfile_translation_unit == null) {
-			ICProject project = CoreModel.getDefault().create(context.getFile().getLocation()).getCProject();
+			ICProject project = CoreModel.getDefault().create(context.getSelectionFile().getLocation()).getCProject();
 			
 			String nl = System.getProperty("line.separator", "\n");
 			String sep = System.getProperty("file.separator", "/");
@@ -48,7 +48,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 				if (lastSemicolon < 0)
 					lastSemicolon = 0;
 				sourceRangeToBeShown = new SourceRange(lastSemicolon, 0);
-				CreateFileChange change = new CreateFileChange(filename, new Path(path + filename), sourceText, context.getFile().getCharset());
+				CreateFileChange change = new CreateFileChange(filename, new Path(path + filename), sourceText, context.getSelectionFile().getCharset());
 				modifications.addFileChange(change);
 				shouldOpenFile = new Path(path + filename);
 			} catch (CoreException e) {

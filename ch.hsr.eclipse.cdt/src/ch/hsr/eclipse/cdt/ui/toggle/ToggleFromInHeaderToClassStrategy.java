@@ -22,6 +22,7 @@ public class ToggleFromInHeaderToClassStrategy extends
 			toremove = selectedDefinition.getParent();
 
 		rewriter.remove(toremove, infoText);
+		// TODO: use deFINItion?
 		rewriter.replace(selectedDeclaration.getParent(),
 				getInClassDefinition(selectedDefinition, selectedDeclaration, definition_unit),
 				infoText);
