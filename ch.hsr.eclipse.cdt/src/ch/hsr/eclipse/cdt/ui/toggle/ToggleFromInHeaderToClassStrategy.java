@@ -41,8 +41,8 @@ public class ToggleFromInHeaderToClassStrategy extends
 		newDeclSpec.setInline(false);
 		IASTFunctionDeclarator newDeclaration = declaration.copy();
 
-		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
-				newDeclSpec, newDeclaration);
+		ICPPASTFunctionDefinition newfunc = ToggleNodeHelper.assembleFunctionDefinitionWithBody(
+				newDeclSpec, newDeclaration, selectedDefinition);
 
 		newfunc.setParent(getParentInsertionPoint(definition, unit));
 		return newfunc;

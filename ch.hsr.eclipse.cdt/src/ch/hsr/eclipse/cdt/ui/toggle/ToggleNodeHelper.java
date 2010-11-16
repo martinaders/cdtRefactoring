@@ -9,11 +9,13 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
@@ -86,5 +88,24 @@ public class ToggleNodeHelper extends NodeHelper {
 		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
 		result.addDeclarator(declarator);
 		return result;
+	}
+
+	static ICPPASTFunctionDefinition assembleFunctionDefinitionWithBody(
+			IASTDeclSpecifier newdeclspec, IASTFunctionDeclarator funcdecl, IASTFunctionDefinition def) {
+		IASTStatement newbody = def.getBody().copy();
+		ICPPASTFunctionDefinition newfunc = null;
+		if (hasCatchHandlers(def)) {
+			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl,
+					newbody);
+			copyCatchHandlers(def, newfunc);
+		} else {
+			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl,
+					newbody);
+		}
+	
+		if (hasInitializerList(def)) {
+			copyInitializerList(newfunc, def);
+		}
+		return newfunc;
 	}	
 }

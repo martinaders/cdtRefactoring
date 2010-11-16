@@ -1,18 +1,14 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.model.ISourceRange;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.text.edits.TextEditGroup;
@@ -57,8 +53,8 @@ public abstract class ToggleRefactoringAbstractStrategy {
 					.getQualifiedName(selectedDefinition.getDeclarator()));
 		ToggleNodeHelper.removeParameterInitializations(funcdecl);
 
-		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
-				newdeclspec, funcdecl);
+		ICPPASTFunctionDefinition newfunc = ToggleNodeHelper.assembleFunctionDefinitionWithBody(
+				newdeclspec, funcdecl, selectedDefinition);
 
 		// was: declaration
 		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper
@@ -71,24 +67,5 @@ public abstract class ToggleRefactoringAbstractStrategy {
 			newfunc.setParent(definition_unit);
 			return newfunc;
 		}
-	}
-
-	protected ICPPASTFunctionDefinition assembleFunctionDefinitionWithBody(
-			IASTDeclSpecifier newdeclspec, IASTFunctionDeclarator funcdecl) {
-		IASTStatement newbody = selectedDefinition.getBody().copy();
-		ICPPASTFunctionDefinition newfunc = null;
-		if (ToggleNodeHelper.hasCatchHandlers(selectedDefinition)) {
-			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl,
-					newbody);
-			ToggleNodeHelper.copyCatchHandlers(selectedDefinition, newfunc);
-		} else {
-			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl,
-					newbody);
-		}
-
-		if (ToggleNodeHelper.hasInitializerList(selectedDefinition)) {
-			ToggleNodeHelper.copyInitializerList(newfunc, selectedDefinition);
-		}
-		return newfunc;
 	}
 }

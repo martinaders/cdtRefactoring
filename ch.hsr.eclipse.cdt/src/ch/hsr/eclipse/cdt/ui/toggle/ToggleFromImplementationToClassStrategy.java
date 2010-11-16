@@ -88,7 +88,7 @@ public class ToggleFromImplementationToClassStrategy extends
 			if (olddeclspec.isVirtual())
 				declspec.setVirtual(true);
 			function.setDeclSpecifier(declspec);
-			IASTFunctionDefinition finalfunc = assembleFunctionDefinitionWithBody(declspec, function.getDeclarator());
+			IASTFunctionDefinition finalfunc = ToggleNodeHelper.assembleFunctionDefinitionWithBody(declspec, function.getDeclarator(), selectedDefinition);
 			finalfunc.setParent(selectedDeclaration.getParent().getParent());
 			
 			headerast.replace(selectedDeclaration.getParent(), finalfunc, infoText);
