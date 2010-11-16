@@ -78,7 +78,7 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 			ASTRewrite otherrewrite = modifications
 			.rewriterForTranslationUnit(siblingfile_translation_unit);
 			otherrewrite.insertBefore(siblingfile_translation_unit.getTranslationUnit(), null,
-					getQualifiedNameDefinition(false), infoText);
+					ToggleNodeHelper.getQualifiedNameDefinition(false, selectedDefinition, selectedDeclaration, definition_unit), infoText);
 			//TODO: maybe not using qualified name because we already have it...
 		}
 	}

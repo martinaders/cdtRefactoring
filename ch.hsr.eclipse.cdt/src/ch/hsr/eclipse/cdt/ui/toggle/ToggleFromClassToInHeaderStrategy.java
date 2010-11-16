@@ -25,7 +25,7 @@ public class ToggleFromClassToInHeaderStrategy extends
 		simpledec.setParent(selectedDefinition.getParent());
 
 		rewriter.replace(selectedDefinition, simpledec, infoText);
-		rewriter.insertBefore(definition_unit, null, getQualifiedNameDefinition(true),infoText);
+		rewriter.insertBefore(definition_unit, null, ToggleNodeHelper.getQualifiedNameDefinition(true, selectedDefinition, selectedDeclaration, definition_unit),infoText);
 	}
 
 }

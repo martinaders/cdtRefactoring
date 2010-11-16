@@ -10,8 +10,10 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
@@ -107,5 +109,38 @@ public class ToggleNodeHelper extends NodeHelper {
 			copyInitializerList(newfunc, def);
 		}
 		return newfunc;
+	}
+
+	static IASTNode getQualifiedNameDefinition(boolean inline, IASTFunctionDefinition def, IASTFunctionDeclarator dec, IASTTranslationUnit definition_unit) {
+		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def
+				.getDeclSpecifier().copy();
+		newdeclspec.setVirtual(false);
+		newdeclspec.setInline(inline);
+		// was: declaration
+		IASTFunctionDeclarator funcdecl = def.getDeclarator()
+				.copy();
+	
+		// TODO: rethink correctness of this statement
+		if (dec != null)
+			funcdecl.setName(ToggleSelectionHelper
+					.getQualifiedName(dec));
+		else
+			funcdecl.setName(ToggleSelectionHelper
+					.getQualifiedName(def.getDeclarator()));
+		removeParameterInitializations(funcdecl);
+	
+		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
+				newdeclspec, funcdecl, def);
+	
+		// was: declaration
+		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration(def);
+		if (templdecl != null) {
+			templdecl.setDeclaration(newfunc);
+			templdecl.setParent(definition_unit);
+			return templdecl;
+		} else {
+			newfunc.setParent(definition_unit);
+			return newfunc;
+		}
 	}	
 }
