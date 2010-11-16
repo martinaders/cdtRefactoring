@@ -1,40 +1,20 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTNodeLocation;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
-import org.eclipse.cdt.core.index.IIndex;
-import org.eclipse.cdt.core.index.IIndexManager;
-import org.eclipse.cdt.core.model.CoreModel;
-import org.eclipse.cdt.core.model.ICElement;
-import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.core.model.IWorkingCopy;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTranslationUnit;
-import org.eclipse.cdt.ui.CUIPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.ui.editors.text.TextEditor;
-
-import ch.hsr.eclipse.cdt.Activator;
 
 /**
  * Given a selection and a translation unit, this class finds a
- * ICPPASTFunctionDeclarator if possible. Nested local functions are skipped
- * during search.
+ * ICPPASTFunctionDeclarator if possible. Special case: Nested local functions
+ * are skipped during search.
  */
 public class DeclaratorFinder {
 
@@ -59,47 +39,9 @@ public class DeclaratorFinder {
 	private IASTFunctionDeclarator findDeclaratorInSelection(
 			TextSelection selection, IASTTranslationUnit unit) {
 		IASTFunctionDeclarator result = findAffectedNode(selection, unit);
-		if (result == null) {
-//			try {
-//				ICProject[] projects= CoreModel.getDefault().getCModel().getCProjects();
-//				IIndex i = CCorePlugin.getIndexManager().getIndex(project);
-//				i.releaseReadLock();
-//			TextEditor editor = (TextEditor) CUIPlugin.getActivePage().getActiveEditor();
-//			IWorkingCopy wc = CUIPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
-//			final ICProject project = wc.getCProject();
-//			final IIndexManager im = CCorePlugin.getIndexManager();
-//				Job job = new Job("update index") {
-//
-//					@Override
-//					protected IStatus run(IProgressMonitor monitor) {
-//						System.out.println("Manually reindexing project...");
-//						try {
-//							im.update(new ICElement[] {project}, IIndexManager.UPDATE_CHECK_CONTENTS_HASH);
-//							System.out.println("update started");
-//						} catch (CoreException e) {
-//							e.printStackTrace();
-//						}
-//						return null;
-//					}
-//				};
-//				job.setPriority(Job.LONG);
-//				job.schedule();
-				
-//				System.out.println("before join");
-//				im.joinIndexer(5000, new NullProgressMonitor());
-//				System.out.println("... indexer joined");
-//				while (!im.isIndexerIdle() || im.isIndexerSetupPostponed(project)) {
-//					Thread.sleep(500);
-//				}
-//			} catch (CoreException e) {
-//				System.out.println("deep s. exception");
-//			}
-//			catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
+		if (result == null)
 			result = findAffectedNode(selection, unit);
-		}
-		
+
 		return result;
 	}
 
