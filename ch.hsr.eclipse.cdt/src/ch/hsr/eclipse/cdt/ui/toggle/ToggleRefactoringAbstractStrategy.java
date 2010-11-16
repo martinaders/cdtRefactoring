@@ -92,21 +92,7 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		return newfunc;
 	}
 
-	protected IASTFunctionDefinition getInClassDefinition(
-			IASTFunctionDefinition definition,
-			IASTFunctionDeclarator declaration, IASTTranslationUnit unit) {
-		IASTDeclSpecifier newDeclSpec = definition.getDeclSpecifier().copy();
-		newDeclSpec.setInline(false);
-		IASTFunctionDeclarator newDeclaration = declaration.copy();
-
-		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
-				newDeclSpec, newDeclaration);
-
-		newfunc.setParent(getParentInsertionPoint(definition, unit));
-		return newfunc;
-	}
-
-	private IASTNode getParentInsertionPoint(IASTNode node,
+	protected IASTNode getParentInsertionPoint(IASTNode node,
 			IASTTranslationUnit alternative) {
 		while (node.getParent() != null) {
 			node = node.getParent();
