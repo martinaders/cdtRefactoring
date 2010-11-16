@@ -12,6 +12,9 @@ import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.UIPlugin;
 
 @SuppressWarnings("restriction")
 public class ToggleFromInHeaderToImplementationStrategy extends
@@ -22,6 +25,7 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 	private String filename;
 	private ToggleRefactoringContext context;
 	private String origin_filename;
+	private boolean newfile;
 
 	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) throws CModelException, CoreException {
 		super(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
@@ -39,6 +43,8 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 				origin_filename = filename + ".cpp";
 				filename += ".h";
 			}
+			Shell shell = UIPlugin.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell();
+			newfile = MessageDialog.openQuestion(shell, "Create new implementation file?", "Create a new file named: " + filename + " and move " + context.getDeclaration().getRawSignature() + " there?");
 		}
 	}
 
@@ -52,7 +58,7 @@ public class ToggleFromInHeaderToImplementationStrategy extends
 		rewriter.remove(toremove, infoText);
 		
 		
-		if (this.siblingfile_translation_unit == null) {
+		if (this.siblingfile_translation_unit == null && newfile) {
 			IASTFunctionDefinition func = selectedDefinition.copy();
 			IASTDeclSpecifier spec = new CPPASTSimpleDeclSpecifier();
 			spec.setInline(false);
