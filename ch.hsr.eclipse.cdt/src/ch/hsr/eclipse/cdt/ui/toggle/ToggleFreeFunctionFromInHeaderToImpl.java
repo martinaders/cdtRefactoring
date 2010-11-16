@@ -28,7 +28,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
+		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(selectedDefinition);
 		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		if (siblingfile_translation_unit == null) {

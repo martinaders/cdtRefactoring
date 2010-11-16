@@ -2,16 +2,20 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.util.ArrayList;
 
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 
 @SuppressWarnings("restriction")
@@ -71,6 +75,16 @@ public class ToggleNodeHelper extends NodeHelper {
 			if (node instanceof ICPPASTConstructorChainInitializer)
 				result.add(((ICPPASTConstructorChainInitializer) node).copy());
 		}
+		return result;
+	}
+
+	static IASTSimpleDeclaration createDeclarationFromDefinition(
+			IASTFunctionDefinition sourcedefinition) {
+		IASTDeclarator declarator = sourcedefinition.getDeclarator().copy();
+		IASTDeclSpecifier specifier = sourcedefinition.getDeclSpecifier()
+				.copy();
+		IASTSimpleDeclaration result = new CPPASTSimpleDeclaration(specifier);
+		result.addDeclarator(declarator);
 		return result;
 	}	
 }
