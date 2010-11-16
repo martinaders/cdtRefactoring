@@ -60,10 +60,10 @@ class ToggleSelectionHelper extends SelectionHelper {
 		if (declarator.getName() instanceof ICPPASTQualifiedName)
 			declarator = backup;
 		IASTNode node = declarator;
-		while(node.getParent() != null) {
-			node = node.getParent();
+		while(node != null) {
 			if (node instanceof IASTCompositeTypeSpecifier)
 				return true;
+			node = node.getParent();
 		}
 		return false;
 	}
@@ -115,21 +115,23 @@ class ToggleSelectionHelper extends SelectionHelper {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		
-		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
-				IndexLocationFactory.getWorkspaceIFL(file));
+		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = getFilenameWithoutExtension(file.getFullPath().toString());
 		if (file.getFileExtension().equals("h")) {
 			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
 				if (getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
-					return getLocalTranslationUnitForFile(include.getIncludedBy().getLocation().getURI(), cProject, projectindex);
+					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(include.getIncludedBy().getLocation().getURI(), cProject);
+					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 				}
 			}
-		} else if (file.getFileExtension().equals("cpp")
-				|| file.getFileExtension().equals("c")) {
+		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("c")) {
 			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
 				if (getFilenameWithoutExtension(include.getFullName()).equals(
 						filename)) {
-					return getLocalTranslationUnitForFile(include.getIncludesLocation().getURI(), cProject, projectindex);
+					URI uri = include.getIncludesLocation().getURI();
+					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
+					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+					
 				}
 			}
 		}

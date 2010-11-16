@@ -96,14 +96,18 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() {
+	private boolean isInImplementationSituation() throws NotSupportedException {
 		IASTTranslationUnit unit = context.getDefinitionUnit();
 		IASTFileLocation location = unit.getFileLocation();
 		String filename = location.getFileName();
 		String extension = getFileExtension(filename);
 		
-		if ((extension.equals("cpp") || extension.equals("c")))
+		if ((extension.equals("cpp") || extension.equals("c"))) {
+			if (context.getDeclarationUnit() == null) {
+				throw new NotSupportedException("Not supported if no declaration is found");
+			}
 			return true;
+		}
 		return false;
 	}
 	

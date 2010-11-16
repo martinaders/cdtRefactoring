@@ -108,7 +108,7 @@ public class ToggleFromImplementationToClassStrategy extends
 		CreateFileChange change;
 		try {
 			change = new CreateFileChange(filename, new
-			Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + GetIncludeGuardEndStatementAsString(), context.getSelectionFile().getCharset());
+			Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + getIncludeGuardEndStatementAsString(), context.getSelectionFile().getCharset());
 			modifications.addFileChange(change);
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -153,9 +153,9 @@ public class ToggleFromImplementationToClassStrategy extends
 		return result;
 	}
 	
-	private String GetIncludeGuardEndStatementAsString() {
+	private String getIncludeGuardEndStatementAsString() {
 		String result = "";
-		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "\n";
+		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "*/" + "\n";
 		return result;
 	}
 	
