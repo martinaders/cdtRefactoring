@@ -91,16 +91,4 @@ public abstract class ToggleRefactoringAbstractStrategy {
 		}
 		return newfunc;
 	}
-
-	protected IASTNode getParentInsertionPoint(IASTNode node,
-			IASTTranslationUnit alternative) {
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				return (ICPPASTCompositeTypeSpecifier) node;
-			}
-		}
-		return definition_unit;
-	}
-
 }

@@ -5,6 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -33,7 +34,7 @@ public class ToggleFromInHeaderToClassStrategy extends
 				infoText);
 	}
 	
-	protected IASTFunctionDefinition getInClassDefinition(
+	private IASTFunctionDefinition getInClassDefinition(
 			IASTFunctionDefinition definition,
 			IASTFunctionDeclarator declaration, IASTTranslationUnit unit) {
 		IASTDeclSpecifier newDeclSpec = definition.getDeclSpecifier().copy();
@@ -45,5 +46,16 @@ public class ToggleFromInHeaderToClassStrategy extends
 
 		newfunc.setParent(getParentInsertionPoint(definition, unit));
 		return newfunc;
+	}
+	
+	private IASTNode getParentInsertionPoint(IASTNode node,
+			IASTTranslationUnit alternative) {
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				return (ICPPASTCompositeTypeSpecifier) node;
+			}
+		}
+		return definition_unit;
 	}
 }
