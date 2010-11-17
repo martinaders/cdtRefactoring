@@ -5,11 +5,9 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
 import org.eclipse.core.internal.jobs.JobStatus;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.window.IShellProvider;
@@ -18,7 +16,6 @@ import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
 /**
  * Responsible for scheduling a job which runs the ToggleRefactoring. Differs
@@ -36,26 +33,26 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			IUndoManager undo = RefactoringCore.getUndoManager();
+			IUndoManager undoManager = RefactoringCore.getUndoManager();
 			Change change = new NullChange();
+			Change undoChange = new NullChange();
+			boolean success = false;
 			try {
 				RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());
 				if (status.hasFatalError())
 					return JobStatus.CANCEL_STATUS;
 				change = refactoring.createChange(new NullProgressMonitor());
-				// change.getClass() => CCompositeChange
-				undo.aboutToPerformChange(change);
-				
-				change.perform(new NullProgressMonitor());
-				undo.changePerformed(change, true);
-				change.initializeValidationData(new NullProgressMonitor()); // needed?
-				undo.addUndo("toggle function body", change);
-				// TODO: try out TextFileChange.KEEP_SAVE_STATE so the refactoring can be undo'ed 
+				undoManager.aboutToPerformChange(change);
+				success = true;
+				undoChange = change.perform(new NullProgressMonitor());
+				undoChange.initializeValidationData(new NullProgressMonitor());
+				undoManager.addUndo("toggle function body", undoChange);
 				refactoring.openEditorIfNeeded();
 			} catch (Exception e) {
-				undo.changePerformed(change, false);
 				System.err.println("Failure during generation of changes:");
 				e.printStackTrace();
+			} finally {
+				undoManager.changePerformed(change, success);
 			}
 			return JobStatus.OK_STATUS;
 		}
