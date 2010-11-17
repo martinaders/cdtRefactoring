@@ -133,10 +133,13 @@ int /*$*/freeFunction/*$$*/()
 int freeFunction();
 
 //@A.cpp
+#include "A.h"
 //=
 #include "A.h"
+
 
 int freeFunction()
 {
     return 42;
 }
+

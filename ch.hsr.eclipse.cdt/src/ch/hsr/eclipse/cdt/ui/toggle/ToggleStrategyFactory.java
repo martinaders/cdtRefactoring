@@ -27,6 +27,8 @@ public class ToggleStrategyFactory {
 			if (isScopedFreeFunction())
 				throw new NotSupportedException("namespaced+templated free functions not supported yet");
 			try {
+				if (context.getTUForSiblingFile() == null)
+					throw new NotSupportedException("Cannot decide where to put the code");
 				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
 				return new ToggleFreeFunctionFromInHeaderToImpl(context);
 			} catch (Exception e) {

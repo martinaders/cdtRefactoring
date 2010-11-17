@@ -5,9 +5,9 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
 import org.eclipse.core.internal.jobs.JobStatus;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.window.IShellProvider;
@@ -40,20 +40,31 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 			Change undoChange = new NullChange();
 			boolean success = false;
 			try {
-				RefactoringStatus status = refactoring.checkAllConditions(new NullProgressMonitor());
+				RefactoringStatus status = refactoring.checkAllConditions(monitor);
 				if (status.hasFatalError())
 					return JobStatus.CANCEL_STATUS;
-				change = refactoring.createChange(new NullProgressMonitor());
+				change = refactoring.createChange(monitor);
+				System.err.print("Locking: ");
 				undoManager.aboutToPerformChange(change);
+				System.err.println("OK");
+				
+				undoChange = change.perform(monitor);
 				success = true;
-				undoChange = change.perform(new NullProgressMonitor());
-				undoChange.initializeValidationData(new NullProgressMonitor());
-				undoManager.addUndo("toggle function body", undoChange);
-			} catch (Exception e) {
+			} catch (IllegalStateException e) {
+				System.err.println("Another refactoring is still in progress, aborting.");
+			} catch (CoreException e) {
 				System.err.println("Failure during generation of changes:");
 				e.printStackTrace();
 			} finally {
-				undoManager.changePerformed(change, success);
+				System.err.print("Unlocking: ");
+				undoManager.changePerformed(change, success);					
+				if (success) {
+					undoChange.initializeValidationData(monitor);
+					// Note: addUndo MUST be called AFTER changePerformed or
+					// the change won't be unlocked correctly. (17.11.2010)
+					undoManager.addUndo("toggle function body", undoChange);
+				}
+				System.err.println(" OK");
 			}
 			return JobStatus.OK_STATUS;
 		}
