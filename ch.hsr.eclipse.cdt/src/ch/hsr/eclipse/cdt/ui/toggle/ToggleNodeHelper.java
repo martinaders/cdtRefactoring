@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTConstructorChainInitializer;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
@@ -142,5 +143,38 @@ public class ToggleNodeHelper extends NodeHelper {
 			newfunc.setParent(definition_unit);
 			return newfunc;
 		}
-	}	
+	}
+
+	static IASTNode getParentInsertionPoint(IASTNode node,
+			IASTTranslationUnit alternative) {
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTCompositeTypeSpecifier) {
+				return (ICPPASTCompositeTypeSpecifier) node;
+			}
+		}
+		return alternative;
+	}
+
+
+	static boolean isVirtual(IASTFunctionDeclarator fdec) {
+		IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
+		ICPPASTDeclSpecifier olddeclspec = (ICPPASTDeclSpecifier) dec.getDeclSpecifier();
+		return olddeclspec.isVirtual();
+	}
+
+	static IASTFunctionDefinition createInClassDefinition(
+			IASTFunctionDeclarator dec, 
+			IASTFunctionDefinition def, 
+			IASTTranslationUnit insertionunit) {
+		IASTFunctionDeclarator declarator = dec.copy();
+		ICPPASTDeclSpecifier declspec = (ICPPASTDeclSpecifier) def.getDeclSpecifier().copy();
+		declspec.setInline(false);
+		if (ToggleNodeHelper.isVirtual(dec))
+			declspec.setVirtual(true);
+		
+		IASTFunctionDefinition newdefinition = assembleFunctionDefinitionWithBody(declspec, declarator, def);
+		newdefinition.setParent(getParentInsertionPoint(def, insertionunit));
+		return newdefinition;
+	}
 }

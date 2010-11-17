@@ -27,15 +27,9 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private ToggleRefactoringContext context;
 	private String origin_filename;
 	private boolean newfile;
-	protected IASTFunctionDeclarator selectedDeclaration;
-	protected IASTFunctionDefinition selectedDefinition;
-	protected IASTTranslationUnit definition_unit;
 	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
 
 	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) throws CModelException, CoreException {
-		this.selectedDeclaration = context.getDeclaration();
-		this.selectedDefinition = context.getDefinition();
-		this.definition_unit = context.getDeclarationUnit();
 		this.context = context;
 		this.siblingfile_translation_unit = context.getTUForSiblingFile();
 		if (this.siblingfile_translation_unit == null) {
@@ -57,20 +51,20 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(definition_unit);
-		IASTNode toremove = selectedDefinition;
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		IASTNode toremove = context.getDefinition();
 		if (toremove.getParent() != null
 				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
-			toremove = selectedDefinition.getParent();
+			toremove = context.getDefinition().getParent();
 		rewriter.remove(toremove, infoText);
 		
 		
 		if (this.siblingfile_translation_unit == null && newfile) {
-			IASTFunctionDefinition func = selectedDefinition.copy();
+			IASTFunctionDefinition func = context.getDefinition().copy();
 			IASTDeclSpecifier spec = new CPPASTSimpleDeclSpecifier();
 			spec.setInline(false);
 			func.setDeclSpecifier(spec);
-			func.setParent(selectedDefinition.getParent());
+			func.setParent(context.getDefinition().getParent());
 			String declaration = func.getRawSignature();
 			declaration = declaration.replaceAll("inline ", "");
 			CreateFileChange change;
@@ -85,10 +79,8 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			ASTRewrite otherrewrite = modifications
 			.rewriterForTranslationUnit(siblingfile_translation_unit);
 			otherrewrite.insertBefore(siblingfile_translation_unit.getTranslationUnit(), null,
-					ToggleNodeHelper.getQualifiedNameDefinition(false, selectedDefinition, selectedDeclaration, definition_unit), infoText);
+					ToggleNodeHelper.getQualifiedNameDefinition(false, context.getDefinition(), context.getDeclaration(), context.getDefinitionUnit()), infoText);
 			//TODO: maybe not using qualified name because we already have it...
 		}
 	}
-	
-	
 }

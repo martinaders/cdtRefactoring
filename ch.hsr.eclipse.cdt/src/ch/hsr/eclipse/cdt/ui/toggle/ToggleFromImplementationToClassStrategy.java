@@ -1,11 +1,8 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
@@ -13,7 +10,6 @@ import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclSpecifier;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -27,91 +23,56 @@ import org.eclipse.text.edits.TextEditGroup;
 @SuppressWarnings("restriction")
 public class ToggleFromImplementationToClassStrategy implements ToggleRefactoringStrategy {
 
-	private IASTTranslationUnit declaration_unit;
-	private String path;
-	private String filename;
 	private ToggleRefactoringContext context;
 	private String filename_without_extension;
-	protected IASTFunctionDeclarator selectedDeclaration;
-	protected IASTFunctionDefinition selectedDefinition;
-	protected IASTTranslationUnit definition_unit;
 	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
 
 	public ToggleFromImplementationToClassStrategy(
 			ToggleRefactoringContext context) {
-		this.selectedDeclaration = context.getDeclaration();
-		this.selectedDefinition = context.getDefinition();
-		this.definition_unit = context.getDefinitionUnit();
 		this.context = context;
-		
-		this.declaration_unit = context.getDeclarationUnit();
-		if (this.declaration_unit == null)
-			createNewFilename(context);
 	}
 
-	private void createNewFilename(ToggleRefactoringContext context) {
-		path = context.getSelectionFile().getFullPath().toString();
-		filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
-		path = path.replaceAll("(\\w)*\\.(\\w)*", "");
-		this.filename_without_extension = filename;
-		if (context.getSelectionFile().getFileExtension().equals("h")) {
-			filename += ".cpp";
-		}
-		if (context.getSelectionFile().getFileExtension().equals("cpp")) {
-			filename += ".h";
-		}
-	}
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite implast = modifications.rewriterForTranslationUnit(definition_unit);
-		implast.remove(selectedDefinition, infoText);
+		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		implast.remove(context.getDefinition(), infoText);
 		
-		if (this.declaration_unit == null) {
+		if (context.getDeclarationUnit() != null) {
+			ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+			
+			IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
+			
+			headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+//			headerast.remove(selectedDeclaration.getParent(), infoText);			
+//			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
+		} else {
+			IASTTranslationUnit other_unit = null;
 			try {
-				declaration_unit = ToggleSelectionHelper.getSiblingFile(context.getSelectionFile(), definition_unit);
-				IASTFunctionDefinition function = selectedDefinition.copy();
-				ASTRewrite classast = modifications.rewriterForTranslationUnit(declaration_unit);
-				classast.insertBefore(declaration_unit, null, function, infoText);
+				other_unit = ToggleSelectionHelper.getSiblingFile(context.getSelectionFile(), context.getDefinitionUnit());
+				IASTFunctionDefinition function = context.getDefinition().copy();
+				ASTRewrite classast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+				classast.insertBefore(other_unit, null, function, infoText);
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
-			if (declaration_unit == null)
+			if (context.getDeclarationUnit() == null)
 				writeNewFile(modifications);
-		} else {
-			ASTRewrite headerast = modifications
-			.rewriterForTranslationUnit(declaration_unit);
-			
-			IASTFunctionDefinition function = new CPPASTFunctionDefinition();
-			function.setBody(selectedDefinition.getBody().copy());
-			
-			IASTFunctionDeclarator declarator = selectedDeclaration.copy();
-			declarator.setParent(function);
-			function.setDeclarator(declarator);
-			ICPPASTSimpleDeclSpecifier declspec = (ICPPASTSimpleDeclSpecifier) selectedDefinition.getDeclSpecifier().copy();
-			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) selectedDeclaration.getParent();
-			ICPPASTSimpleDeclSpecifier olddeclspec = (ICPPASTSimpleDeclSpecifier) dec.getDeclSpecifier();
-			if (olddeclspec.isVirtual())
-				declspec.setVirtual(true);
-			function.setDeclSpecifier(declspec);
-			IASTFunctionDefinition finalfunc = ToggleNodeHelper.assembleFunctionDefinitionWithBody(declspec, function.getDeclarator(), selectedDefinition);
-			finalfunc.setParent(selectedDeclaration.getParent().getParent());
-			
-			headerast.replace(selectedDeclaration.getParent(), finalfunc, infoText);
-//			headerast.remove(selectedDeclaration.getParent(), infoText);			
-//			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
 		}
 	}
 
+
 	private void writeNewFile(ModificationCollector modifications) {
-		IASTFunctionDefinition func = selectedDefinition.copy();
+		IASTFunctionDefinition func = context.getDefinition().copy();
 		IASTDeclSpecifier spec = new CPPASTSimpleDeclSpecifier();
 		spec.setInline(false);
 		func.setDeclSpecifier(spec);
-		func.setParent(selectedDefinition.getParent());
+		func.setParent(context.getDefinition().getParent());
 		String declaration = func.getRawSignature();
 		declaration = declaration.replaceAll("inline ", "");
 		CreateFileChange change;
+		String path = context.getSelectionFile().getFullPath().toString();
+		String filename = generateNewFilename(path);
 		try {
 			change = new CreateFileChange(filename, new
 			Path(path+filename), getIncludeGuardStatementAsString() + "\n" + getClassStart(func.getDeclarator().getRawSignature()) + "\n\t" + getPureDeclaration(declaration) + "\n" + "};" + "\n\n" + getIncludeGuardEndStatementAsString(), context.getSelectionFile().getCharset());
@@ -119,11 +80,24 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		//insertIncludeStatement();			
+		//insertIncludeStatement(filename);			
 	}
 
-	private void insertIncludeStatement() {
-		Path p = new Path(definition_unit.getFileLocation().getFileName());
+	private String generateNewFilename(String path) {
+		String filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
+		path = path.replaceAll("(\\w)*\\.(\\w)*", "");
+		this.filename_without_extension = filename;
+		if (context.getSelectionFile().getFileExtension().equals("h")) {
+			return filename += ".cpp";
+		}
+		if (context.getSelectionFile().getFileExtension().equals("cpp")) {
+			return filename += ".h";
+		}
+		return null;
+	}
+
+	private void insertIncludeStatement(String filename) {
+		Path p = new Path(context.getDefinitionUnit().getFileLocation().getFileName());
 		ICElement e = CoreModel.getDefault().create(p);
 		ICProject cProject = e.getCProject();
 		ITranslationUnit tu;
@@ -164,5 +138,4 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "*/" + "\n";
 		return result;
 	}
-	
 }
