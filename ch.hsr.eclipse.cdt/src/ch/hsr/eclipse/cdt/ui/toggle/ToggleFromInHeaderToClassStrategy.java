@@ -10,13 +10,20 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromInHeaderToClassStrategy extends
-		ToggleRefactoringAbstractStrategy {
+public class ToggleFromInHeaderToClassStrategy implements ToggleRefactoringStrategy {
+
+	protected IASTFunctionDeclarator selectedDeclaration;
+	protected IASTFunctionDefinition selectedDefinition;
+	protected IASTTranslationUnit definition_unit;
+	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
 
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
-		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
+		this.selectedDeclaration = context.getDeclaration();
+		this.selectedDefinition = context.getDefinition();
+		this.definition_unit = context.getDefinitionUnit();
 	}
 
 	@Override

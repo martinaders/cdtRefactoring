@@ -18,7 +18,6 @@ import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
 import org.eclipse.cdt.core.index.IndexLocationFactory;
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
@@ -142,11 +141,5 @@ class ToggleSelectionHelper extends SelectionHelper {
 		filename = filename.replaceAll("\\.(.)*$", "");
 		filename = filename.replaceAll("(.)*\\/", "");
 		return filename;
-	}
-
-	private static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri, ICProject project, IIndex index)
-			throws CModelException, CoreException {
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(fileUri, project);
-		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
 }

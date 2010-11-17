@@ -22,20 +22,26 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromImplementationToClassStrategy extends
-		ToggleRefactoringAbstractStrategy {
+public class ToggleFromImplementationToClassStrategy implements ToggleRefactoringStrategy {
 
 	private IASTTranslationUnit declaration_unit;
 	private String path;
 	private String filename;
 	private ToggleRefactoringContext context;
 	private String filename_without_extension;
+	protected IASTFunctionDeclarator selectedDeclaration;
+	protected IASTFunctionDefinition selectedDefinition;
+	protected IASTTranslationUnit definition_unit;
+	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
 
 	public ToggleFromImplementationToClassStrategy(
 			ToggleRefactoringContext context) {
-		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
+		this.selectedDeclaration = context.getDeclaration();
+		this.selectedDefinition = context.getDefinition();
+		this.definition_unit = context.getDefinitionUnit();
 		this.context = context;
 		
 		this.declaration_unit = context.getDeclarationUnit();

@@ -78,7 +78,7 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 				return;
 			Change change = refactoring.createChange(new NullProgressMonitor());
 			change.perform(new NullProgressMonitor());
-			refactoring.openEditorIfNeeded();
+			//refactoring.openEditorIfNeeded();
 		} catch (Exception e) {
 			System.err.println("Failure during generation of changes." + e.getMessage() + e.getClass() + "\n");
 			e.printStackTrace();

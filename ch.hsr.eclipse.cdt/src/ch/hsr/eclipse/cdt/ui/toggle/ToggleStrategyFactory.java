@@ -14,7 +14,7 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringAbstractStrategy getAppropriateStategy() throws NotSupportedException {
+	public ToggleRefactoringStrategy getAppropriateStategy() throws NotSupportedException {
 		assert(context.getDefinition() != null);
 		if (isInImplementationSituation()) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
