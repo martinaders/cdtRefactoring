@@ -156,13 +156,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return alternative;
 	}
 
-
-	static boolean isVirtual(IASTFunctionDeclarator fdec) {
-		IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
-		ICPPASTDeclSpecifier olddeclspec = (ICPPASTDeclSpecifier) dec.getDeclSpecifier();
-		return olddeclspec.isVirtual();
-	}
-
 	static IASTFunctionDefinition createInClassDefinition(
 			IASTFunctionDeclarator dec, 
 			IASTFunctionDefinition def, 
@@ -176,5 +169,19 @@ public class ToggleNodeHelper extends NodeHelper {
 		IASTFunctionDefinition newdefinition = assembleFunctionDefinitionWithBody(declspec, declarator, def);
 		newdefinition.setParent(getParentInsertionPoint(def, insertionunit));
 		return newdefinition;
+	}
+	
+	static boolean isVirtual(IASTFunctionDeclarator fdec) {
+		IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
+		ICPPASTDeclSpecifier olddeclspec = (ICPPASTDeclSpecifier) dec.getDeclSpecifier();
+		return olddeclspec.isVirtual();
+	}
+
+	static IASTNode getParentRemovePoint(IASTFunctionDefinition definition) {
+		IASTNode toremove = definition;
+		if (toremove.getParent() != null
+				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
+			toremove = definition.getParent();
+		return toremove;
 	}
 }

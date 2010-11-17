@@ -25,11 +25,12 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 
 	private ToggleRefactoringContext context;
 	private String filename_without_extension;
-	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
+	protected TextEditGroup infoText;
 
 	public ToggleFromImplementationToClassStrategy(
 			ToggleRefactoringContext context) {
 		this.context = context;
+		this.infoText = new TextEditGroup("Toggle function body placement");
 	}
 
 
@@ -40,12 +41,10 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 		
 		if (context.getDeclarationUnit() != null) {
 			ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-			
 			IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-			
 			headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
-//			headerast.remove(selectedDeclaration.getParent(), infoText);			
-//			headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
+			//headerast.remove(selectedDeclaration.getParent(), infoText);			
+			//headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
 		} else {
 			IASTTranslationUnit other_unit = null;
 			try {
@@ -60,7 +59,6 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 				writeNewFile(modifications);
 		}
 	}
-
 
 	private void writeNewFile(ModificationCollector modifications) {
 		IASTFunctionDefinition func = context.getDefinition().copy();

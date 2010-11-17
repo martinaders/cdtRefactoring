@@ -1,9 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
@@ -36,7 +34,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		rewriter.remove(getParentRemovePoint(), infoText);
+		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
 		
 		IASTFunctionDefinition newImpldef = copyDefinitionFromInHeader();
 		if (this.siblingtu != null) {
@@ -62,14 +60,6 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 				context.getSelectionFile().getFullPath().toString()) + ".cpp";
 	}
 	
-	private IASTNode getParentRemovePoint() {
-		IASTNode toremove = context.getDefinition();
-		if (toremove.getParent() != null
-				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
-			toremove = context.getDefinition().getParent();
-		return toremove;
-	}
-
 	private IASTFunctionDefinition copyDefinitionFromInHeader() {
 		IASTFunctionDefinition newImpldef = context.getDefinition().copy();
 		newImpldef.getDeclSpecifier().setInline(false);
