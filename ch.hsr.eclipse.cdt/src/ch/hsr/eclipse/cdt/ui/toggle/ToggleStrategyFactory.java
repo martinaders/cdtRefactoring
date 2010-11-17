@@ -51,7 +51,7 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isFreeFunction() {
-		return !ToggleSelectionHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
+		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
 
 	private boolean isAllInHeader() {

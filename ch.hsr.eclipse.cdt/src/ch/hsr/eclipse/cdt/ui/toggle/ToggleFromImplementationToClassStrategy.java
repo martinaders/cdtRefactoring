@@ -48,7 +48,7 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 		} else {
 			IASTTranslationUnit other_unit = null;
 			try {
-				other_unit = ToggleSelectionHelper.getSiblingFile(context.getSelectionFile(), context.getDefinitionUnit());
+				other_unit = ToggleNodeHelper.getSiblingFile(context.getSelectionFile(), context.getDefinitionUnit());
 				IASTFunctionDefinition function = context.getDefinition().copy();
 				ASTRewrite classast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
 				classast.insertBefore(other_unit, null, function, infoText);
@@ -82,7 +82,7 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 	}
 
 	private String generateNewFilename(String path) {
-		String filename = ToggleSelectionHelper.getFilenameWithoutExtension(path);
+		String filename = ToggleNodeHelper.getFilenameWithoutExtension(path);
 		path = path.replaceAll("(\\w)*\\.(\\w)*", "");
 		this.filename_without_extension = filename;
 		if (context.getSelectionFile().getFileExtension().equals("h")) {

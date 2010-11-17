@@ -163,7 +163,7 @@ public class ToggleRefactoringContext {
 		IASTTranslationUnit unit = getDeclarationUnit();
 		if (unit == null)
 			unit = getDefinitionUnit();
-		return ToggleSelectionHelper.getSiblingFile(getSelectionFile(),
+		return ToggleNodeHelper.getSiblingFile(getSelectionFile(),
 				unit);
 	}
 

@@ -56,7 +56,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	}
 	
 	private String getNewFileName() {
-		return ToggleSelectionHelper.getFilenameWithoutExtension(
+		return ToggleNodeHelper.getFilenameWithoutExtension(
 				context.getSelectionFile().getFullPath().toString()) + ".cpp";
 	}
 	
@@ -67,7 +67,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	}
 
 	private String getNewFileContent(String definition) {
-		String originfile = ToggleSelectionHelper.getFilenameWithoutExtension(
+		String originfile = ToggleNodeHelper.getFilenameWithoutExtension(
 				context.getSelectionFile().getFullPath().toString()) + ".h";
 		return "#include " + "\"" + originfile + "\"\n\n" + definition;
 	}
