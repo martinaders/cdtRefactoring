@@ -55,17 +55,6 @@ public class ToggleRefactoringContext {
 		System.out.print("complete\n\nStrategy: ");
 	}
 
-	private void findSelectionUnit() throws NotSupportedException {
-		try {
-			selectionUnit = TranslationUnitHelper.loadTranslationUnit(
-					selectionFile, true);
-		} catch (Exception e) {
-		}
-		if (selectionUnit == null)
-			throw new NotSupportedException(
-					"not able to work without translation unit");
-	}
-
 	public void findSelectedFunctionDeclarator(TextSelection selection)
 			throws NotSupportedException {
 		selectionName = new DeclaratorFinder(selection, selectionUnit)
@@ -165,6 +154,17 @@ public class ToggleRefactoringContext {
 			unit = getDefinitionUnit();
 		return ToggleNodeHelper.getSiblingFile(getSelectionFile(),
 				unit);
+	}
+	
+	private void findSelectionUnit() throws NotSupportedException {
+		try {
+			selectionUnit = TranslationUnitHelper.loadTranslationUnit(
+					selectionFile, true);
+		} catch (Exception e) {
+		}
+		if (selectionUnit == null)
+			throw new NotSupportedException(
+					"not able to work without translation unit");
 	}
 
 	private IASTTranslationUnit getTUForNameinFile(IIndexName iname)
