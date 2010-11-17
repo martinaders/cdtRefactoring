@@ -62,15 +62,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return false;
 	}
 
-	static ICPPASTTemplateDeclaration getTemplateDeclaration(IASTNode node) {
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTTemplateDeclaration)
-				return (ICPPASTTemplateDeclaration) node.copy();
-		}
-		return null;
-	}
-
 	static ArrayList<ICPPASTConstructorChainInitializer> getAllInitializerList(
 			IASTFunctionDefinition definition) {
 		ArrayList<ICPPASTConstructorChainInitializer> result = 
@@ -112,26 +103,26 @@ public class ToggleNodeHelper extends NodeHelper {
 		return newfunc;
 	}
 
-	static IASTNode getQualifiedNameDefinition(boolean inline, IASTFunctionDefinition def, IASTFunctionDeclarator dec, IASTTranslationUnit definition_unit) {
-		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def
-				.getDeclSpecifier().copy();
+	static IASTNode getQualifiedNameDefinition(
+			boolean inline, 
+			IASTFunctionDefinition def, 
+			IASTFunctionDeclarator dec, 
+			IASTTranslationUnit definition_unit) {
+		
+		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def.getDeclSpecifier().copy();
 		newdeclspec.setVirtual(false);
 		newdeclspec.setInline(inline);
 		// was: declaration
-		IASTFunctionDeclarator funcdecl = def.getDeclarator()
-				.copy();
+		IASTFunctionDeclarator funcdecl = def.getDeclarator().copy();
 	
 		// TODO: rethink correctness of this statement
 		if (dec != null)
-			funcdecl.setName(ToggleSelectionHelper
-					.getQualifiedName(dec));
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(dec));
 		else
-			funcdecl.setName(ToggleSelectionHelper
-					.getQualifiedName(def.getDeclarator()));
+			funcdecl.setName(ToggleSelectionHelper.getQualifiedName(def.getDeclarator()));
+		
 		removeParameterInitializations(funcdecl);
-	
-		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(
-				newdeclspec, funcdecl, def);
+		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(newdeclspec, funcdecl, def);
 	
 		// was: declaration
 		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration(def);
@@ -143,6 +134,15 @@ public class ToggleNodeHelper extends NodeHelper {
 			newfunc.setParent(definition_unit);
 			return newfunc;
 		}
+	}
+
+	static ICPPASTTemplateDeclaration getTemplateDeclaration(IASTNode node) {
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTTemplateDeclaration)
+				return (ICPPASTTemplateDeclaration) node.copy();
+		}
+		return null;
 	}
 
 	static IASTNode getParentInsertionPoint(IASTNode node,
