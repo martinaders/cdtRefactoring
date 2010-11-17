@@ -5,6 +5,7 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.core.runtime.Path;
 
 public class ToggleStrategyFactory {
 	
@@ -55,7 +56,8 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isAllInHeader() {
-		return getFileExtension(context.getDefinition().getFileLocation().getFileName()).equals("h");
+		Path p = new Path(context.getDefinition().getContainingFilename());
+		return p.getFileExtension().equals("h");
 	}
 
 	private boolean isinHeaderSituation() {
@@ -64,11 +66,12 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isInSamFile() {
-		return context.getDefinition().getFileLocation().getFileName().equals(context.getDefinition().getFileLocation().getFileName());
+		return context.getDefinition().getFileLocation().getFileName().equals(context.getDeclaration().getFileLocation().getFileName());
 	}
 
 	private boolean isInHeaderFile() {
-		return context.getDefinition().getFileLocation().getFileName().endsWith(".h") || context.getDefinition().getFileLocation().getFileName().endsWith(".hpp");
+		Path p = new Path(context.getDefinition().getContainingFilename());
+		return p.getFileExtension().equals(".h") || p.getFileExtension().equals(".hpp");
 	}
 
 	// special: Don't support decl AND def inside the class definition
@@ -97,21 +100,13 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isInImplementationSituation() throws NotSupportedException {
-		IASTTranslationUnit unit = context.getDefinitionUnit();
-		IASTFileLocation location = unit.getFileLocation();
-		String filename = location.getFileName();
-		String extension = getFileExtension(filename);
-		
-		if ((extension.equals("cpp") || extension.equals("c"))) {
+		Path p = new Path(context.getDefinition().getContainingFilename());
+		if ((p.getFileExtension().equals("cpp") || p.getFileExtension().equals("c"))) {
 			if (context.getDeclarationUnit() == null) {
 				throw new NotSupportedException("Not supported if no declaration is found");
 			}
 			return true;
 		}
 		return false;
-	}
-	
-	private String getFileExtension(String fileName) {
-		return fileName.replaceAll("(.)*\\.", "");
 	}
 }
