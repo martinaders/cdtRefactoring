@@ -28,7 +28,10 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		simpledec.setParent(fcontext.getDefinition().getParent());
 
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		rewriter.insertBefore(fcontext.getDefinitionUnit(), null, ToggleNodeHelper.getQualifiedNameDefinition(true, fcontext.getDefinition(), fcontext.getDeclaration(), fcontext.getDefinitionUnit()),infoText);
+		rewriter.insertBefore(fcontext.getDefinitionUnit(), null, 
+				ToggleNodeHelper.getQualifiedNameDefinition(true, 
+						fcontext.getDefinition(), fcontext.getDeclaration(), 
+						fcontext.getDefinitionUnit()),infoText);
 	}
 
 }
