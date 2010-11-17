@@ -49,12 +49,9 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				change = refactoring.createChange(monitor);
 				change.initializeValidationData(monitor);
 				if (!change.isValid(monitor).isOK()) {
-					System.err.println("Nah, not valid :-(");
 					return JobStatus.CANCEL_STATUS;
 				}
-				System.err.print("Locking: ");
 				undoManager.aboutToPerformChange(change);
-				System.err.println("OK");
 				
 				undoChange = change.perform(monitor);
 				success = true;
@@ -64,10 +61,8 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 			} catch (IllegalStateException e) {
 				System.err.println("Another refactoring is still in progress, aborting.");
 			} catch (CoreException e) {
-				System.err.println("Failure during generation of changes:");
-				e.printStackTrace();
+				System.err.println("Failure during generation of changes. Toggled too fast?");
 			} finally {
-				System.err.print("Unlocking: ");
 				undoChange.initializeValidationData(monitor);
 				undoManager.changePerformed(change, success);					
 				try {
@@ -79,7 +74,6 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				} catch (OperationCanceledException e) {
 					e.printStackTrace();
 				}
-				System.err.println(" OK");
 			}
 			return JobStatus.OK_STATUS;
 		}

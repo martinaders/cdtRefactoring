@@ -220,7 +220,6 @@ public class ToggleRefactoringContext {
 					CPPASTFunctionDefinition func = (CPPASTFunctionDefinition) declaration;
 					IASTName name = func.getDeclarator().getName();
 					if (name.equals(element_name2)) {
-						System.out.println("got it");
 						container.setObject(func);
 						return PROCESS_ABORT;
 					}
@@ -247,7 +246,6 @@ public class ToggleRefactoringContext {
 					IASTName name = decl.getName();
 
 					if (name.equals(element_name2)) {
-						System.out.println("got it");
 						container.setObject(decl);
 						return PROCESS_ABORT;
 					}
