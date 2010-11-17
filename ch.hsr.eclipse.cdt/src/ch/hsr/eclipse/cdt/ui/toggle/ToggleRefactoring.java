@@ -4,10 +4,8 @@ import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.pdom.indexer.IndexerPreferences;
-import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.cdt.internal.ui.util.EditorUtility;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -17,7 +15,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 
 /**
@@ -29,7 +26,7 @@ import org.eclipse.ui.ide.IDE;
 public class ToggleRefactoring extends CRefactoring {
 
 	private TextSelection selection;
-	private ToggleRefactoringAbstractStrategy strategy;
+	private ToggleRefactoringStrategy strategy;
 	private ToggleRefactoringContext context;
 	
 	public ToggleRefactoring(IFile file, TextSelection selection, ICProject proj) {
@@ -72,20 +69,5 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
 		return new EmptyRefactoringDescription();
-	}
-
-	/**
-	 * Some strategies create a new file which should be shown to the user. The
-	 * TogglingActionDelegate invokes this method after having applied the
-	 * collected changes and the new file has been created.
-	 */
-	public void openEditorIfNeeded() {
-		if (strategy.shouldOpenFile == null)
-			return;
-		try {
-			CEditor editor = (CEditor) EditorUtility.openInEditor(strategy.shouldOpenFile, null);
-			editor.setSelection(strategy.sourceRangeToBeShown, true);
-		} catch (PartInitException e) {
-		}
 	}
 }

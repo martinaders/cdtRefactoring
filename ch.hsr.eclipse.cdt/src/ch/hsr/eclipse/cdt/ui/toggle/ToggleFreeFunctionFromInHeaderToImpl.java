@@ -1,5 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -7,20 +8,27 @@ import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.model.ext.SourceRange;
+import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
+import org.eclipse.cdt.internal.ui.util.EditorUtility;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFreeFunctionFromInHeaderToImpl extends
-		ToggleRefactoringAbstractStrategy {
+public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringStrategy {
 
 	private IASTTranslationUnit siblingfile_translation_unit;
 	private final ToggleRefactoringContext context;
+	private IASTFunctionDefinition selectedDefinition;
+	private IASTTranslationUnit definition_unit;
+	private TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
+
 
 	public ToggleFreeFunctionFromInHeaderToImpl(ToggleRefactoringContext context) throws CModelException, CoreException {
-		super(context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
+		this.selectedDefinition = context.getDefinition();
+		this.definition_unit = context.getDefinitionUnit();
 		this.siblingfile_translation_unit = context.getTUForSiblingFile();
 		this.context = context;
 	}
@@ -28,7 +36,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
-		IASTSimpleDeclaration declaration = createDeclarationFromDefinition(selectedDefinition);
+		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(selectedDefinition);
 		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		if (siblingfile_translation_unit == null) {
@@ -47,10 +55,11 @@ public class ToggleFreeFunctionFromInHeaderToImpl extends
 					lastSemicolon = sourceText.lastIndexOf('{') + 1;
 				if (lastSemicolon < 0)
 					lastSemicolon = 0;
-				sourceRangeToBeShown = new SourceRange(lastSemicolon, 0);
 				CreateFileChange change = new CreateFileChange(filename, new Path(path + filename), sourceText, context.getSelectionFile().getCharset());
 				modifications.addFileChange(change);
-				shouldOpenFile = new Path(path + filename);
+				
+				CEditor editor = (CEditor) EditorUtility.openInEditor(new Path(path + filename), null);
+				editor.setSelection(new SourceRange(lastSemicolon, 0), true);
 			} catch (CoreException e) {
 			}
 		} else {

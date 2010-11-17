@@ -24,6 +24,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */
 @SuppressWarnings("restriction")
 public class ToggleRefactoringRunner extends RefactoringRunner {
+	
+	private ToggleRefactoring refactoring;
 
 	private final class RefactoringJob extends Job {
 		private RefactoringJob() {
@@ -47,7 +49,6 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				undoChange = change.perform(new NullProgressMonitor());
 				undoChange.initializeValidationData(new NullProgressMonitor());
 				undoManager.addUndo("toggle function body", undoChange);
-				refactoring.openEditorIfNeeded();
 			} catch (Exception e) {
 				System.err.println("Failure during generation of changes:");
 				e.printStackTrace();
@@ -57,8 +58,6 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 			return JobStatus.OK_STATUS;
 		}
 	}
-
-	private ToggleRefactoring refactoring;
 
 	public ToggleRefactoringRunner(IFile file, TextSelection selection,
 			ICElement element, IShellProvider shellProvider, ICProject project) {

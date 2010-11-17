@@ -1,6 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
@@ -14,11 +13,13 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringAbstractStrategy getAppropriateStategy() throws NotSupportedException {
+	public ToggleRefactoringStrategy getAppropriateStategy() throws NotSupportedException {
 		assert(context.getDefinition() != null);
 		if (isInImplementationSituation()) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
-			if (context.getDeclarationUnit() == context.getDefinitionUnit())
+			if (context.getDeclarationUnit() == null
+					|| context.getDeclarationUnit() == context
+							.getDefinitionUnit())
 				throw new NotSupportedException("Definition+declaration both in a cpp file -> not clear where to move the function body.");
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
@@ -104,15 +105,12 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() {
+	private boolean isInImplementationSituation() throws NotSupportedException {
 		IASTTranslationUnit unit = context.getDefinitionUnit();
-		IASTFileLocation location = unit.getFileLocation();
-		String filename = location.getFileName();
+		String filename = unit.getFileLocation().getFileName();
 		String extension = getFileExtension(filename);
 		
-		if ((extension.equals("cpp") || extension.equals("c") || extension.equals("cxx")))
-			return true;
-		return false;
+		return ((extension.equals("cpp") || extension.equals("c")) || extension.equals("cxx"));
 	}
 	
 	private String getFileExtension(String fileName) {

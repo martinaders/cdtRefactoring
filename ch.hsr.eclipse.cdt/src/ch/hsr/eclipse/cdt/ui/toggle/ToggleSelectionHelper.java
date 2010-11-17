@@ -18,7 +18,6 @@ import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
 import org.eclipse.cdt.core.index.IndexLocationFactory;
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
@@ -130,14 +129,14 @@ class ToggleSelectionHelper extends SelectionHelper {
 		ICProject cProject = CoreModel.getDefault().create(file).getCProject();
 		IIndex projectindex = CCorePlugin.getIndexManager().getIndex(cProject);
 		
-		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),
-				IndexLocationFactory.getWorkspaceIFL(file));
+		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = getFilenameWithoutExtension(file.getFullPath().toString());
 		if (file.getFileExtension().equals("h")
 				|| file.getFileExtension().equals("hpp")) {
 			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
 				if (getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
-					return getLocalTranslationUnitForFile(include.getIncludedBy().getLocation().getURI(), cProject, projectindex);
+					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(include.getIncludedBy().getLocation().getURI(), cProject);
+					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 				}
 			}
 		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("cxx")
@@ -145,7 +144,10 @@ class ToggleSelectionHelper extends SelectionHelper {
 			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
 				if (getFilenameWithoutExtension(include.getFullName()).equals(
 						filename)) {
-					return getLocalTranslationUnitForFile(include.getIncludesLocation().getURI(), cProject, projectindex);
+					URI uri = include.getIncludesLocation().getURI();
+					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
+					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+					
 				}
 			}
 		}
@@ -156,11 +158,5 @@ class ToggleSelectionHelper extends SelectionHelper {
 		filename = filename.replaceAll("\\.(.)*$", "");
 		filename = filename.replaceAll("(.)*\\/", "");
 		return filename;
-	}
-
-	private static IASTTranslationUnit getLocalTranslationUnitForFile(URI fileUri, ICProject project, IIndex index)
-			throws CModelException, CoreException {
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(fileUri, project);
-		return tu.getAST(index, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
 }
