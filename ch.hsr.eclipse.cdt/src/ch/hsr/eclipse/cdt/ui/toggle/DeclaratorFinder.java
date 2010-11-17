@@ -13,8 +13,8 @@ import org.eclipse.jface.text.TextSelection;
 
 /**
  * Given a selection and a translation unit, this class finds a
- * ICPPASTFunctionDeclarator if possible. Nested local functions are skipped
- * during search.
+ * ICPPASTFunctionDeclarator if possible. Special case: Nested local functions
+ * are skipped during search.
  */
 public class DeclaratorFinder {
 
@@ -38,6 +38,15 @@ public class DeclaratorFinder {
 
 	private IASTFunctionDeclarator findDeclaratorInSelection(
 			TextSelection selection, IASTTranslationUnit unit) {
+		IASTFunctionDeclarator result = findAffectedNode(selection, unit);
+		if (result == null)
+			result = findAffectedNode(selection, unit);
+
+		return result;
+	}
+
+	private IASTFunctionDeclarator findAffectedNode(TextSelection selection,
+			IASTTranslationUnit unit) {
 		IASTNode firstNodeInsideSelection = unit.getNodeSelector(null)
 				.findFirstContainedNode(selection.getOffset(),
 						selection.getLength());

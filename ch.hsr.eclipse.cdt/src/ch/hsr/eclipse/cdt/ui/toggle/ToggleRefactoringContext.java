@@ -1,5 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -7,7 +8,6 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
@@ -209,7 +209,7 @@ public class ToggleRefactoringContext {
 			final IASTName element_name2) {
 		System.err.println("fallback with visitor for definition");
 		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
-		selectionUnit.accept(new CPPASTVisitor(true) {
+		selectionUnit.accept(new ASTVisitor(true) {
 			{
 				shouldVisitDeclarations = true;
 			}
@@ -235,7 +235,7 @@ public class ToggleRefactoringContext {
 			final IASTName element_name2) {
 		System.err.println("fallback with vistitor for declaration");
 		final Container<IASTFunctionDeclarator> container = new Container<IASTFunctionDeclarator>();
-		selectionUnit.accept(new CPPASTVisitor(true) {
+		selectionUnit.accept(new ASTVisitor(true) {
 			{
 				shouldVisitDeclarations = true;
 			}
