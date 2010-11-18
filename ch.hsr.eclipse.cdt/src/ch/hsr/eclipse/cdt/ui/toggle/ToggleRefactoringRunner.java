@@ -26,12 +26,18 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 @SuppressWarnings("restriction")
 public class ToggleRefactoringRunner extends RefactoringRunner {
 	
+	private static final Object FAMILY_TOGGLE_BODY = new Object();
 	private ToggleRefactoring refactoring;
 
 	private final class RefactoringJob extends Job {
 		private RefactoringJob() {
 			super("'toggle body position' code automation");
 			setPriority(Job.SHORT);
+		}
+		
+		@Override
+		public boolean belongsTo(Object family) {
+			return family == FAMILY_TOGGLE_BODY;
 		}
 
 		@Override
@@ -60,9 +66,10 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				undoChange.initializeValidationData(monitor);
 				undoManager.changePerformed(change, success);					
 				try {
-					if (success && undoChange.getAffectedObjects().length == 0) {
+					if (success && undoChange != null) {
 						// Note: addUndo MUST be called AFTER changePerformed or
 						// the change won't be unlocked correctly. (17.11.2010)
+						System.out.println("add undo");
 						undoManager.addUndo("toggle function body", undoChange);
 					}
 				} catch (OperationCanceledException e) {
@@ -81,6 +88,9 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 
 	@Override
 	public void run() {
+		Job[] jobs = Job.getJobManager().find(FAMILY_TOGGLE_BODY);
+		if (jobs.length > 0)
+			System.err.println("Another Toggling-Job still in progress, aborting.");
 		new RefactoringJob().schedule();
 	}
 }
