@@ -35,12 +35,4 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 						fcontext.getDefinition(), fcontext.getDeclaration(), 
 						fcontext.getDefinitionUnit()),infoText);
 	}
-
-	@Override
-	public ArrayList<String> getAffectedFiles() {
-		ArrayList<String> result = new ArrayList<String>();
-		result.add(fcontext.getDefinitionUnit().getContainingFilename());
-		return result;
-	}
-
 }

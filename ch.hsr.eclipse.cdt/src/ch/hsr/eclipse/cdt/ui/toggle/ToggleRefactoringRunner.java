@@ -1,14 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
-import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.index.IIndexManager;
-import org.eclipse.cdt.core.model.CModelException;
-import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
 import org.eclipse.core.internal.jobs.JobStatus;
 import org.eclipse.core.resources.IFile;
@@ -16,7 +9,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.window.IShellProvider;
@@ -65,8 +57,6 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				}
 				undoManager.aboutToPerformChange(change);
 				undoChange = change.perform(monitor);
-				IIndexManager manager = CCorePlugin.getIndexManager();
-				manager.update(getaffectedUnits(), IIndexManager.UPDATE_ALL);
 				success = true;
 			} catch (IllegalStateException e) {
 				System.err.println("Another refactoring is still in progress, aborting.");
@@ -87,26 +77,6 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				}
 			}
 			return JobStatus.OK_STATUS;
-		}
-
-		private ICElement[] getaffectedUnits() {
-			ArrayList<String> affected_files = refactoring.getaffectedfiles();
-			ArrayList<ITranslationUnit> result = new ArrayList<ITranslationUnit>();
-			for(String filename: affected_files) {
-				Path p = new Path(filename);
-				ITranslationUnit unit;
-				try {
-					unit = CoreModelUtil.findTranslationUnitForLocation(p, project);
-					result.add(unit);
-				} catch (CModelException e) {
-					e.printStackTrace();
-				}
-			}
-			ICElement[] elements = new ICElement[affected_files.size()];
-			for(int i = 0; i < affected_files.size(); i++) {
-				elements[i] = result.get(i);
-			}
-			return elements;
 		}
 	}
 

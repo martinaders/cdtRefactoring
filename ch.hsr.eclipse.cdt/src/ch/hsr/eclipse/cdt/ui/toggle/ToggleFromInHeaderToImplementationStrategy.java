@@ -86,12 +86,4 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		String result = context.getSelectionFile().getFullPath().toString();
 		return result.replaceAll("(\\w)*\\.(\\w)*", "");
 	}
-
-	@Override
-	public ArrayList<String> getAffectedFiles() {
-		ArrayList<String> result = new ArrayList<String>();
-		result.add(context.getDeclarationUnit().getContainingFilename());
-		result.add(this.siblingtu.getContainingFilename());
-		return result;
-	}
 }
