@@ -1,0 +1,26 @@
+//!TestInBodyComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+void /*$*/member/*$$*/()
+{
+    int i = 3;
+    // a simple comment surrounded by statements
+    return;
+}
+//=
+void member();
+//@A.cpp
+#include "A.h"
+//=
+#include "A.h"
+
+
+void member()
+{
+    int i = 3;
+    // a simple comment surrounded by statements
+    return;
+}
+
