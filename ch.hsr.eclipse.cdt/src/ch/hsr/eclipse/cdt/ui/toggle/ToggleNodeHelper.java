@@ -35,6 +35,7 @@ import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamedTypeSpecifier;
@@ -193,11 +194,17 @@ public class ToggleNodeHelper extends NodeHelper {
 		newdefinition.setParent(getParentInsertionPoint(def, insertionunit));
 		return newdefinition;
 	}
-	
+
+	/**
+	 * Does not work for *every* function declarator; its parent needs to be a
+	 * simple declaration.
+	 */
 	static boolean isVirtual(IASTFunctionDeclarator fdec) {
-		IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
-		ICPPASTDeclSpecifier olddeclspec = (ICPPASTDeclSpecifier) dec.getDeclSpecifier();
-		return olddeclspec.isVirtual();
+		if (fdec.getParent() instanceof IASTSimpleDeclaration) {
+			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
+			return ((ICPPASTDeclSpecifier) dec.getDeclSpecifier()).isVirtual();
+		}
+		return false;
 	}
 
 	static IASTNode getParentRemovePoint(IASTFunctionDefinition definition) {

@@ -120,7 +120,7 @@ int freeFunction(int *a, int & b)
 }
 
 
-//!TestTemplatedFreeFunction
+//!TestFreeFunction
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -133,10 +133,13 @@ int /*$*/freeFunction/*$$*/()
 int freeFunction();
 
 //@A.cpp
+#include "A.h"
 //=
 #include "A.h"
+
 
 int freeFunction()
 {
     return 42;
 }
+

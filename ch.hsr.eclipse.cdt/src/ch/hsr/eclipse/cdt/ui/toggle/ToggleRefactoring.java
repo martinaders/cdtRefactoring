@@ -42,11 +42,9 @@ public class ToggleRefactoring extends CRefactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
 		try {
-			IIndexManager im = CCorePlugin.getIndexManager();
-			if (!im.isProjectIndexed(project))
-				throw new NotSupportedException("not able to work without the indexer");
-			lockIndex();
-			IndexerPreferences.set(project.getProject(), IndexerPreferences.KEY_INDEX_UNUSED_HEADERS_WITH_DEFAULT_LANG, Boolean.TRUE.toString());
+			pm.subTask("waiting for indexer");
+			prepareIndexer(pm);
+			pm.subTask("analyzing user text selection");
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
 			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {
@@ -60,9 +58,19 @@ public class ToggleRefactoring extends CRefactoring {
 		return initStatus;
 	}
 
+	private void prepareIndexer(IProgressMonitor pm) throws NotSupportedException, CoreException, InterruptedException  {
+		IIndexManager im = CCorePlugin.getIndexManager();
+//		im.joinIndexer(IIndexManager.FOREVER, pm);
+		if (!im.isProjectIndexed(project))
+			throw new NotSupportedException("not able to work without the indexer");
+		lockIndex();
+		IndexerPreferences.set(project.getProject(), IndexerPreferences.KEY_INDEX_UNUSED_HEADERS_WITH_DEFAULT_LANG, Boolean.TRUE.toString());
+	}
+
 	@Override
 	protected void collectModifications(IProgressMonitor pm,
 			ModificationCollector modifications) throws CoreException {
+		pm.subTask("calculating required code modifications");
 		strategy.run(modifications);
 	}
 
