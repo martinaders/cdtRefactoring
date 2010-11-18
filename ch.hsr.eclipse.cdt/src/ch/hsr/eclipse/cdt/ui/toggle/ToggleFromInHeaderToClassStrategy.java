@@ -28,11 +28,4 @@ public class ToggleFromInHeaderToClassStrategy implements
 						context.getDefinition(), context.getDefinitionUnit()), infoText);
 
 	}
-
-	@Override
-	public ArrayList<String> getAffectedFiles() {
-		ArrayList<String> result = new ArrayList<String>();
-		result.add(context.getDefinition().getContainingFilename());
-		return result;
-	}
 }

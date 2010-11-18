@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -37,13 +35,5 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 		otherrewrite.insertBefore(
 				siblingfile_translation_unit.getTranslationUnit(), null,
 				selectedDefinition.copy(), infoText);
-	}
-
-	@Override
-	public ArrayList<String> getAffectedFiles() {
-		ArrayList<String> result = new ArrayList<String>();
-		result.add(definition_unit.getContainingFilename());
-		result.add(siblingfile_translation_unit.getContainingFilename());
-		return result;
 	}
 }

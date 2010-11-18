@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.model.ICProject;
@@ -79,9 +77,5 @@ public class ToggleRefactoring extends CRefactoring {
 	@Override
 	protected RefactoringDescriptor getRefactoringDescriptor() {
 		return new EmptyRefactoringDescription();
-	}
-
-	public ArrayList<String> getaffectedfiles() {
-		return strategy.getAffectedFiles();
 	}
 }

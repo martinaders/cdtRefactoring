@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -136,15 +134,6 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 	private String getIncludeGuardEndStatementAsString() {
 		String result = "";
 		result += "#endif " + "/* " + filename_without_extension.toUpperCase() + "_" + "H" + "_" + "*/" + "\n";
-		return result;
-	}
-
-
-	@Override
-	public ArrayList<String> getAffectedFiles() {
-		ArrayList<String> result = new ArrayList<String>();
-		result.add(context.getDeclarationUnit().getContainingFilename());
-		result.add(context.getDefinitionUnit().getContainingFilename());
 		return result;
 	}
 }
