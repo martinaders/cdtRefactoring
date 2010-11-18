@@ -1,5 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
@@ -25,5 +27,12 @@ public class ToggleFromInHeaderToClassStrategy implements
 				ToggleNodeHelper.createInClassDefinition( context.getDeclaration(), 
 						context.getDefinition(), context.getDefinitionUnit()), infoText);
 
+	}
+
+	@Override
+	public ArrayList<String> getAffectedFiles() {
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(context.getDefinition().getContainingFilename());
+		return result;
 	}
 }

@@ -1,5 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -83,5 +85,13 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private String getPath() {
 		String result = context.getSelectionFile().getFullPath().toString();
 		return result.replaceAll("(\\w)*\\.(\\w)*", "");
+	}
+
+	@Override
+	public ArrayList<String> getAffectedFiles() {
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(context.getDeclarationUnit().getContainingFilename());
+		result.add(this.siblingtu.getContainingFilename());
+		return result;
 	}
 }

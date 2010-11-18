@@ -38,7 +38,8 @@ public class TogglingActionDelegate implements IWorkbenchWindowActionDelegate {
 		action.setEnabled(isTextSelection);
 		if (!isTextSelection)
 			return;
-		this.selection = (TextSelection) selection;
+		//get our own selection due to (a possible) bug??
+		this.selection = (TextSelection) CUIPlugin.getActivePage().getActiveEditor().getEditorSite().getSelectionProvider().getSelection();
 	}
 
 	@Override

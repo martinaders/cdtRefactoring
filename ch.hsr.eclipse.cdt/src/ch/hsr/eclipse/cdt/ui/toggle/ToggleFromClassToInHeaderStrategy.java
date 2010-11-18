@@ -1,5 +1,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
@@ -32,6 +34,13 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 				ToggleNodeHelper.getQualifiedNameDefinition(true, 
 						fcontext.getDefinition(), fcontext.getDeclaration(), 
 						fcontext.getDefinitionUnit()),infoText);
+	}
+
+	@Override
+	public ArrayList<String> getAffectedFiles() {
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(fcontext.getDefinitionUnit().getContainingFilename());
+		return result;
 	}
 
 }
