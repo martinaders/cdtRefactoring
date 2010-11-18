@@ -60,7 +60,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private void prepareIndexer(IProgressMonitor pm) throws NotSupportedException, CoreException, InterruptedException  {
 		IIndexManager im = CCorePlugin.getIndexManager();
-		im.joinIndexer(IIndexManager.FOREVER, pm);
+//		im.joinIndexer(IIndexManager.FOREVER, pm);
 		if (!im.isProjectIndexed(project))
 			throw new NotSupportedException("not able to work without the indexer");
 		lockIndex();

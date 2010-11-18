@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
@@ -52,12 +50,8 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 					return JobStatus.CANCEL_STATUS;
 				}
 				undoManager.aboutToPerformChange(change);
-				
 				undoChange = change.perform(monitor);
 				success = true;
-				IIndexManager im = CCorePlugin.getIndexManager();
-				im.reindex(project);
-				im.joinIndexer(IIndexManager.FOREVER, monitor);
 			} catch (IllegalStateException e) {
 				System.err.println("Another refactoring is still in progress, aborting.");
 			} catch (CoreException e) {
