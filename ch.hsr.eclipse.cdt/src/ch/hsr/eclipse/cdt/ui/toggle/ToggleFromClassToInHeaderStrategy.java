@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
@@ -29,10 +27,13 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		simpledec.addDeclarator(funcdecl);
 		simpledec.setParent(fcontext.getDefinition().getParent());
 
+		InsertionPointFinder finder = new InsertionPointFinder(fcontext);
+		
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		rewriter.insertBefore(fcontext.getDefinitionUnit(), null, 
+		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 
 				ToggleNodeHelper.getQualifiedNameDefinition(true, 
 						fcontext.getDefinition(), fcontext.getDeclaration(), 
 						fcontext.getDefinitionUnit()),infoText);
 	}
+
 }

@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;

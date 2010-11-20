@@ -32,6 +32,7 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDeclarator targetDeclaration;
 	private IASTTranslationUnit targetDefinitionUnit;
 	private IASTTranslationUnit targetDeclarationUnit;
+	private IASTFunctionDefinition insertbeforepint;
 	private IIndex index;
 	private IASTTranslationUnit selectionUnit;
 	private IFile selectionFile;
@@ -57,8 +58,7 @@ public class ToggleRefactoringContext {
 
 	public void findSelectedFunctionDeclarator(TextSelection selection)
 			throws NotSupportedException {
-		selectionName = new DeclaratorFinder(selection, selectionUnit)
-				.getName();
+		selectionName = new DeclaratorFinder(selection, selectionUnit).getName();
 	}
 
 	public void findBinding() throws NotSupportedException {
