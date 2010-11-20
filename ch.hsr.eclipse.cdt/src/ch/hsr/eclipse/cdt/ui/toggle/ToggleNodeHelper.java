@@ -7,6 +7,7 @@ import java.util.Stack;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -126,7 +127,7 @@ public class ToggleNodeHelper extends NodeHelper {
 		return newfunc;
 	}
 
-	static IASTNode getQualifiedNameDefinition(
+	static IASTDeclaration getQualifiedNameDefinition(
 			boolean inline, 
 			IASTFunctionDefinition def, 
 			IASTFunctionDeclarator dec, 
