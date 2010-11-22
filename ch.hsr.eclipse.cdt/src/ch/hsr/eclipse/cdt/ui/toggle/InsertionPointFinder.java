@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 
@@ -28,7 +29,9 @@ public class InsertionPointFinder {
 		findRightPlace();
 	}
 	
-	public ICPPASTFunctionDefinition getPosition() {
+	public IASTDeclaration getPosition() {
+		if (position.getParent() != null && position.getParent() instanceof ICPPASTTemplateDeclaration)
+			return (ICPPASTTemplateDeclaration) position.getParent();
 		return position;
 	}
 	
