@@ -49,7 +49,8 @@ public class InsertionPointFinder {
 				if (decl_name.equals(def_name)) {
 					if (def.getParent() != null && def.getParent() instanceof ICPPASTTemplateDeclaration)
 						position = (IASTDeclaration) def.getParent();
-					position = def;
+					else
+						position = def;
 					return;
 				}
 			}
