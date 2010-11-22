@@ -39,7 +39,8 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		IASTFunctionDefinition newImpldef = copyDefinitionFromInHeader();
 		if (this.siblingtu != null) {
 			ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(siblingtu);
-			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), null, newImpldef, infoText);
+			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
+			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newImpldef, infoText);
 			return;
 		}
 		if (newfile) {

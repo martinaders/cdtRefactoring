@@ -27,7 +27,7 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		simpledec.addDeclarator(funcdecl);
 		simpledec.setParent(fcontext.getDefinition().getParent());
 
-		InsertionPointFinder finder = new InsertionPointFinder(fcontext);
+		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), fcontext.getDefinition().getDeclarator());
 		
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
 		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 

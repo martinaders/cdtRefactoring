@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
@@ -14,36 +15,55 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 
+@SuppressWarnings("restriction")
 public class InsertionPointFinder {
 
-	private ToggleRefactoringContext context;
 	private ArrayList<ICPPASTFunctionDeclarator> allafterdeclarations;
 	private ArrayList<ICPPASTFunctionDefinition> alldefinitionsoutside;
 	private ICPPASTFunctionDefinition position;
 	
-
-	public InsertionPointFinder(ToggleRefactoringContext context) {
-		this.context = context;
-		findAllDeclarationsAfterInClass();
-		findAllDefinitionsoutSideClass();
+	public InsertionPointFinder(IASTTranslationUnit classunit, IASTTranslationUnit functiondefunit, IASTFunctionDeclarator funcdecl) {
+		findAllDeclarationsAfterInClass(classunit, funcdecl);
+		findAllDefinitionsoutSideClass(functiondefunit);
 		findRightPlace();
+	}
+	
+	public ICPPASTFunctionDefinition getPosition() {
+		return position;
 	}
 	
 	private void findRightPlace() {
 		for(ICPPASTFunctionDeclarator decl: allafterdeclarations) {
+			String decl_name = decl.getName().toString();
 			for(ICPPASTFunctionDefinition def: alldefinitionsoutside) {
-				ICPPASTQualifiedName qname = (ICPPASTQualifiedName) def.getDeclarator().getName();
-				if (decl.getName().toString().equals(qname.getNames()[1].toString())) {
-						position = def;
-						return;
+				String def_name = null;
+				if (def.getDeclarator().getName() instanceof ICPPASTQualifiedName) {
+					ICPPASTQualifiedName qname = (ICPPASTQualifiedName) def.getDeclarator().getName();
+					def_name = qname.getNames()[1].toString(); 
+				}
+				else if (def.getDeclarator().getName() instanceof CPPASTName) {
+					def_name = def.getDeclarator().getName().toString();
+				}
+
+				if (decl_name.equals(def_name)) {
+					position = def;
+					return;
 				}
 			}
 		}
 	}
 
-	private void findAllDefinitionsoutSideClass() {
+	private void findAllDeclarationsAfterInClass(IASTTranslationUnit classunit, IASTFunctionDeclarator funcdecl) {
+		ICPPASTCompositeTypeSpecifier klass = getklass(classunit);
+		allafterdeclarations = getDeclarationsInClass(klass, funcdecl);
+	}
+	
+	/**
+	 * @param unit, the translation unit where to find the definitions
+	 */
+	private void findAllDefinitionsoutSideClass(IASTTranslationUnit unit) {
 		final ArrayList<ICPPASTFunctionDefinition> definitions = new ArrayList<ICPPASTFunctionDefinition>();
-		context.getDefinitionUnit().accept(
+		unit.accept(
 			new CPPASTVisitor() {
 				{
 					shouldVisitDeclarations = true;
@@ -62,43 +82,38 @@ public class InsertionPointFinder {
 		alldefinitionsoutside = definitions;
 	}
 
-	private void findAllDeclarationsAfterInClass() {
-		ICPPASTCompositeTypeSpecifier klass = getklass();
-		allafterdeclarations = getDeclarationsInClass(klass);
-	}
-
-	private ArrayList<ICPPASTFunctionDeclarator> getDeclarationsInClass(
-			ICPPASTCompositeTypeSpecifier klass) {
-		final ICPPASTFunctionDeclarator selected = (ICPPASTFunctionDeclarator) context.getDefinition().getDeclarator();
+	private ArrayList<ICPPASTFunctionDeclarator> getDeclarationsInClass(ICPPASTCompositeTypeSpecifier klass, final IASTFunctionDeclarator selected) {
 		final ArrayList<ICPPASTFunctionDeclarator> declarations = new ArrayList<ICPPASTFunctionDeclarator>();
-		klass.accept(new CPPASTVisitor() {
-			{
-				shouldVisitDeclarators = true;
-			}
-
-			boolean got = false;
-			@Override
-			public int visit(IASTDeclarator declarator) {
-				if (declarator instanceof ICPPASTFunctionDeclarator) {
-					if (((ICPPASTFunctionDeclarator) declarator) == selected) {
-						System.out.println("catch");
-						got = true;
-					}
-					if (got) {
-						System.out.println("declarator: " + declarator.getParent().getRawSignature());
-						declarations.add((ICPPASTFunctionDeclarator) declarator);
-					}
+		
+		klass.accept(
+				new CPPASTVisitor() {
+				{
+					shouldVisitDeclarators = true;
 				}
-				return super.visit(declarator);
-			}
+	
+				boolean got = false;
+				@Override
+				public int visit(IASTDeclarator declarator) {
+					if (declarator instanceof ICPPASTFunctionDeclarator) {
+						if (((ICPPASTFunctionDeclarator) declarator) == selected) {
+							got = true;
+						}
+						if (got) {
+							declarations.add((ICPPASTFunctionDeclarator) declarator);
+						}
+					}
+					return super.visit(declarator);
+				}
 		});
+		
 		return declarations;
 	}
 
-	private ICPPASTCompositeTypeSpecifier getklass() {
+	private ICPPASTCompositeTypeSpecifier getklass(IASTTranslationUnit unit) {
 		final Container<ICPPASTCompositeTypeSpecifier> result = new Container<ICPPASTCompositeTypeSpecifier>();
 
-		context.getDefinitionUnit().accept(new CPPASTVisitor() {
+		unit.accept(
+			new CPPASTVisitor() {
 			{
 				shouldVisitDeclSpecifiers = true;
 			}
@@ -113,13 +128,5 @@ public class InsertionPointFinder {
 			}
 		});
 		return result.getObject();
-	}
-
-	public IASTNode getInsertionPoint() {
-		return new CPPASTName();
-	}
-
-	public ICPPASTFunctionDefinition getPosition() {
-		return position;
 	}
 }
