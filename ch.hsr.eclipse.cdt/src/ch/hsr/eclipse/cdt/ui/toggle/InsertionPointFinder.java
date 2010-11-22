@@ -21,7 +21,7 @@ public class InsertionPointFinder {
 
 	private ArrayList<ICPPASTFunctionDeclarator> allafterdeclarations;
 	private ArrayList<ICPPASTFunctionDefinition> alldefinitionsoutside;
-	private ICPPASTFunctionDefinition position;
+	private IASTDeclaration position;
 	
 	public InsertionPointFinder(IASTTranslationUnit classunit, IASTTranslationUnit functiondefunit, IASTFunctionDeclarator funcdecl) {
 		findAllDeclarationsAfterInClass(classunit, funcdecl);
@@ -30,8 +30,6 @@ public class InsertionPointFinder {
 	}
 	
 	public IASTDeclaration getPosition() {
-		if (position.getParent() != null && position.getParent() instanceof ICPPASTTemplateDeclaration)
-			return (ICPPASTTemplateDeclaration) position.getParent();
 		return position;
 	}
 	
@@ -49,6 +47,8 @@ public class InsertionPointFinder {
 				}
 
 				if (decl_name.equals(def_name)) {
+					if (def.getParent() != null && def.getParent() instanceof ICPPASTTemplateDeclaration)
+						position = (IASTDeclaration) def.getParent();
 					position = def;
 					return;
 				}
