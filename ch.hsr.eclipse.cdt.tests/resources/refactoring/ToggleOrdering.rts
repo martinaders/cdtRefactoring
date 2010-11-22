@@ -124,3 +124,110 @@ void A::func3()
 {
     return;
 }
+//!TestCorrectTemplateOrderingInClassToInHeader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+template <typename T>
+class A {
+public:
+    void func1();
+    void /*$*/func2/*$$*/()
+    {
+    }
+    void func3();
+    void func4()
+    {
+    }
+};
+
+template<typename T> inline void A<T>::func1()
+{
+}
+
+template<typename T> inline void A<T>::func3()
+{
+}
+//=
+#include <iostream>
+
+template <typename T>
+class A {
+public:
+    void func1();
+    void func2();
+    void func3();
+    void func4()
+    {
+    }
+};
+
+template<typename T> inline void A<T>::func1()
+{
+}
+
+template<typename T> inline void A<T>::func2()
+{
+}
+
+template<typename T> inline void A<T>::func3()
+{
+}
+//!TestCorrectTemplateOrderingInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+
+template <typename T>
+class A {
+public:
+    void func1();
+    void func2();
+    void func3();
+    void func4()
+    {
+    }
+};
+
+template<typename T> inline void A<T>::func1()
+{
+}
+
+template<typename T> inline void A<T>::/*$*/func2/*$$*/()
+{
+}
+
+template<typename T> inline void A<T>::func3()
+{
+}
+//=
+#include <iostream>
+
+template <typename T>
+class A {
+public:
+    void func1();
+    void func2()
+    {
+    }
+
+    void func3();
+    void func4()
+    {
+    }
+};
+
+template<typename T> inline void A<T>::func1()
+{
+}
+
+
+
+template<typename T> inline void A<T>::func3()
+{
+}
