@@ -344,7 +344,8 @@ public class ToggleNodeHelper extends NodeHelper {
 			ASTCommenter.addCommentMapping(oldNode, newNode);
 		IASTNode[] oldChildren = oldNode.getChildren();
 		IASTNode[] newChildren = newNode.getChildren();
-		for (int i = 0; i < oldChildren.length; i++)
+		for (int i = 0; i < oldChildren.length && i < newChildren.length; i++) {
 			remapAllComments(oldChildren[i], newChildren[i], false);
+		}
 	}
 }
