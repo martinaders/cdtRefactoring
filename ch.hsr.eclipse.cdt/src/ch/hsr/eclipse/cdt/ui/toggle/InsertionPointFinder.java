@@ -78,6 +78,10 @@ public class InsertionPointFinder {
 	 */
 	private void findAllDefinitionsoutSideClass(IASTTranslationUnit unit) {
 		final ArrayList<ICPPASTFunctionDefinition> definitions = new ArrayList<ICPPASTFunctionDefinition>();
+		if (unit == null) {
+			alldefinitionsoutside = definitions;
+			return;
+		}
 		unit.accept(
 			new CPPASTVisitor() {
 				{

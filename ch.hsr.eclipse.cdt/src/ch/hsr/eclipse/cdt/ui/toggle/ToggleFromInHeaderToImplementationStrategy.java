@@ -12,9 +12,15 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamespaceDefinition;
+import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
@@ -45,13 +51,30 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(siblingtu);
 		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
 		
 		IASTFunctionDefinition newImpldef = copyDefinitionFromInHeader();
 		if (this.siblingtu != null) {
-			ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(siblingtu);
-			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
-			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newImpldef, infoText);
+			IASTNode parent_ns = getParentNamespace(context.getDeclaration());
+			IASTNode parent = null;
+			if (parent_ns instanceof ICPPASTNamespaceDefinition) {
+				parent = searchForNamespace(((ICPPASTNamespaceDefinition) parent_ns).getName());
+				if (parent == null) {//need to create namespace
+					CPPASTNamespaceDefinition nsdef = new CPPASTNamespaceDefinition(((ICPPASTNamespaceDefinition) parent_ns).getName().copy());
+					nsdef.setParent(siblingtu);
+					ASTRewrite sub = otherrewrite.insertBefore(siblingtu.getTranslationUnit(), null, nsdef, infoText);
+					parent = nsdef;
+					newImpldef.setParent(nsdef);
+					sub.insertBefore(parent, null, newImpldef, infoText);
+					return;
+				}
+			}
+			else {
+				parent = siblingtu.getTranslationUnit();
+			}
+			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), parent.getTranslationUnit(), context.getDeclaration());
+			otherrewrite.insertBefore(parent, finder.getPosition(), newImpldef, infoText);
 			return;
 		}
 		if (newfile) {
@@ -65,6 +88,35 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private IASTNode searchForNamespace(final IASTName name) {
+		final Container<IASTNode> result = new Container<IASTNode>();
+		this.siblingtu.accept(
+				new CPPASTVisitor() {
+					{
+						shouldVisitNamespaces = true;
+					}
+					
+					@Override
+					public int visit(ICPPASTNamespaceDefinition namespaceDefinition) {
+						if (name.toString().equals(namespaceDefinition.getName().toString())) {
+							result.setObject(namespaceDefinition);
+							return PROCESS_ABORT;
+						}
+						return super.visit(namespaceDefinition);
+					}
+		});
+		return result.getObject();
+	}
+
+	private IASTNode getParentNamespace(IASTNode node) {
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTNamespaceDefinition)
+				return node;
+		}
+		return context.getDefinitionUnit();
 	}
 	
 	private String getNewFileName() {
