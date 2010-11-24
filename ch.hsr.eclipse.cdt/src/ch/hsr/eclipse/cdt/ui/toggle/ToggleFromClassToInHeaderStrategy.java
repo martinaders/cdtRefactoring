@@ -1,22 +1,24 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Institute for Software, HSR Hochschule fuer Technik  
+ * Rapperswil, University of applied sciences and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Eclipse Public License v1.0 
+ * which accompanies this distribution, and is available at 
+ * http://www.eclipse.org/legal/epl-v10.html  
+ * 
+ * Contributors: 
+ * 		Martin Schwab & Thomas Kallenberg - initial API and implementation 
+ ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.List;
-
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompoundStatement;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.cdt.internal.ui.refactoring.NodeContainer;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
@@ -42,52 +44,18 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		CPPASTSimpleDeclaration simpledec = (CPPASTSimpleDeclaration) factory.newSimpleDeclaration(spec);
 		simpledec.addDeclarator(funcdecl);
 		simpledec.setParent(fcontext.getDefinition().getParent());
-		
-		// TODO: Support comments above the declaration
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
+		ASTCommenter.addCommentMapping(fcontext.getDefinition(), simpledec);
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
 
-		// TODO: Support ICPPASTTemplateDeclaration (will throw ClassCastEx now)
-		IASTFunctionDefinition synth = (IASTFunctionDefinition) ToggleNodeHelper.getQualifiedNameDefinition(true,fcontext.getDefinition(), fcontext.getDeclaration(), fcontext.getDefinitionUnit());
-		IASTFunctionDefinition newFunction = new CPPASTFunctionDefinition();
-		newFunction.setParent(fcontext.getDefinitionUnit());
-		newFunction.setDeclSpecifier(synth.getDeclSpecifier());
-		newFunction.setDeclarator(synth.getDeclarator());
-		IASTCompoundStatement compound = new CPPASTCompoundStatement();
-		newFunction.setBody(compound);
-		ASTRewrite subRW = rewriter.insertBefore(fcontext.getDefinitionUnit(), null, newFunction, infoText);
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(true, 
+				fcontext.getDefinition(), fcontext.getDeclaration(), 
+				fcontext.getDefinitionUnit());
+		ToggleNodeHelper.remapAllComments(fcontext.getDefinition(), newDefinition);
 
-		List<IASTNode> list = findExtractableNodes().getNodesToWrite();
-		for (IASTNode each : list) {
-			subRW.insertBefore(compound, null, each, infoText);
-		}
+		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), fcontext.getDefinition().getDeclarator());
+		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 
+				newDefinition,infoText);
 	}
 
-	private NodeContainer findExtractableNodes() {
-		final NodeContainer container = new NodeContainer();
-		fcontext.getDefinition().accept(new ASTVisitor() {
-			{
-				shouldVisitStatements = true;
-				shouldVisitExpressions = true;
-			}
-			boolean isCompoundStatementAlreadySkipped = false;
-
-			@Override
-			public int visit(IASTStatement stmt) {
-				if (!isCompoundStatementAlreadySkipped) {
-					isCompoundStatementAlreadySkipped = true;
-					return PROCESS_CONTINUE;
-				}
-				container.add(stmt);
-				return PROCESS_SKIP;
-			}
-
-			@Override
-			public int visit(IASTExpression expression) {
-				container.add(expression);
-				return PROCESS_SKIP;
-			}
-		});
-		return container;
-	}
 }
