@@ -42,6 +42,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -319,5 +320,20 @@ public class ToggleNodeHelper extends NodeHelper {
 			node = node.getParent();
 		}
 		return false;
+	}
+
+	public static void remapAllComments(IASTNode oldNode, IASTNode newNode) {
+		ToggleNodeHelper.remapAllComments(oldNode, newNode, true);
+	}
+
+	public static void remapAllComments(IASTNode oldNode, IASTNode newNode, boolean skipFirst) {
+		if (oldNode == null || newNode == null)
+			return;
+		if (!skipFirst)
+			ASTCommenter.addCommentMapping(oldNode, newNode);
+		IASTNode[] oldChildren = oldNode.getChildren();
+		IASTNode[] newChildren = newNode.getChildren();
+		for (int i = 0; i < oldChildren.length; i++)
+			remapAllComments(oldChildren[i], newChildren[i], false);
 	}
 }

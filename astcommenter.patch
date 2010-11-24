@@ -1,0 +1,85 @@
+### Eclipse Workspace Patch 1.0
+#P org.eclipse.cdt.core
+Index: parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java,v
+retrieving revision 1.9
+diff -u -r1.9 ASTCommenter.java
+--- parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	29 Jul 2009 08:46:30 -0000	1.9
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	24 Nov 2010 15:36:38 -0000
+@@ -13,6 +13,8 @@
+ 
+ import java.util.ArrayList;
+ import java.util.Collections;
++import java.util.HashMap;
++import java.util.Map.Entry;
+ import java.util.TreeMap;
+ 
+ import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+@@ -21,6 +23,7 @@
+ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+ import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
++import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier.IASTEnumerator;
+ import org.eclipse.cdt.core.dom.ast.IASTExpression;
+ import org.eclipse.cdt.core.dom.ast.IASTInitializer;
+ import org.eclipse.cdt.core.dom.ast.IASTName;
+@@ -31,11 +34,10 @@
+ import org.eclipse.cdt.core.dom.ast.IASTStatement;
+ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+ import org.eclipse.cdt.core.dom.ast.IASTTypeId;
+-import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier.IASTEnumerator;
+ import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
++import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
+ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateParameter;
+-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
+ import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
+ import org.eclipse.cdt.internal.core.dom.rewrite.util.OffsetHelper;
+ import org.eclipse.core.resources.IProject;
+@@ -56,6 +58,7 @@
+  */
+ public class ASTCommenter {
+ 	
++	private static HashMap<IASTNode, IASTNode> manualCommentMapping = new HashMap<IASTNode, IASTNode>();
+ 	private static final class PPRangeChecker extends CPPASTVisitor {
+ 		
+ 		int ppOffset;
+@@ -165,6 +168,16 @@
+ 		}
+ 	}
+ 
++	/**
++	 * Allows to map comments of a removed node to a new node. The mapping has to be done before using the
++	 * rewriter.
++	 * 
++	 * @param oldNode comments will be removed from this node...
++	 * @param newNode ... and attached to this node. This may be a synthetic node.
++	 */
++	public static void addCommentMapping(IASTNode oldNode, IASTNode newNode) {
++		manualCommentMapping.put(oldNode, newNode);
++	}
+ 
+ 	/**
+ 	 * Creates a NodeCommentMap for the given TranslationUnit. This is the only way
+@@ -181,7 +194,19 @@
+ 		if(comments == null || comments.size() == 0) {
+ 			return new NodeCommentMap();
+ 		}
+-		return addCommentsToCommentMap(transUnit, comments);
++		NodeCommentMap oldMap = addCommentsToCommentMap(transUnit, comments);
++		return remapSyntheticNodeComments(oldMap);
++	}
++
++	private static NodeCommentMap remapSyntheticNodeComments(NodeCommentMap result) {
++		for (Entry<IASTNode, IASTNode> entry : manualCommentMapping.entrySet()) {
++			IASTNode oldNode = entry.getKey();
++			IASTNode newNode = entry.getValue();
++			result.leadingMap.put(newNode, result.leadingMap.remove(oldNode));
++			result.freestandingMap.put(newNode, result.freestandingMap.remove(oldNode));
++			result.trailingMap.put(newNode, result.trailingMap.remove(oldNode));
++		}
++		return result;
+ 	}
+ 
+ 	private static ArrayList<IASTComment> removeNotNeededComments(IASTTranslationUnit transUnit) {
