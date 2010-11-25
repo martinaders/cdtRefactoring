@@ -6,7 +6,7 @@ RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/ecl
 retrieving revision 1.9
 diff -u -r1.9 ASTCommenter.java
 --- parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	29 Jul 2009 08:46:30 -0000	1.9
-+++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	25 Nov 2010 19:00:27 -0000
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	25 Nov 2010 19:51:27 -0000
 @@ -13,6 +13,9 @@
  
  import java.util.ArrayList;
@@ -38,68 +38,79 @@ diff -u -r1.9 ASTCommenter.java
  import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
  import org.eclipse.cdt.internal.core.dom.rewrite.util.OffsetHelper;
  import org.eclipse.core.resources.IProject;
-@@ -56,6 +59,7 @@
+@@ -55,7 +58,49 @@
+  * @author Guido Zgraggen IFS 
   */
  public class ASTCommenter {
- 	
-+	private static Map<IASTNode, IASTNode> manualCommentMapping = new HashMap<IASTNode, IASTNode>();
+-	
++	/**
++	 * Remembers which node's comments should be applied to which (newly inserted) node.
++	 */
++	public static class CommentRemapping {
++		private Map<IASTNode, IASTNode> manualCommentMapping = new HashMap<IASTNode, IASTNode>();
++		
++		/**
++		 * Allows to map comments of a removed node to a new node. The mapping has to be done before using the
++		 * rewriter. Won't be applied recursively.
++		 * 
++		 * @param oldNode comments will be removed from this node...
++		 * @param newNode ... and attached to this node. This may be a synthetic node.
++		 */
++		public void addCommentMapping(IASTNode oldNode, IASTNode newNode) {
++			manualCommentMapping.put(oldNode, newNode);
++		}
++
++		public NodeCommentMap remapComments(NodeCommentMap result, IASTTranslationUnit unit) {
++			for (Entry<IASTNode, IASTNode> entry : manualCommentMapping.entrySet()) {
++				IASTNode oldNode = entry.getKey();
++				IASTNode newNode = entry.getValue();
++
++				if (newNode.getTranslationUnit() == null || !newNode.getTranslationUnit().equals(unit))
++					continue;
++
++				NodeCommentMap lookHere = result;
++				if (!newNode.getTranslationUnit().equals(oldNode.getTranslationUnit())) {
++					ArrayList<IASTComment> comments = removeNotNeededComments(oldNode.getTranslationUnit());
++					if (comments != null && comments.size() > 0) {
++						lookHere = addCommentsToCommentMap(oldNode.getTranslationUnit(), comments);
++					}
++				}
++
++				if (lookHere.leadingMap.get(oldNode) != null)
++					result.leadingMap.put(newNode, lookHere.leadingMap.remove(oldNode));
++				if (lookHere.freestandingMap.get(oldNode) != null)
++					result.freestandingMap.put(newNode, lookHere.freestandingMap.remove(oldNode));
++				if (lookHere.trailingMap.get(oldNode) != null)
++					result.trailingMap.put(newNode, lookHere.trailingMap.remove(oldNode));
++			}
++			return result;
++		}
++	}
  	private static final class PPRangeChecker extends CPPASTVisitor {
  		
  		int ppOffset;
-@@ -165,6 +169,16 @@
+@@ -165,7 +210,7 @@
  		}
  	}
  
-+	/**
-+	 * Allows to map comments of a removed node to a new node. The mapping has to be done before using the
-+	 * rewriter. Won't be applied recursively.
-+	 * 
-+	 * @param oldNode comments will be removed from this node...
-+	 * @param newNode ... and attached to this node. This may be a synthetic node.
-+	 */
-+	public static void addCommentMapping(IASTNode oldNode, IASTNode newNode) {
-+		manualCommentMapping.put(oldNode, newNode);
-+	}
- 
+-
++	public static CommentRemapping map = new CommentRemapping();
  	/**
  	 * Creates a NodeCommentMap for the given TranslationUnit. This is the only way
-@@ -178,10 +192,36 @@
+ 	 * to get a NodeCommentMap which contains all the comments mapped against nodes.
+@@ -178,10 +223,11 @@
  			return new NodeCommentMap();
  		}
  		ArrayList<IASTComment> comments = removeNotNeededComments(transUnit);		
 -		if(comments == null || comments.size() == 0) {
 -			return new NodeCommentMap();
-+		NodeCommentMap oldMap = new NodeCommentMap();
-+		if (comments != null && comments.size() > 0)
-+			oldMap = addCommentsToCommentMap(transUnit, comments);
-+		return remapComments(oldMap, transUnit);
-+	}
-+
-+	private static NodeCommentMap remapComments(NodeCommentMap result, IASTTranslationUnit unit) {
-+		for (Entry<IASTNode, IASTNode> entry : manualCommentMapping.entrySet()) {
-+			IASTNode oldNode = entry.getKey();
-+			IASTNode newNode = entry.getValue();
-+
-+			if (newNode.getTranslationUnit() == null || !newNode.getTranslationUnit().equals(unit))
-+				continue;
-+
-+			NodeCommentMap lookHere = result;
-+			if (!newNode.getTranslationUnit().equals(oldNode.getTranslationUnit())) {
-+				ArrayList<IASTComment> comments = removeNotNeededComments(oldNode.getTranslationUnit());
-+				if (comments != null && comments.size() > 0) {
-+					lookHere = addCommentsToCommentMap(oldNode.getTranslationUnit(), comments);
-+				}
-+			}
-+
-+			if (lookHere.leadingMap.get(oldNode) != null)
-+				result.leadingMap.put(newNode, lookHere.leadingMap.remove(oldNode));
-+			if (lookHere.freestandingMap.get(oldNode) != null)
-+				result.freestandingMap.put(newNode, lookHere.freestandingMap.remove(oldNode));
-+			if (lookHere.trailingMap.get(oldNode) != null)
-+				result.trailingMap.put(newNode, lookHere.trailingMap.remove(oldNode));
- 		}
+-		}
 -		return addCommentsToCommentMap(transUnit, comments);
-+		return result;
++		NodeCommentMap currentMap = new NodeCommentMap();
++		if (comments != null && comments.size() > 0)
++			currentMap = addCommentsToCommentMap(transUnit, comments);
++		CommentRemapping commentRemapping = map;
++		return commentRemapping.remapComments(currentMap, transUnit);
  	}
  
  	private static ArrayList<IASTComment> removeNotNeededComments(IASTTranslationUnit transUnit) {

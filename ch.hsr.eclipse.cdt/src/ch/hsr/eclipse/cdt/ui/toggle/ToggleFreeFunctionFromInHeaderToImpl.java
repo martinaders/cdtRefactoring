@@ -39,7 +39,7 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(selectedDefinition);
-		ASTCommenter.addCommentMapping(selectedDefinition, declaration);
+		ASTCommenter.map.addCommentMapping(selectedDefinition, declaration);
 		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		ASTRewrite otherrewrite = modifications
