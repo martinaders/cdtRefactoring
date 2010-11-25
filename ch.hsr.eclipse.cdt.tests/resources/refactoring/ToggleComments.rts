@@ -52,6 +52,8 @@ inline void A::member()
 class A {
     void member();
 };
+
+
 //@A.cpp
 #include "A.h"
 //=

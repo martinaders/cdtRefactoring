@@ -11,10 +11,12 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNullStatement;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -45,23 +47,27 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		IASTFunctionDefinition newImpldef = copyDefinitionFromInHeader();
-		ToggleNodeHelper.remapAllComments(context.getDefinition(), newImpldef);
+		IASTFunctionDefinition newDefinition = copyDefinitionFromInHeader();
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		// Comments around the deleted definition will stay there (25.11.2010, IFS/MS).
 		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
 		
 		if (this.siblingtu != null) {
 			ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(siblingtu);
 			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
-			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newImpldef, infoText);
+
+			newDefinition.setParent(siblingtu);
+			ToggleNodeHelper.remapAllComments(context.getDefinition(), newDefinition);
+
+			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newDefinition, infoText);
 			return;
 		}
 		if (newfile) {
 			try {
 				//set a parent or will not be able to print the signature
-				newImpldef.setParent(context.getDeclarationUnit());
+				newDefinition.setParent(context.getDeclarationUnit());
 				CreateFileChange change = createNewImplementationFile(
-						getNewFileContent(newImpldef.getRawSignature()), getNewFileName());
+						getNewFileContent(newDefinition.getRawSignature()), getNewFileName());
 				modifications.addFileChange(change);			
 			} catch (CoreException e) {
 				e.printStackTrace();
