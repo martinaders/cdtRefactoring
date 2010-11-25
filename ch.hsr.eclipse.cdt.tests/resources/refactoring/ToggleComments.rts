@@ -1,4 +1,4 @@
-//!TestInBodyComment
+//!TestInsideBodyAndSameFileComment
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -29,4 +29,42 @@ inline void A::member()
     return;
 }
 
+
+//!TestInsideBodyToOtherFileComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/();
+};
+
+inline void A::member()
+{
+    // a declaration statement
+    int foo();
+    // an expression statement
+    int i = 3;
+    // and a return statmenet
+    return;
+}
+//=
+class A {
+    void member();
+};
+//@A.cpp
+#include "A.h"
+//=
+#include "A.h"
+
+
+void A::member()
+{
+    // a declaration statement
+    int foo();
+    // an expression statement
+    int i = 3;
+    // and a return statmenet
+    return;
+}
 

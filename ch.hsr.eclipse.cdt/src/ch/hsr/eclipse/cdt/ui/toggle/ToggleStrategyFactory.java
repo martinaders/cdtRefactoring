@@ -99,7 +99,6 @@ public class ToggleStrategyFactory {
 
 	private boolean isinHeaderSituation() {
 		boolean declarationAndDefinitionExist = context.getDefinition() != null && context.getDeclaration() != null;
-		System.out.println(declarationAndDefinitionExist + ", " + isInHeaderFile() + ", " + isInSamFile());
 		return declarationAndDefinitionExist && isInHeaderFile() && isInSamFile();
 	}
 

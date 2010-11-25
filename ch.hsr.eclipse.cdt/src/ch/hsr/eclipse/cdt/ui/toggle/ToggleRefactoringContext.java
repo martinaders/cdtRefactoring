@@ -106,8 +106,6 @@ public class ToggleRefactoringContext {
 			}
 		} catch (CoreException e) {
 		}
-		if (targetDeclaration == null)
-			System.out.print("(no declaration found) ");
 	}
 
 	public void findDefinition() throws NotSupportedException {
