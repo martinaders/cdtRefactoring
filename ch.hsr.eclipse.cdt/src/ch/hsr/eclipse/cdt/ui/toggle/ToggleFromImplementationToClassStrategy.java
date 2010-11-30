@@ -53,7 +53,8 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 			IASTNode oldDeclaration = context.getDeclaration().getParent();
 			IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 			newDefinition.setParent(oldDeclaration.getParent());
-			ToggleNodeHelper.remapAllComments(headerast, context.getDefinition(), newDefinition, false);
+			headerast.addRecursiveCommentMapping(context.getDefinition(), newDefinition);
+			headerast.addCommentMapping(oldDeclaration, newDefinition);
 			headerast.replace(oldDeclaration, newDefinition, infoText);
 			//headerast.remove(selectedDeclaration.getParent(), infoText);			
 			//headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);

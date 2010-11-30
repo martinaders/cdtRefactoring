@@ -342,7 +342,7 @@ public class ToggleNodeHelper extends NodeHelper {
 		if (oldNode == null || newNode == null)
 			return;
 		if (!skipFirst)
-			rewriter.addNodeCommentRemapping(oldNode, newNode);
+			rewriter.addCommentMapping(oldNode, newNode);
 		IASTNode[] oldChildren = oldNode.getChildren();
 		IASTNode[] newChildren = newNode.getChildren();
 		for (int i = 0; i < oldChildren.length && i < newChildren.length; i++) {
