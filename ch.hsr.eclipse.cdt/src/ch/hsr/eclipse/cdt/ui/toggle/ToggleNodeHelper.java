@@ -39,6 +39,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
+import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
@@ -54,7 +55,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -334,19 +334,19 @@ public class ToggleNodeHelper extends NodeHelper {
 		return false;
 	}
 
-	public static void remapAllComments(IASTNode oldNode, IASTNode newNode) {
-		ToggleNodeHelper.remapAllComments(oldNode, newNode, true);
+	public static void remapAllComments(ASTRewrite rewriter, IASTNode oldNode, IASTNode newNode) {
+		ToggleNodeHelper.remapAllComments(rewriter, oldNode, newNode, true);
 	}
 
-	public static void remapAllComments(IASTNode oldNode, IASTNode newNode, boolean skipFirst) {
+	public static void remapAllComments(ASTRewrite rewriter, IASTNode oldNode, IASTNode newNode, boolean skipFirst) {
 		if (oldNode == null || newNode == null)
 			return;
 		if (!skipFirst)
-			ASTCommenter.map.addCommentMapping(oldNode, newNode);
+			rewriter.addNodeCommentRemapping(oldNode, newNode);
 		IASTNode[] oldChildren = oldNode.getChildren();
 		IASTNode[] newChildren = newNode.getChildren();
 		for (int i = 0; i < oldChildren.length && i < newChildren.length; i++) {
-			remapAllComments(oldChildren[i], newChildren[i], false);
+			remapAllComments(rewriter, oldChildren[i], newChildren[i], false);
 		}
 	}
 }

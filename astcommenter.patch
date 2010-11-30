@@ -1,23 +1,149 @@
 ### Eclipse Workspace Patch 1.0
 #P org.eclipse.cdt.core
+Index: .settings/.api_filters
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/.settings/Attic/.api_filters,v
+retrieving revision 1.4
+diff -u -r1.4 .api_filters
+--- .settings/.api_filters	12 May 2010 09:03:16 -0000	1.4
++++ .settings/.api_filters	30 Nov 2010 09:24:34 -0000
+@@ -35,6 +35,15 @@
+             </message_arguments>
+         </filter>
+     </resource>
++    <resource path="parser/org/eclipse/cdt/core/dom/rewrite/ASTRewrite.java" type="org.eclipse.cdt.core.dom.rewrite.ASTRewrite">
++        <filter id="643846161">
++            <message_arguments>
++                <message_argument value="CommentRemapping"/>
++                <message_argument value="ASTRewrite"/>
++                <message_argument value="setNodeCommentRemapping(CommentRemapping)"/>
++            </message_arguments>
++        </filter>
++    </resource>
+     <resource path="parser/org/eclipse/cdt/core/parser/IInactiveCodeToken.java" type="org.eclipse.cdt.core.parser.IInactiveCodeToken">
+         <filter id="403853384">
+             <message_arguments>
+Index: parser/org/eclipse/cdt/core/dom/rewrite/ASTRewrite.java
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/eclipse/cdt/core/dom/rewrite/ASTRewrite.java,v
+retrieving revision 1.3
+diff -u -r1.3 ASTRewrite.java
+--- parser/org/eclipse/cdt/core/dom/rewrite/ASTRewrite.java	4 Feb 2009 09:44:08 -0000	1.3
++++ parser/org/eclipse/cdt/core/dom/rewrite/ASTRewrite.java	30 Nov 2010 09:24:34 -0000
+@@ -20,6 +20,7 @@
+ import org.eclipse.cdt.internal.core.dom.rewrite.ASTModificationStore;
+ import org.eclipse.cdt.internal.core.dom.rewrite.ASTRewriteAnalyzer;
+ import org.eclipse.cdt.internal.core.dom.rewrite.ASTModification.ModificationKind;
++import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.CommentRemapping;
+ import org.eclipse.ltk.core.refactoring.Change;
+ import org.eclipse.text.edits.TextEditGroup;
+ 
+@@ -55,6 +56,7 @@
+ 	private final IASTNode fRoot;
+ 	private final ASTModificationStore fModificationStore;
+ 	private final ASTModification fParentMod;
++	private CommentRemapping mappedComments;
+ 
+ 	private ASTRewrite(IASTNode root, ASTModificationStore modStore, ASTModification parentMod) {
+ 		fRoot= root;
+@@ -175,9 +177,17 @@
+ 		if (!(fRoot instanceof IASTTranslationUnit)) {
+ 			throw new IllegalArgumentException("This API can only be used for the root rewrite object."); //$NON-NLS-1$
+ 		}
++		if (mappedComments != null)
++			return ASTRewriteAnalyzer.rewriteAST((IASTTranslationUnit) fRoot, fModificationStore, mappedComments);
+ 		return ASTRewriteAnalyzer.rewriteAST((IASTTranslationUnit) fRoot, fModificationStore);
+ 	}
+-
++	
++	public void addNodeCommentRemapping(IASTNode oldNode, IASTNode newNode) {
++		if (mappedComments == null)
++			mappedComments = new CommentRemapping();
++		mappedComments.addCommentMapping(oldNode, newNode);
++	}
++	
+ 	private void checkBelongsToAST(IASTNode node) {
+ 		while (node != null) {
+ 			node= node.getParent();
+Index: parser/org/eclipse/cdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.java
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/eclipse/cdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.java,v
+retrieving revision 1.3
+diff -u -r1.3 ASTRewriteAnalyzer.java
+--- parser/org/eclipse/cdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.java	12 Mar 2008 09:53:14 -0000	1.3
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/ASTRewriteAnalyzer.java	30 Nov 2010 09:24:34 -0000
+@@ -12,6 +12,7 @@
+ 
+ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+ import org.eclipse.cdt.internal.core.dom.rewrite.changegenerator.ChangeGenerator;
++import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.CommentRemapping;
+ import org.eclipse.core.resources.IFile;
+ import org.eclipse.ltk.core.refactoring.Change;
+ import org.eclipse.ltk.core.refactoring.TextFileChange;
+@@ -24,6 +25,13 @@
+ 		rewriter.generateChange(root);
+ 		return rewriter.getChange();
+ 	}
++	
++	public static Change rewriteAST(IASTTranslationUnit root, ASTModificationStore modificationStore,
++			CommentRemapping map) {
++		ChangeGenerator rewriter = new ChangeGenerator(modificationStore);
++		rewriter.generateChange(root, rewriter, map);
++		return rewriter.getChange();
++	}
+ 
+ 	public static void setCTextFileChangeFactory(ICTextFileChangeFactory factory) {
+ 		sFileChangeFactory= factory;
+Index: parser/org/eclipse/cdt/internal/core/dom/rewrite/changegenerator/ChangeGenerator.java
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/eclipse/cdt/internal/core/dom/rewrite/changegenerator/ChangeGenerator.java,v
+retrieving revision 1.18
+diff -u -r1.18 ChangeGenerator.java
+--- parser/org/eclipse/cdt/internal/core/dom/rewrite/changegenerator/ChangeGenerator.java	3 Jun 2010 17:52:53 -0000	1.18
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/changegenerator/ChangeGenerator.java	30 Nov 2010 09:24:34 -0000
+@@ -39,6 +39,7 @@
+ import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
+ import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ProblemRuntimeException;
+ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
++import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.CommentRemapping;
+ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
+ import org.eclipse.cdt.internal.core.dom.rewrite.util.FileContentHelper;
+ import org.eclipse.cdt.internal.core.dom.rewrite.util.FileHelper;
+@@ -107,9 +108,16 @@
+ 
+ 	public void generateChange(IASTNode rootNode, CPPASTVisitor pathProvider)
+ 			throws ProblemRuntimeException {
++		generateChange(rootNode, pathProvider, null);
++	}
++
++	public void generateChange(IASTNode rootNode, CPPASTVisitor pathProvider, CommentRemapping map) throws ProblemRuntimeException {
+ 		change = new CompositeChange(Messages.ChangeGenerator_compositeChange);
+ 		initParentModList();
+-		commentMap = ASTCommenter.getCommentedNodeMap(rootNode.getTranslationUnit());
++		if (map == null)
++			commentMap = ASTCommenter.getCommentedNodeMap(rootNode.getTranslationUnit());
++		else
++			commentMap = ASTCommenter.getCommentedNodeMap(rootNode.getTranslationUnit(), map);
+ 		rootNode.accept(pathProvider);
+ 		for (IFile currentFile : changes.keySet()) {
+ 
+@@ -118,7 +126,7 @@
+ 			change.add(subchange);
+ 		}
+ 	}
+-
++	
+ 	private void initParentModList() {
+ 		ASTModificationMap rootModifications = modificationStore
+ 				.getRootModifications();
 Index: parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java
 ===================================================================
 RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.core/parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java,v
 retrieving revision 1.9
 diff -u -r1.9 ASTCommenter.java
 --- parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	29 Jul 2009 08:46:30 -0000	1.9
-+++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	25 Nov 2010 19:51:27 -0000
-@@ -13,6 +13,9 @@
- 
- import java.util.ArrayList;
- import java.util.Collections;
-+import java.util.HashMap;
-+import java.util.Map;
-+import java.util.Map.Entry;
- import java.util.TreeMap;
- 
- import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-@@ -21,6 +24,7 @@
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/ASTCommenter.java	30 Nov 2010 09:24:34 -0000
+@@ -21,6 +21,7 @@
  import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
  import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
  import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -25,7 +151,7 @@ diff -u -r1.9 ASTCommenter.java
  import org.eclipse.cdt.core.dom.ast.IASTExpression;
  import org.eclipse.cdt.core.dom.ast.IASTInitializer;
  import org.eclipse.cdt.core.dom.ast.IASTName;
-@@ -31,11 +35,10 @@
+@@ -31,11 +32,10 @@
  import org.eclipse.cdt.core.dom.ast.IASTStatement;
  import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
  import org.eclipse.cdt.core.dom.ast.IASTTypeId;
@@ -38,79 +164,160 @@ diff -u -r1.9 ASTCommenter.java
  import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
  import org.eclipse.cdt.internal.core.dom.rewrite.util.OffsetHelper;
  import org.eclipse.core.resources.IProject;
-@@ -55,7 +58,49 @@
+@@ -55,7 +55,6 @@
   * @author Guido Zgraggen IFS 
   */
  public class ASTCommenter {
 -	
-+	/**
-+	 * Remembers which node's comments should be applied to which (newly inserted) node.
-+	 */
-+	public static class CommentRemapping {
-+		private Map<IASTNode, IASTNode> manualCommentMapping = new HashMap<IASTNode, IASTNode>();
-+		
-+		/**
-+		 * Allows to map comments of a removed node to a new node. The mapping has to be done before using the
-+		 * rewriter. Won't be applied recursively.
-+		 * 
-+		 * @param oldNode comments will be removed from this node...
-+		 * @param newNode ... and attached to this node. This may be a synthetic node.
-+		 */
-+		public void addCommentMapping(IASTNode oldNode, IASTNode newNode) {
-+			manualCommentMapping.put(oldNode, newNode);
-+		}
-+
-+		public NodeCommentMap remapComments(NodeCommentMap result, IASTTranslationUnit unit) {
-+			for (Entry<IASTNode, IASTNode> entry : manualCommentMapping.entrySet()) {
-+				IASTNode oldNode = entry.getKey();
-+				IASTNode newNode = entry.getValue();
-+
-+				if (newNode.getTranslationUnit() == null || !newNode.getTranslationUnit().equals(unit))
-+					continue;
-+
-+				NodeCommentMap lookHere = result;
-+				if (!newNode.getTranslationUnit().equals(oldNode.getTranslationUnit())) {
-+					ArrayList<IASTComment> comments = removeNotNeededComments(oldNode.getTranslationUnit());
-+					if (comments != null && comments.size() > 0) {
-+						lookHere = addCommentsToCommentMap(oldNode.getTranslationUnit(), comments);
-+					}
-+				}
-+
-+				if (lookHere.leadingMap.get(oldNode) != null)
-+					result.leadingMap.put(newNode, lookHere.leadingMap.remove(oldNode));
-+				if (lookHere.freestandingMap.get(oldNode) != null)
-+					result.freestandingMap.put(newNode, lookHere.freestandingMap.remove(oldNode));
-+				if (lookHere.trailingMap.get(oldNode) != null)
-+					result.trailingMap.put(newNode, lookHere.trailingMap.remove(oldNode));
-+			}
-+			return result;
-+		}
-+	}
  	private static final class PPRangeChecker extends CPPASTVisitor {
  		
  		int ppOffset;
-@@ -165,7 +210,7 @@
+@@ -165,7 +164,6 @@
  		}
  	}
  
 -
-+	public static CommentRemapping map = new CommentRemapping();
  	/**
  	 * Creates a NodeCommentMap for the given TranslationUnit. This is the only way
  	 * to get a NodeCommentMap which contains all the comments mapped against nodes.
-@@ -178,10 +223,11 @@
+@@ -177,14 +175,26 @@
+ 		if(transUnit== null) {
  			return new NodeCommentMap();
  		}
- 		ArrayList<IASTComment> comments = removeNotNeededComments(transUnit);		
+-		ArrayList<IASTComment> comments = removeNotNeededComments(transUnit);		
 -		if(comments == null || comments.size() == 0) {
--			return new NodeCommentMap();
--		}
--		return addCommentsToCommentMap(transUnit, comments);
-+		NodeCommentMap currentMap = new NodeCommentMap();
-+		if (comments != null && comments.size() > 0)
-+			currentMap = addCommentsToCommentMap(transUnit, comments);
-+		CommentRemapping commentRemapping = map;
-+		return commentRemapping.remapComments(currentMap, transUnit);
++		ArrayList<IASTComment> comments = removeNotNeededComments(transUnit);
++		if (comments == null || comments.size() == 0) {
+ 			return new NodeCommentMap();
+ 		}
+ 		return addCommentsToCommentMap(transUnit, comments);
  	}
  
- 	private static ArrayList<IASTComment> removeNotNeededComments(IASTTranslationUnit transUnit) {
+-	private static ArrayList<IASTComment> removeNotNeededComments(IASTTranslationUnit transUnit) {
++	/**
++	 * Get the comment map of the given translation unit and add all comments that should be copied from old
++	 * nodes.
++	 * 
++	 * @param transUnit get comments of this translation unit
++	 * @param map defines which old node's comments will be copied to which new node.
++	 * @return the given map, flavored with the newly mapped comments
++	 */
++	public static NodeCommentMap getCommentedNodeMap(IASTTranslationUnit transUnit, CommentRemapping map){
++		return map.remapComments(getCommentedNodeMap(transUnit), transUnit);
++	}
++
++	public static ArrayList<IASTComment> removeNotNeededComments(IASTTranslationUnit transUnit) {
+ 		ArrayList<IASTComment> comments = getCommentsInWorkspace(transUnit);
+ 		if (comments == null || comments.size() == 0) {
+ 			return null;
+@@ -289,7 +299,7 @@
+ 	}
+ 
+ 	
+-	private static NodeCommentMap addCommentsToCommentMap(IASTTranslationUnit rootNode,	ArrayList<IASTComment> comments){
++	public static NodeCommentMap addCommentsToCommentMap(IASTTranslationUnit rootNode,	ArrayList<IASTComment> comments){
+ 		NodeCommentMap commentMap = new NodeCommentMap();
+ 		CommentHandler commHandler = new CommentHandler(comments);
+ 
+Index: parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/CommentRemapping.java
+===================================================================
+RCS file: parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/CommentRemapping.java
+diff -N parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/CommentRemapping.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ parser/org/eclipse/cdt/internal/core/dom/rewrite/commenthandler/CommentRemapping.java	1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,54 @@
++package org.eclipse.cdt.internal.core.dom.rewrite.commenthandler;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Map.Entry;
++
++import org.eclipse.cdt.core.dom.ast.IASTComment;
++import org.eclipse.cdt.core.dom.ast.IASTNode;
++import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
++
++/**
++ * Remembers which node's comments should be applied to which (newly inserted) node.
++ */
++public class CommentRemapping {
++	private Map<IASTNode, IASTNode> manualCommentMapping = new HashMap<IASTNode, IASTNode>();
++	
++	/**
++	 * Allows to map comments of a removed node to a new node. The mapping has to be done before using the
++	 * rewriter. Won't be applied recursively.
++	 * 
++	 * @param oldNode comments will be removed from this node...
++	 * @param newNode ... and attached to this node. This may be a synthetic node.
++	 */
++	public void addCommentMapping(IASTNode oldNode, IASTNode newNode) {
++		manualCommentMapping.put(oldNode, newNode);
++	}
++
++	public NodeCommentMap remapComments(NodeCommentMap result, IASTTranslationUnit unit) {
++		for (Entry<IASTNode, IASTNode> entry : manualCommentMapping.entrySet()) {
++			IASTNode oldNode = entry.getKey();
++			IASTNode newNode = entry.getValue();
++
++			if (newNode.getTranslationUnit() == null || !newNode.getTranslationUnit().equals(unit))
++				continue;
++
++			NodeCommentMap lookHere = result;
++			if (!newNode.getTranslationUnit().equals(oldNode.getTranslationUnit())) {
++				ArrayList<IASTComment> comments = ASTCommenter.removeNotNeededComments(oldNode.getTranslationUnit());
++				if (comments != null && comments.size() > 0) {
++					lookHere = ASTCommenter.addCommentsToCommentMap(oldNode.getTranslationUnit(), comments);
++				}
++			}
++
++			if (lookHere.leadingMap.get(oldNode) != null)
++				result.leadingMap.put(newNode, lookHere.leadingMap.remove(oldNode));
++			if (lookHere.freestandingMap.get(oldNode) != null)
++				result.freestandingMap.put(newNode, lookHere.freestandingMap.remove(oldNode));
++			if (lookHere.trailingMap.get(oldNode) != null)
++				result.trailingMap.put(newNode, lookHere.trailingMap.remove(oldNode));
++		}
++		return result;
++	}
++}
+\ No newline at end of file
+#P org.eclipse.cdt.ui
+Index: src/org/eclipse/cdt/internal/ui/refactoring/ModificationCollector.java
+===================================================================
+RCS file: /cvsroot/tools/org.eclipse.cdt/all/org.eclipse.cdt.ui/src/org/eclipse/cdt/internal/ui/refactoring/ModificationCollector.java,v
+retrieving revision 1.4
+diff -u -r1.4 ModificationCollector.java
+--- src/org/eclipse/cdt/internal/ui/refactoring/ModificationCollector.java	3 Sep 2009 09:09:01 -0000	1.4
++++ src/org/eclipse/cdt/internal/ui/refactoring/ModificationCollector.java	30 Nov 2010 09:24:35 -0000
+@@ -19,6 +19,7 @@
+ 
+ import org.eclipse.ltk.core.refactoring.Change;
+ 
++import org.eclipse.cdt.core.dom.ast.IASTNode;
+ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+ import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+ 
+@@ -50,7 +51,14 @@
+ 		}
+ 		changes.add(change);
+ 	}
+-	
++
++	public void addCommentRemapping(IASTTranslationUnit unit, IASTNode oldNode, IASTNode newNode) {
++		ASTRewrite rewriter = rewriters.get(unit);
++		if (rewriter == null)
++			throw new IllegalArgumentException("no rewriter found for the given translation unit.");
++		rewriter.addNodeCommentRemapping(oldNode, newNode);
++	}
++
+ 	public CCompositeChange createFinalChange() {
+ 		// Synthetic changes aren't displayed and therefore don't need a name
+ 		CCompositeChange result = new CCompositeChange(""); //$NON-NLS-1$
+@@ -60,7 +68,6 @@
+ 			result.addAll(changes.toArray(new Change[changes.size()]));
+ 		
+ 		for (ASTRewrite each : rewriters.values()) {
+-			
+ 			result.add(each.rewriteAST());
+ 		}
+ 		

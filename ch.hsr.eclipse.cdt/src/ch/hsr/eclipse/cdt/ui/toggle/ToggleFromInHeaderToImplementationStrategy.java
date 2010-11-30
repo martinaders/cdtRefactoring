@@ -11,13 +11,10 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNullStatement;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
@@ -57,7 +54,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
 
 			newDefinition.setParent(siblingtu);
-			ToggleNodeHelper.remapAllComments(context.getDefinition(), newDefinition);
+			ToggleNodeHelper.remapAllComments(rewriter, context.getDefinition(), newDefinition);
 
 			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newDefinition, infoText);
 			return;

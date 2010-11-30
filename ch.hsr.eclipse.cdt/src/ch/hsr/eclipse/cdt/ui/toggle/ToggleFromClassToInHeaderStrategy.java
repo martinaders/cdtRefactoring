@@ -45,13 +45,13 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		simpledec.addDeclarator(funcdecl);
 		simpledec.setParent(fcontext.getDefinition().getParent());
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
-		ASTCommenter.map.addCommentMapping(fcontext.getDefinition(), simpledec);
+		rewriter.addNodeCommentRemapping(fcontext.getDefinition(), simpledec);
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
 
 		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(true, 
 				fcontext.getDefinition(), fcontext.getDeclaration(), 
 				fcontext.getDefinitionUnit());
-		ToggleNodeHelper.remapAllComments(fcontext.getDefinition(), newDefinition);
+		ToggleNodeHelper.remapAllComments(rewriter, fcontext.getDefinition(), newDefinition);
 
 		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), fcontext.getDefinition().getDeclarator());
 		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 

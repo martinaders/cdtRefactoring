@@ -16,7 +16,6 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
@@ -39,14 +38,14 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 	public void run(ModificationCollector modifications) {
 		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
 		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(selectedDefinition);
-		ASTCommenter.map.addCommentMapping(selectedDefinition, declaration);
+		astrewriter.addNodeCommentRemapping(selectedDefinition, declaration);
 		astrewriter.replace(selectedDefinition, declaration, infoText);
 		
 		ASTRewrite otherrewrite = modifications
 		.rewriterForTranslationUnit(siblingfile_translation_unit);
 
 		IASTFunctionDefinition newDefinition = selectedDefinition.copy();
-		ToggleNodeHelper.remapAllComments(selectedDefinition, newDefinition, true);
+		ToggleNodeHelper.remapAllComments(otherrewrite, selectedDefinition, newDefinition, true);
 		otherrewrite.insertBefore(
 				siblingfile_translation_unit.getTranslationUnit(), null,
 				newDefinition, infoText);
