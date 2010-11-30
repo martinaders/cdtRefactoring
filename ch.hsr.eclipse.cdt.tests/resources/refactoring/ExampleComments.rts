@@ -1,0 +1,22 @@
+//!ExampleTest
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ExampleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+// c1
+void /*$*/member/*$$*/()
+{
+    // a comment
+    return;
+}
+
+// c2
+void member();
+//=
+
+// c1
+// c2
+void member() {
+    // a comment
+    return;
+}
