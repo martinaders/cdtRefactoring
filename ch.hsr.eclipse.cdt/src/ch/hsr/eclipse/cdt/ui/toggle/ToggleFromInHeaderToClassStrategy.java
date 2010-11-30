@@ -11,6 +11,8 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
@@ -31,10 +33,14 @@ public class ToggleFromInHeaderToClassStrategy implements
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context
 				.getDefinitionUnit());
-		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
-		rewriter.replace(context.getDeclaration().getParent(),
-				ToggleNodeHelper.createInClassDefinition( context.getDeclaration(), 
-						context.getDefinition(), context.getDefinitionUnit()), infoText);
+		IASTFunctionDefinition newDefinition = ToggleNodeHelper
+				.createInClassDefinition(context.getDeclaration(),
+						context.getDefinition(), context.getDefinitionUnit());
+		IASTNode oldDefinition = context.getDeclaration().getParent();
 
+		ToggleNodeHelper.remapAllComments(rewriter, oldDefinition, newDefinition);
+
+		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
+		rewriter.replace(oldDefinition, newDefinition, infoText);
 	}
 }

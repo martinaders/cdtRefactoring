@@ -54,7 +54,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
 
 			newDefinition.setParent(siblingtu);
-			ToggleNodeHelper.remapAllComments(rewriter, context.getDefinition(), newDefinition);
+			ToggleNodeHelper.remapAllComments(otherrewrite, context.getDefinition(), newDefinition);
 
 			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newDefinition, infoText);
 			return;

@@ -13,6 +13,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
@@ -47,13 +48,13 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		implast.remove(context.getDefinition(), infoText);
-		
 		if (context.getDeclarationUnit() != null) {
 			ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-			IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-			headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+			IASTNode oldDeclaration = context.getDeclaration().getParent();
+			IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
+			newDefinition.setParent(oldDeclaration.getParent());
+			ToggleNodeHelper.remapAllComments(headerast, context.getDefinition(), newDefinition, false);
+			headerast.replace(oldDeclaration, newDefinition, infoText);
 			//headerast.remove(selectedDeclaration.getParent(), infoText);			
 			//headerast.insertBefore(selectedDeclaration.getParent().getParent(), null, finalfunc, infoText);
 		} else {
@@ -69,6 +70,8 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 			if (context.getDeclarationUnit() == null)
 				writeNewFile(modifications);
 		}
+		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		implast.remove(context.getDefinition(), infoText);
 	}
 
 	private void writeNewFile(ModificationCollector modifications) {

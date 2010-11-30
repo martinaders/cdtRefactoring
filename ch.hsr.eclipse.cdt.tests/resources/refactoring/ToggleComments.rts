@@ -10,7 +10,7 @@ class A {
         int foo();
         // an expression statement
         int i = 3;
-        // and a return statmenet
+        // and a return statement
         return;
     }
 };
@@ -25,7 +25,7 @@ inline void A::member()
     int foo();
     // an expression statement
     int i = 3;
-    // and a return statmenet
+    // and a return statement
     return;
 }
 
@@ -45,7 +45,7 @@ inline void A::member()
     int foo();
     // an expression statement
     int i = 3;
-    // and a return statmenet
+    // and a return statement
     return;
 }
 //=
@@ -66,7 +66,53 @@ void A::member()
     int foo();
     // an expression statement
     int i = 3;
-    // and a return statmenet
+    // and a return statement
     return;
 }
 
+//!TestImplementationToClassComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+/** some multi-line
+ *  member description
+ */
+void A::/*$*/member/*$$*/()
+{
+    // a declaration statement
+    int foo();
+    // an expression statement
+    int i = 3;
+    // and a return statement
+    return;
+}
+//=
+#include "A.h"
+
+/** some multi-line
+ *  member description
+ */
+
+//@A.h
+class A {
+    void member();
+};
+//=
+class A {
+    /** some multi-line
+ *  member description
+ */
+    void member()
+    {
+        // a declaration statement
+        int foo();
+        // an expression statement
+        int i = 3;
+        // and a return statement
+        return;
+    }
+
+};
