@@ -34,9 +34,10 @@ public class ExampleRefactoring extends CRefactoring {
 			OperationCanceledException {
 		ASTRewrite rewriter = collector.rewriterForTranslationUnit(unit);
 		TextEditGroup editGroup = new TextEditGroup("");
+//		rewriter.addCommentMapping(unit.getDeclarations()[1], unit.getDeclarations()[0]);
 		IASTNode remove = unit.getDeclarations()[1];
 		rewriter.remove(remove, editGroup);
 		IASTNode replace = unit.getDeclarations()[0];
-//		rewriter.replace(replace , editGroup);
+		rewriter.replace(replace, replace.copy(), editGroup);
 	}
 }

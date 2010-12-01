@@ -22,7 +22,7 @@ public class ExampleRefactoringTest extends RefactoringTest {
 
 	@Override
 	protected void runTest() throws Throwable {
-		Refactoring refactoring = new ExampleRefactoring(project.getFile(fileName), selection, cproject, cproject);
+		Refactoring refactoring = new ExampleRefactoring(project.getFile(fileName), selection, null, null);
 		assertConditionsOk(refactoring.checkInitialConditions(NULL_PROGRESS_MONITOR));
 		Change changes = refactoring.createChange(NULL_PROGRESS_MONITOR);
 		assertConditionsOk(refactoring.checkFinalConditions(NULL_PROGRESS_MONITOR));
