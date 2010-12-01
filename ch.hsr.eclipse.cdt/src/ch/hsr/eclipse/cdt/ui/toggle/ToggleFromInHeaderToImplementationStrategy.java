@@ -15,6 +15,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +52,8 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		if (this.siblingtu != null) {
 			ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(siblingtu);
 			InsertionPointFinder finder = new InsertionPointFinder(context.getDeclarationUnit(), siblingtu.getTranslationUnit(), context.getDeclaration());
-			otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newImpldef, infoText);
+			ASTRewrite aaa = otherrewrite.insertBefore(siblingtu.getTranslationUnit(), finder.getPosition(), newImpldef, infoText);
+			aaa.replace(newImpldef.getBody(), new ASTLiteralNode(context.getDefinition().getBody().getRawSignature()), infoText);
 			return;
 		}
 		if (newfile) {

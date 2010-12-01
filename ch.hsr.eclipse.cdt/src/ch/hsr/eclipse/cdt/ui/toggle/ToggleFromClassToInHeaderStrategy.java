@@ -12,10 +12,16 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -32,19 +38,33 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
 		CPPNodeFactory factory = new CPPNodeFactory();
-		IASTFunctionDeclarator funcdecl = fcontext.getDefinition().getDeclarator().copy();
-		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) fcontext.getDefinition().getDeclSpecifier().copy();
-		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
-		simpledec.addDeclarator(funcdecl);
-		simpledec.setParent(fcontext.getDefinition().getParent());
+		IASTFunctionDefinition oldDefinition = fcontext.getDefinition();
+		IASTFunctionDeclarator funcdecl = oldDefinition.getDeclarator().copy();
+		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) oldDefinition.getDeclSpecifier().copy();
+		IASTSimpleDeclaration newDeclaration = factory.newSimpleDeclaration(spec);
+		newDeclaration.addDeclarator(funcdecl);
+		newDeclaration.setParent(oldDefinition.getParent());
 
-		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), fcontext.getDefinition().getDeclarator());
+		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), oldDefinition.getDeclarator());
+
+		rewriter.remove(oldDefinition.getBody(), infoText);
+		if (oldDefinition instanceof CPPASTFunctionWithTryBlock)
+			rewriter.remove(((CPPASTFunctionWithTryBlock)oldDefinition).getCatchHandlers()[0], infoText);
+		rewriter.replace(oldDefinition.getDeclarator(), new ASTLiteralNode("" + oldDefinition.getDeclarator().getRawSignature() + ";"), infoText);
+
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(true, 
+				oldDefinition, fcontext.getDeclaration(), 
+				fcontext.getDefinitionUnit());
 		
-		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 
-				ToggleNodeHelper.getQualifiedNameDefinition(true, 
-						fcontext.getDefinition(), fcontext.getDeclaration(), 
-						fcontext.getDefinitionUnit()),infoText);
+		ICPPASTFunctionDefinition newDef;
+		if (newDefinition instanceof ICPPASTFunctionDefinition)
+			newDef=(ICPPASTFunctionDefinition)newDefinition;
+		else
+			newDef = (ICPPASTFunctionDefinition) ((ICPPASTTemplateDeclaration)newDefinition).getDeclaration();
+
+		ASTRewrite newRw = rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 
+				newDefinition, infoText);
+		newRw.replace(newDef.getBody(), new ASTLiteralNode(oldDefinition.getBody().getRawSignature()), infoText);
 	}
 
 }

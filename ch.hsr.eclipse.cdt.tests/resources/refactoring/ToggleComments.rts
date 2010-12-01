@@ -24,3 +24,117 @@ void member()
     return;
 }
 
+//!TestBodyComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/()
+    {
+        int i = 3;
+        // a simple comment surrounded by statements
+        return;
+    }
+};
+//=
+class A {
+    void member();
+
+
+};
+
+inline void A::member()
+{
+        int i = 3;
+        // a simple comment surrounded by statements
+        return;
+    }
+
+//!TestTopComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    // Top comment
+    void /*$*/member/*$$*/()
+    {
+        return;
+    }
+};
+//=
+class A {
+    // Top comment
+    void member();
+
+
+};
+
+inline void A::member()
+{
+        return;
+    }
+
+//!TestMacro
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#define SQRT(x, x) (x)*(x)
+class A {
+    void /*$*/member/*$$*/()
+    {
+        SQRT(2, 2);
+        return;
+    }
+};
+//=
+#define SQRT(x, x) (x)*(x)
+class A {
+    void member();
+
+
+};
+
+inline void A::member()
+{
+        SQRT(2, 2);
+        return;
+    }
+
+//!TestMacroInOtherFile
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#define SQRT(x, x) (x)*(x)
+class A {
+    void /*$*/member/*$$*/();
+};
+
+inline void A::member()
+{
+    SQRT(2, 2);
+    // comment
+    return;
+}
+//=
+#define SQRT(x, x) (x)*(x)
+class A {
+    void member();
+};
+
+
+//@A.cpp
+#include "A.h"
+//=
+#include "A.h"
+
+
+void A::member()
+{
+    SQRT(2, 2);
+    // comment
+    return;
+}
