@@ -57,7 +57,7 @@ public class ToggleRefactoring extends CRefactoring {
 			prepareIndexer(pm);
 			pm.subTask("analyzing user text selection");
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
-			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
+			strategy = new ToggleStrategyFactory(context).getAppropriateStategy(project);
 		} catch (InterruptedException e) {
 		} catch (NotSupportedException e) {
 			System.err.println("not implemented: " + e.getMessage());

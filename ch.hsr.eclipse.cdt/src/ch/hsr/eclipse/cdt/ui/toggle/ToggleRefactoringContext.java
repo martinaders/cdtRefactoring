@@ -43,7 +43,6 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDeclarator targetDeclaration;
 	private IASTTranslationUnit targetDefinitionUnit;
 	private IASTTranslationUnit targetDeclarationUnit;
-	private IASTFunctionDefinition insertbeforepint;
 	private IIndex index;
 	private IASTTranslationUnit selectionUnit;
 	private IFile selectionFile;
@@ -163,8 +162,7 @@ public class ToggleRefactoringContext {
 		IASTTranslationUnit unit = getDeclarationUnit();
 		if (unit == null)
 			unit = getDefinitionUnit();
-		return ToggleNodeHelper.getSiblingFile(getSelectionFile(),
-				unit);
+		return ToggleNodeHelper.getSiblingFile(getSelectionFile(),unit);
 	}
 	
 	private void findSelectionUnit() throws NotSupportedException {

@@ -46,10 +46,12 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
 		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
 		
-		InsertionPointFinder finder = new InsertionPointFinder(unit, unit, fcontext.getDefinition().getDeclarator());
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		rewriter.insertBefore(parent_ns, finder.getPosition(), 
-				ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns), infoText);
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, 
+				fcontext.getDefinition().getDeclarator());
+		rewriter.insertBefore(parent_ns, insertion_point, 
+				ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), 
+						fcontext.getDefinitionUnit(), parent_ns), infoText);
 	}
 
 	private IASTNode getParentNamespace(IASTNode node) {

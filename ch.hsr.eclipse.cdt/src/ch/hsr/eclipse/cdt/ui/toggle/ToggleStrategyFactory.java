@@ -17,6 +17,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.core.runtime.Path;
 
 public class ToggleStrategyFactory {
@@ -27,7 +28,7 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringStrategy getAppropriateStategy() throws NotSupportedException {
+	public ToggleRefactoringStrategy getAppropriateStategy(ICProject project) throws NotSupportedException {
 		assert(context.getDefinition() != null);
 		if (isInImplementationSituation()) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
@@ -63,7 +64,7 @@ public class ToggleStrategyFactory {
 		if (isinHeaderSituation()) {
 			try {
 				System.out.println("ToggleFromInHeaderToImplementationStrategy");
-				return new ToggleFromInHeaderToImplementationStrategy(context);
+				return new ToggleFromInHeaderToImplementationStrategy(context, project);
 			} catch (Exception e) {
 				throw new NotSupportedException("move FromInHeaderToImplementation was not possible.");
 			}
