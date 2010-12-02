@@ -2,7 +2,6 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
-import org.eclipse.core.runtime.Path;
 
 public class ToggleStrategyFactory {
 	
@@ -15,26 +14,16 @@ public class ToggleStrategyFactory {
 	public ToggleRefactoringStrategy getAppropriateStategy() {
 		if (context.getDefinition() == null)
 			throw new NotSupportedException("cannot work without function defintion");
-		if ((!context.getDefinitionUnit().isHeaderUnit())) {
-			System.out.println("ToggleFromImplementationToClassStrategy");
+		if (!context.getDefinitionUnit().isHeaderUnit())
 			return new ToggleFromImplementationToClassStrategy(context);
-		}
-		if (isFreeFunction() && isAllInHeader()) {
-			System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
+		if (isFreeFunction() && context.getDefinitionUnit().isHeaderUnit())
 			return new ToggleFreeFunctionFromInHeaderToImpl(context);
-		}
-		if (isInClassSituation()) {
-			System.out.println("ToggleFromClassToInHeaderStrategy");
+		if (isInClassSituation())
 			return new ToggleFromClassToInHeaderStrategy(context);
-		}
-		if (isTemplateSituation()) {
-			System.out.println("ToggleFromInHeaderToClassStrategy");
+		if (isTemplateSituation())
 			return new ToggleFromInHeaderToClassStrategy(context);
-		}
-		if (isinHeaderSituation()) {
-			System.out.println("ToggleFromInHeaderToImplementationStrategy");
+		if (isinHeaderSituation())
 			return new ToggleFromInHeaderToImplementationStrategy(context);
-		}
 		throw new NotSupportedException("Unsupported situation for moving function body.");
 	}
 	
@@ -42,24 +31,13 @@ public class ToggleStrategyFactory {
 		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
 
-	private boolean isAllInHeader() {
-		Path p = new Path(context.getDefinition().getContainingFilename());
-		return p.getFileExtension().equals("h");
-	}
-
 	private boolean isinHeaderSituation() {
 		boolean declarationAndDefinitionExist = context.getDefinition() != null && context.getDeclaration() != null;
-		System.out.println(declarationAndDefinitionExist + ", " + isInHeaderFile() + ", " + isInSameFile());
-		return declarationAndDefinitionExist && isInHeaderFile() && isInSameFile();
+		return declarationAndDefinitionExist && context.getDefinitionUnit().isHeaderUnit() && isInSameFile();
 	}
 
 	private boolean isInSameFile() {
 		return context.getDefinition().getFileLocation().getFileName().equals(context.getDeclaration().getFileLocation().getFileName());
-	}
-
-	private boolean isInHeaderFile() {
-		Path p = new Path(context.getDefinition().getContainingFilename());
-		return p.getFileExtension().equals("h") || p.getFileExtension().equals("hpp");
 	}
 
 	private boolean isInClassSituation() {
