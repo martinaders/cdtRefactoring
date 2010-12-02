@@ -8,29 +8,33 @@ useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a
 small range of such code helpers today. In addition, some of them don't work
 satisfyingly: Currenty, extracting the body of a hello world function takes more
 than three seconds on our machines. Reliability? Try to \texttt{extract
-constant} the hello world string of the same program. Currently it will fail.
-The code won't even compile.\newline
-Every bachelor student at HSR should to visit a C++ class. Nearly
-everybody uses Eclipse to solve the exercises. After a while it was clear that
+constant} the hello world string of the same program. At the time of this 
+writing, this still fails.
+
+Many bachelor students at HSR visit a C++ programming class and are using 
+Eclipse to solve the exercises. After a while it was clear that
 touching the refactoring buttons was a dangerous action because in some cases
 descibed above they broke your code. Compile errors all over the place and
-difficult exercise assignments didn't make our life easier.\newline
+difficult exercise assignments didn't make our life easier.
+
 One annoying problem in C++ is the separation of the source and the header
 files. This is a pain point for every programmer. Forgetting to update the
 function signature in one of the files will result in compilation error which
-causes either lack of understanding for beginners or loss of time.\newline
+causes either lack of understanding for beginners or loss of time.
+
 After two minutes of compile error hunting because you forgot to rename a
 function signature in both, the header and the implementation file, you start
 asking yourself: Why nobody has yet implemented a solution to prevent such an
-error?\newline
+error?
+
 One answer seems to be that this is not an easy task to achieve. But
 nevertheless we do not want to be part of the people who always complain about
-open source software. We change it, because we can. \newline
+open source software. We change it, because we can.
  
 The IFS Institute for Software at HSR with its group around Professor Peter
 Sommerlad and
 Emanuel Graf has been working on Eclipse refactorings for a long time. Since
-2006 nine Eclipse refactoring projects have been completed.\newline
+2006 nine Eclipse refactoring projects have been completed.
 
 \section{What has been planned}
 
@@ -46,14 +50,14 @@ refactorings to the Eclipse CDT project. The priorities are as follows
 There is a need for three toggling subfunctions to enable toggling circularly
 from \texttt{in-class}
 to \texttt{in-header} to \texttt{separate-file}  and back again to
-\texttt{in-class}. We concentrate on this order during this project. If the
+\texttt{in-class}. We concentrated on this order during this project. If the
 implementation is fast enough there is no need for a configuration dialog which
-defines the order of the toggle subfunctions.\newline
+defines the order of the toggle subfunctions.
 
 Depending on the success of the implementation with those three variations of
 the
 first refactoring we continue with the re-implementation of  ``Implement
-Function'' and then ``Override virtual member function''.\newline
+Function'' and then ``Override virtual member function''.
 
 The re-implementation of ``implement function'' should be very fast. It should
 only create an empty block below the function signature. This newly created
