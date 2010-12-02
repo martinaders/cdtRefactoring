@@ -41,27 +41,16 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		ICPPASTNamespaceDefinition ns = getNamespaceDefinnition(context.getDefinition());
+		ICPPASTNamespaceDefinition ns = getNamespaceDefinition(context.getDefinition());
 		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition()))
 			implast.remove(ns, infoText);
 		else
 			implast.remove(context.getDefinition(), infoText);
 		
-		if (context.getDeclarationUnit() != null) {
-			ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-			IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-			headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
-		} else {
-			IASTTranslationUnit other_unit = null;
-			try {
-				other_unit = ToggleNodeHelper.getSiblingFile(context.getSelectionFile(), context.getDefinitionUnit());
-				IASTFunctionDefinition function = context.getDefinition().copy();
-				ASTRewrite classast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-				classast.insertBefore(other_unit, null, function, infoText);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
+		ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
+				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
+		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
 	}
 
 	private boolean isSingleElementInNamespace(ICPPASTNamespaceDefinition ns,
@@ -69,7 +58,7 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 		return ns.getChildren().length == 2 && (ns.contains(definition));
 	}
 
-	private ICPPASTNamespaceDefinition getNamespaceDefinnition(IASTNode node) {
+	private ICPPASTNamespaceDefinition getNamespaceDefinition(IASTNode node) {
 		while(node.getParent() != null) {
 			node = node.getParent();
 			if (node instanceof ICPPASTNamespaceDefinition)
