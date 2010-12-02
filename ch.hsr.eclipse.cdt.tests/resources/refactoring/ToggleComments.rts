@@ -1,4 +1,4 @@
-//!TestInBodyComment
+//!Empty
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
@@ -6,7 +6,6 @@ filename=A.h
 void /*$*/member/*$$*/()
 {
     int i = 3;
-    // a simple comment surrounded by statements
     return;
 }
 //=
@@ -20,7 +19,6 @@ void member();
 void member()
 {
     int i = 3;
-    // a simple comment surrounded by statements
     return;
 }
 
