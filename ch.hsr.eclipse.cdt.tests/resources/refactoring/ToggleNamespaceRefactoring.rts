@@ -205,7 +205,7 @@ int main()
 namespace N {
     class A {
         void foo();
-    }
+    };
 }
 //=
 #include <iostream>
@@ -217,5 +217,42 @@ namespace N {
             return;
         }
 
+    };
+}
+//!TestRemoveEmptyNamespaceFromImplentation
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+namespace N {
+    void /*$*/A::foo/*$$*/() 
+    {
+        return;
     }
+}
+//=
+#include "A.h"
+
+
+//@A.h
+#include <iostream>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+//=
+#include <iostream>
+
+namespace N {
+    class A {
+        void foo()
+        {
+            return;
+        }
+
+    };
 }

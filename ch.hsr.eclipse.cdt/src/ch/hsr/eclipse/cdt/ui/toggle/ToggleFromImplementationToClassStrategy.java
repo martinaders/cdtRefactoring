@@ -12,7 +12,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
@@ -39,7 +41,11 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		implast.remove(context.getDefinition(), infoText);
+		ICPPASTNamespaceDefinition ns = getNamespaceDefinnition(context.getDefinition());
+		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition()))
+			implast.remove(ns, infoText);
+		else
+			implast.remove(context.getDefinition(), infoText);
 		
 		if (context.getDeclarationUnit() != null) {
 			ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
@@ -56,5 +62,19 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private boolean isSingleElementInNamespace(ICPPASTNamespaceDefinition ns,
+			IASTFunctionDefinition definition) {
+		return ns.getChildren().length == 2 && (ns.contains(definition));
+	}
+
+	private ICPPASTNamespaceDefinition getNamespaceDefinnition(IASTNode node) {
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTNamespaceDefinition)
+				return (ICPPASTNamespaceDefinition) node;
+		}
+		return null;
 	}
 }
