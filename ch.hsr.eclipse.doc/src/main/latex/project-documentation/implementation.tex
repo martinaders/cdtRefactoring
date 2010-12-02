@@ -1,6 +1,42 @@
 \chapter{Implementation and Solution}
 \thispagestyle{fancy}
 
+\section{Architecture}
+
+In Eclipse, most of the architecture is already given. Some specialities of the 
+toggle refactoring are presented in this section.
+
+\subsubsection{Basic call flow}
+Here's the place for some nice diagram to visualize the work.
+
+Activator -- ActionDelegate -- (Job) -- ToggleRefactoring -- Strategy
+
+\subsubsection{The strategies}
+The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
+considered, based on the user selection. The following strategies have been 
+implemented to cover the specified cases:
+
+\begin{itemize}
+\item ToggleFromImplementationToClassStrategy
+\item ToggleFreeFunctionFromInHeaderToImpl
+\item ToggleFromClassToInHeaderStrategy
+\item ToggleFromInHeaderToClassStrategy
+\item ToggleFromInHeaderToImplementationStrategy
+\end{itemize}
+
+\subsubsection{implications of not using a refactoring wizard}
+No wizard was used for this refactoring since it must be fast and may be 
+executed several times in succession. When using a wizard, the 
+\textit{RefactoringWizardOpenOperation} handles the execution of the refactoring 
+inside a separate job. Since the toggle refactoring does not use the wizard, a 
+separate job had to be scheduled by the ActionDelegate.
+
+In addition, the undo functionality had to be implemented separately. When the 
+changes are performed, they (surprisingly) also return the undo changes that are 
+needed by the UndoManager. The UndoManager is available through 
+\textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
+for more details on the implementation.
+
 \section{Testing and Performance}
 
 This section introduces special tricks that were used to simplify testing and
@@ -54,7 +90,38 @@ to each other. The same developer laptop was used for before and after tests.
 \subsection{Issues}
 
 This section describes special cases that have been omitted intentionally or due 
-to lack of time. In addition, found limitations by the CDT are described here.
+to lack of time. In addition, found limitations of the CDT are described here.
+
+\subsubsection{Constructor/Destructor bug}
+\textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
+Then toggle the constructor out of the class definition. The Destructor will be overridden partially. This problem only occurs in exactly this situation (no paramenters, no initialization lists).
+\textbf{Cause}: Unknown. It seems to be some offset bug.
+\textbf{Solution}: None yet.
+
+\subsubsection{Menu integration}
+\textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
+developing a separate plugin.
+\textbf{Cause}: Menu items are hardcoded inside 
+\textit{CRefactoringActionGroup}. No way was found to replace or change this 
+class within a separate plugin. In addition, the use of the 
+\textit{org.eclipse.ui.actionSets} extension point does not make inserting new 
+items easier.
+\textbf{Solution}: The menu was added using \textit{plugin.xml} and may be added 
+by the user manually. Right-click the toolbar, choose "Customize Perspective...", 
+"Command Groups Availability" and check every group that is named "C++ Coding". 
+This reveals the new menu item inside the refactor menu. Anyhow, the refactoring 
+may always be invoked using the key binding.
+
+The toggle key binding was realized using the \textit{org.eclipse.ui.bindings} 
+extension point.
+
+\subsubsection{The selection}
+\textbf{Problem}: After toggling multiple times, the wrong functions were 
+toggled or no selected function was found at all. 
+\textbf{Cause}: The region provided by \textit{CRefactoring} pointed to a wrong 
+code offset. 
+\textbf{Solution}: The current selection is now based directly on the current 
+active editor part's selection.
 
 \subsubsection{Comments and macros}
 \textbf{Problem}: Nodes inside a translation unit have to be copied to be 
