@@ -138,27 +138,19 @@ public class ToggleNodeHelper extends NodeHelper {
 	}
 
 	static IASTNode getQualifiedNameDefinition(
-			boolean inline, 
 			IASTFunctionDefinition def, 
-			IASTFunctionDeclarator dec, 
-			IASTTranslationUnit definition_unit) {
+			IASTTranslationUnit definition_unit, IASTNode namespace) {
 		
 		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def.getDeclSpecifier().copy();
 		newdeclspec.setVirtual(false);
-		newdeclspec.setInline(inline);
-		// was: declaration
+		newdeclspec.setInline(true);
 		IASTFunctionDeclarator funcdecl = def.getDeclarator().copy();
 	
-		// TODO: rethink correctness of this statement
-		if (dec != null)
-			funcdecl.setName(ToggleNodeHelper.getQualifiedName(dec));
-		else
-			funcdecl.setName(ToggleNodeHelper.getQualifiedName(def.getDeclarator()));
+		funcdecl.setName(ToggleNodeHelper.getQualifiedName(def.getDeclarator(), namespace));
 		
 		removeParameterInitializations(funcdecl);
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(newdeclspec, funcdecl, def);
 	
-		// was: declaration
 		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration(def);
 		if (templdecl != null) {
 			templdecl.setDeclaration(newfunc);
@@ -225,11 +217,16 @@ public class ToggleNodeHelper extends NodeHelper {
 		return toremove;
 	}
 
-	static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator) {
+	/**
+	 * @param declarator the declarator from which the full qualified namespace should be fetched
+	 * @param limiter set a limiter in the class hierarchy where the lookup will stop
+	 * @return
+	 */
+	static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator, IASTNode limiter) {
 		IASTNode node = declarator;
 		Stack<IASTNode> nodes = new Stack<IASTNode>();
 		IASTName lastname = declarator.getName();
-		while(node.getParent() != null) {
+		while(node.getParent() != null && node.getParent() != limiter) {
 			node = node.getParent();
 			if (node instanceof IASTCompositeTypeSpecifier) {
 				nodes.push(((IASTCompositeTypeSpecifier) node).copy());

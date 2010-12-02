@@ -22,6 +22,7 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
+
 	public ToggleRefactoringStrategy getAppropriateStategy() {
 		if (context.getDefinition() == null)
 			throw new NotSupportedException("cannot work without function defintion");

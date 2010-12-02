@@ -30,21 +30,19 @@ import org.eclipse.cdt.internal.ui.refactoring.Container;
 @SuppressWarnings("restriction")
 public class InsertionPointFinder {
 
-	private ArrayList<ICPPASTFunctionDeclarator> allafterdeclarations;
-	private ArrayList<ICPPASTFunctionDefinition> alldefinitionsoutside;
-	private IASTDeclaration position;
+	private static ArrayList<ICPPASTFunctionDeclarator> allafterdeclarations;
+	private static ArrayList<ICPPASTFunctionDefinition> alldefinitionsoutside;
+	private static IASTDeclaration position;
 	
-	public InsertionPointFinder(IASTTranslationUnit classunit, IASTTranslationUnit functiondefunit, IASTFunctionDeclarator funcdecl) {
+	public static IASTDeclaration findInsertionPoint(IASTTranslationUnit classunit, IASTTranslationUnit functiondefunit, IASTFunctionDeclarator funcdecl) {
+		position = null;
 		findAllDeclarationsAfterInClass(classunit, funcdecl);
 		findAllDefinitionsoutSideClass(functiondefunit);
 		findRightPlace();
-	}
-	
-	public IASTDeclaration getPosition() {
 		return position;
 	}
 	
-	private void findRightPlace() {
+	private static void findRightPlace() {
 		for(ICPPASTFunctionDeclarator decl: allafterdeclarations) {
 			String decl_name = decl.getName().toString();
 			for(ICPPASTFunctionDefinition def: alldefinitionsoutside) {
@@ -68,7 +66,7 @@ public class InsertionPointFinder {
 		}
 	}
 
-	private void findAllDeclarationsAfterInClass(IASTTranslationUnit classunit, IASTFunctionDeclarator funcdecl) {
+	private static void findAllDeclarationsAfterInClass(IASTTranslationUnit classunit, IASTFunctionDeclarator funcdecl) {
 		ICPPASTCompositeTypeSpecifier klass = getklass(classunit);
 		allafterdeclarations = getDeclarationsInClass(klass, funcdecl);
 	}
@@ -76,8 +74,12 @@ public class InsertionPointFinder {
 	/**
 	 * @param unit, the translation unit where to find the definitions
 	 */
-	private void findAllDefinitionsoutSideClass(IASTTranslationUnit unit) {
+	private static void findAllDefinitionsoutSideClass(IASTTranslationUnit unit) {
 		final ArrayList<ICPPASTFunctionDefinition> definitions = new ArrayList<ICPPASTFunctionDefinition>();
+		if (unit == null) {
+			alldefinitionsoutside = definitions;
+			return;
+		}
 		unit.accept(
 			new CPPASTVisitor() {
 				{
@@ -97,7 +99,7 @@ public class InsertionPointFinder {
 		alldefinitionsoutside = definitions;
 	}
 
-	private ArrayList<ICPPASTFunctionDeclarator> getDeclarationsInClass(ICPPASTCompositeTypeSpecifier klass, final IASTFunctionDeclarator selected) {
+	private static ArrayList<ICPPASTFunctionDeclarator> getDeclarationsInClass(ICPPASTCompositeTypeSpecifier klass, final IASTFunctionDeclarator selected) {
 		final ArrayList<ICPPASTFunctionDeclarator> declarations = new ArrayList<ICPPASTFunctionDeclarator>();
 		
 		klass.accept(
@@ -124,7 +126,7 @@ public class InsertionPointFinder {
 		return declarations;
 	}
 
-	private ICPPASTCompositeTypeSpecifier getklass(IASTTranslationUnit unit) {
+	private static ICPPASTCompositeTypeSpecifier getklass(IASTTranslationUnit unit) {
 		final Container<ICPPASTCompositeTypeSpecifier> result = new Container<ICPPASTCompositeTypeSpecifier>();
 
 		unit.accept(

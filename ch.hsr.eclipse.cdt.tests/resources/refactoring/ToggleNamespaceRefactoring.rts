@@ -21,15 +21,112 @@ namespace N {
     class A {
         void foo();
     };
+    inline void A::foo()
+    {
+        return;
+    }
+
+}
+//!TestSimpleNamespaceInHeaderToImplementationWithinNSDefinition
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+    inline void A::/*$*/foo/*$$*/()
+    {
+        return;
+    }
+}
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
 }
 
-inline void N::A::foo()
+namespace N
 {
-    return;
+    void A::foo()
+    {
+        return;
+    }
+
 }
 
+//!TestSimpleNamespaceInHeaderToImplementationWithNSDefinitionInImpl
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#include <iostream>
+#include <exception>
 
-//!TestSimpleNamespaceInHeaderToImplementation
+namespace N {
+    class A {
+        void foo();
+    };
+    inline void A::/*$*/foo/*$$*/()
+    {
+        return;
+    }
+}
+//=
+#include <iostream>
+#include <exception>
+
+namespace N {
+    class A {
+        void foo();
+    };
+}
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+namespace N
+{
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+namespace N
+{
+    void A::foo()
+    {
+        return;
+    }
+
+}
+//!TestSimpleNamespaceInHeaderToImplementationWithNamespaceQualifiedName
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h

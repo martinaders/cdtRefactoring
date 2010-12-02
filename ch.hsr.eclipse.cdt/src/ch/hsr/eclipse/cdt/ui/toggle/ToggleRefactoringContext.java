@@ -43,7 +43,6 @@ public class ToggleRefactoringContext {
 	private IASTFunctionDeclarator targetDeclaration;
 	private IASTTranslationUnit targetDefinitionUnit;
 	private IASTTranslationUnit targetDeclarationUnit;
-	private IASTFunctionDefinition insertbeforepint;
 	private IIndex index;
 	private IASTTranslationUnit selectionUnit;
 	private IFile selectionFile;

@@ -12,8 +12,11 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -33,20 +36,32 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
-		CPPNodeFactory factory = new CPPNodeFactory();
 		IASTFunctionDeclarator funcdecl = fcontext.getDefinition().getDeclarator().copy();
 		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) fcontext.getDefinition().getDeclSpecifier().copy();
+		
+		CPPNodeFactory factory = new CPPNodeFactory();
+		
 		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
 		simpledec.addDeclarator(funcdecl);
 		simpledec.setParent(fcontext.getDefinition().getParent());
 
-		InsertionPointFinder finder = new InsertionPointFinder(fcontext.getDefinitionUnit(), fcontext.getDefinitionUnit(), fcontext.getDefinition().getDeclarator());
+		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
+		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
 		
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		rewriter.insertBefore(fcontext.getDefinitionUnit(), finder.getPosition(), 
-				ToggleNodeHelper.getQualifiedNameDefinition(true, 
-						fcontext.getDefinition(), fcontext.getDeclaration(), 
-						fcontext.getDefinitionUnit()),infoText);
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, 
+				fcontext.getDefinition().getDeclarator());
+		rewriter.insertBefore(parent_ns, insertion_point, 
+				ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), 
+						fcontext.getDefinitionUnit(), parent_ns), infoText);
 	}
 
+	private IASTNode getParentNamespace(IASTNode node) {
+		while(node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof ICPPASTNamespaceDefinition)
+				return node;
+		}
+		return fcontext.getDefinitionUnit();
+	}
 }
