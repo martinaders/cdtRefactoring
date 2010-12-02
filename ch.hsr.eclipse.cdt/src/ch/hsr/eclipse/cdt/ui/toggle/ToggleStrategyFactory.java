@@ -13,8 +13,9 @@ public class ToggleStrategyFactory {
 	}
 	
 	public ToggleRefactoringStrategy getAppropriateStategy() {
-		assert(context.getDefinition() != null);
-		if (isInImplementationSituation()) {
+		if (context.getDefinition() == null)
+			throw new NotSupportedException("cannot work without function defintion");
+		if ((!context.getDefinitionUnit().isHeaderUnit())) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
@@ -48,11 +49,11 @@ public class ToggleStrategyFactory {
 
 	private boolean isinHeaderSituation() {
 		boolean declarationAndDefinitionExist = context.getDefinition() != null && context.getDeclaration() != null;
-		System.out.println(declarationAndDefinitionExist + ", " + isInHeaderFile() + ", " + isInSamFile());
-		return declarationAndDefinitionExist && isInHeaderFile() && isInSamFile();
+		System.out.println(declarationAndDefinitionExist + ", " + isInHeaderFile() + ", " + isInSameFile());
+		return declarationAndDefinitionExist && isInHeaderFile() && isInSameFile();
 	}
 
-	private boolean isInSamFile() {
+	private boolean isInSameFile() {
 		return context.getDefinition().getFileLocation().getFileName().equals(context.getDeclaration().getFileLocation().getFileName());
 	}
 
@@ -71,17 +72,6 @@ public class ToggleStrategyFactory {
 			node = node.getParent();
 			if (node instanceof ICPPASTTemplateDeclaration)
 				return true;
-		}
-		return false;
-	}
-
-	private boolean isInImplementationSituation() {
-		Path p = new Path(context.getDefinition().getContainingFilename());
-		if ((p.getFileExtension().equals("cpp") || p.getFileExtension().equals("c") || p.getFileExtension().equals("cxx"))) {
-			if (context.getDeclarationUnit() == null) {
-				throw new NotSupportedException("Not supported if no declaration is found");
-			}
-			return true;
 		}
 		return false;
 	}
