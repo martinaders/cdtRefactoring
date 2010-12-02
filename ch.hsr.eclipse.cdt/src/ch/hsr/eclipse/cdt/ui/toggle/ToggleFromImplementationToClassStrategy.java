@@ -13,11 +13,9 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
@@ -40,13 +38,22 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 
 	@Override
 	public void run(ModificationCollector modifications) {
+		removeDefinitionFromImplementation(modifications);
+		
+		addDefinitionToClass(modifications);
+	}
+
+	private void removeDefinitionFromImplementation(
+			ModificationCollector modifications) {
 		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
 		ICPPASTNamespaceDefinition ns = getNamespaceDefinition(context.getDefinition());
 		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition()))
 			implast.remove(ns, infoText);
 		else
 			implast.remove(context.getDefinition(), infoText);
-		
+	}
+	
+	private void addDefinitionToClass(ModificationCollector modifications) {
 		ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
 		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
 				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
