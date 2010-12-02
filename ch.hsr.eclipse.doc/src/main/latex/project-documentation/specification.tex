@@ -4,11 +4,16 @@
 This section describes how the different code automation mechanisms have been
 understood and designed.
 
-\section{\textit{Move Implementation}}
+\section{\textit{Toggle Function Definition}}
 
-\textit{Move Implementation} moves the code of a member function between
-different possible places. What those places are and in which direction the code
-has to be moved is described in the following chapters. 
+The idea: good code should separate interface and implementation. However, it is 
+annoying to copy function signatures from the header file to the implementation 
+file or vice versa. 
+
+\textit{Toggle Function Definition} moves the code of a member function between 
+different possible places, preserving the declaration statement inside the 
+header file. What the different places are and in which direction the code may 
+be moved is described in the following chapters. 
 
 \subsection{Three ways to implement a member function}
 
@@ -20,15 +25,16 @@ most intuitive behaviour for Java developers. New code blocks created by
 \textit{Implement Member Function} are placed inside the class definition too.
 
 \lstinputlisting[caption={In Class implementation in A.h},
-label={classheaderimpl}]{classheader_implementation.c}
+label={classheaderimpl}]{classheader_implementation.h}
 
+%TODO: add a footnote for the 'extern' problem. (MS, 2.12.2010)
 The most common position \marginline{\textit{in-header}} for ``templated``
 member functions is described by listing \ref{outsideclass}. Due to the problem
-of the \textbf{extern} TODO:LINK keyword, the definition must stay in the header
+of the \texttt{extern} keyword, the definition must stay in the header
 file.
 
 \lstinputlisting[caption={Implementation outside of the class in A.h},
-label={outsideclass}]{outside_class_implementation.c}
+label={outsideclass}]{outside_class_implementation.h}
 
 To avoid changing header files, \marginline{\textit{in-file}} it is common to
 write implementation code inside a separate .cpp file. This third position of a
@@ -36,18 +42,27 @@ member function definition is shown by listings \ref{twofilesolution_header} and
 \ref{twofilesolution_impl}.
 
 \begin{tabular}{p{5cm}p{.4cm}p{5cm}}
-\lstinputlisting[caption={two file solution - A.h},
+\lstinputlisting[caption={A.h},
 label={twofilesolution_header}]{implementation_file.h}
 & & 
-\lstinputlisting[caption={two file solution - A.cpp},
+\lstinputlisting[caption={A.cpp},
 label={twofilesolution_impl}]{implementation_file.c}
 \end{tabular}
 
 \subsection{How it works}
 
-\textit{Move implementation} is used to move the implementation of a member
-function between the positions described above. For a non-templated member
-function, moving is done in the following order:
+Depending on the current selections, different strategies need to be applied to 
+move the function definition. All supported toggling Situations and their 
+special cases are listed in this chapter.
+
+\subsubsection{Toggling free functions}
+may be templated or namespaced and may be placed inside a cpp or a header file.
+
+\subsubsection{Toggling member functions}
+
+\textit{Toggle Function Definition} is used to move the implementation of a 
+member function between the positions described above. For a non-templated 
+member function, moving is done in the following order:
 
 \begin{itemize}
  \item From inside of the class definition (header file)
@@ -56,6 +71,8 @@ function, moving is done in the following order:
  \item to a separate \textit{.cpp} file
  \item and back into the class definition / header file.
 \end{itemize}
+
+\subsubsection{Toggling templated member functions}
 
 Templated member functions \marginline{templates} usually cannot be placed into
 a separate file due to compiler restrictions. In case of a templated member
@@ -81,7 +98,6 @@ will be supported by a new \textit{Implement Member Function} which achieves
 synergy with the toggle key.
 
 \subsection{How it works}
-
 After writing a function declaration in the class definition, not yet written
 the ``;'', code completion can be used to create the function body with a
 appropriated default empty return statement.\newline
