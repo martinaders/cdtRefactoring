@@ -320,4 +320,14 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 		return false;
 	}
+
+	public static boolean isWrappedInsideAClass(IASTNode definition) {
+		IASTNode node = definition;
+		while (node != null) {
+			if (node instanceof ICPPASTCompositeTypeSpecifier)
+				return true;
+			node = node.getParent();
+		}
+		return false;
+	}
 }

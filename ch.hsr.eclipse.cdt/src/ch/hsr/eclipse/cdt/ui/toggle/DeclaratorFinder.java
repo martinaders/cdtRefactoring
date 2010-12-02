@@ -20,8 +20,7 @@ public class DeclaratorFinder {
 
 	private IASTFunctionDeclarator foundDeclarator;
 
-	public DeclaratorFinder(TextSelection selection, IASTTranslationUnit unit)
-			throws NotSupportedException {
+	public DeclaratorFinder(TextSelection selection, IASTTranslationUnit unit) {
 		foundDeclarator = findDeclaratorInSelection(selection, unit);
 
 		if (foundDeclarator == null)

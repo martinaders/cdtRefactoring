@@ -29,6 +29,10 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 
 	public ToggleFromImplementationToClassStrategy(
 			ToggleRefactoringContext context) {
+		if (context.getDeclarationUnit() == null
+				|| context.getDeclarationUnit() == context.getDefinitionUnit())
+			throw new NotSupportedException(
+					"Definition+declaration both in a cpp file -> not clear where to move the function body.");
 		this.context = context;
 		this.infoText = new TextEditGroup("Toggle function body placement");
 	}

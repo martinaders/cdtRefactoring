@@ -1,7 +1,5 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
@@ -17,6 +15,8 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	private ToggleRefactoringContext fcontext;
 
 	public ToggleFromClassToInHeaderStrategy(ToggleRefactoringContext context) {
+		if (ToggleNodeHelper.isWrappedInsideAClass(context.getDefinition()) && ToggleNodeHelper.isWrappedInsideAClass(context.getDeclaration()))
+			throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
 		this.fcontext = context;
 	}
 

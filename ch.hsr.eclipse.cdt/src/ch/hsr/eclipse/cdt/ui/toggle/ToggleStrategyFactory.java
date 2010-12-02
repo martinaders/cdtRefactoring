@@ -1,10 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.core.runtime.Path;
 
@@ -16,33 +12,18 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 	
-	public ToggleRefactoringStrategy getAppropriateStategy() throws NotSupportedException {
+	public ToggleRefactoringStrategy getAppropriateStategy() {
 		assert(context.getDefinition() != null);
 		if (isInImplementationSituation()) {
 			System.out.println("ToggleFromImplementationToClassStrategy");
-			if (context.getDeclarationUnit() == null
-					|| context.getDeclarationUnit() == context
-							.getDefinitionUnit())
-				throw new NotSupportedException("Definition+declaration both in a cpp file -> not clear where to move the function body.");
 			return new ToggleFromImplementationToClassStrategy(context);
 		}
 		if (isFreeFunction() && isAllInHeader()) {
-			if (isScopedFreeFunction())
-				throw new NotSupportedException("namespaced+templated free functions not supported yet");
-			try {
-				if (context.getTUForSiblingFile() == null)
-					throw new NotSupportedException("Cannot decide where to put the code");
-				System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
-				return new ToggleFreeFunctionFromInHeaderToImpl(context);
-			} catch (Exception e) {
-				throw new NotSupportedException("move FreeFunctionFromInHeaderToImplementation was not possible");
-			}
+			System.out.println("ToggleFreeFunctionFromInHeaderToImpl");
+			return new ToggleFreeFunctionFromInHeaderToImpl(context);
 		}
 		if (isInClassSituation()) {
 			System.out.println("ToggleFromClassToInHeaderStrategy");
-			System.out.println(context.getDefinition() + ", " + context.getDeclaration());
-			if (isWrappedInsideAClass(context.getDefinition()) && isWrappedInsideAClass(context.getDeclaration()))
-				throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
 			return new ToggleFromClassToInHeaderStrategy(context);
 		}
 		if (isTemplateSituation()) {
@@ -50,33 +31,12 @@ public class ToggleStrategyFactory {
 			return new ToggleFromInHeaderToClassStrategy(context);
 		}
 		if (isinHeaderSituation()) {
-			try {
-				System.out.println("ToggleFromInHeaderToImplementationStrategy");
-				return new ToggleFromInHeaderToImplementationStrategy(context);
-			} catch (Exception e) {
-				throw new NotSupportedException("move FromInHeaderToImplementation was not possible.");
-			}
+			System.out.println("ToggleFromInHeaderToImplementationStrategy");
+			return new ToggleFromInHeaderToImplementationStrategy(context);
 		}
 		throw new NotSupportedException("Unsupported situation for moving function body.");
 	}
 	
-	private boolean isScopedFreeFunction() {
-		return isNamespacedOrTemplated(context.getDefinition().getDeclarator(), context.getDeclaration());
-	}
-
-	private boolean isNamespacedOrTemplated(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
-		if (declarator.getName() instanceof ICPPASTQualifiedName)
-			declarator = backup;
-		IASTNode node = declarator;
-		while (node != null) {
-			if (node instanceof ICPPASTNamespaceDefinition
-					|| node instanceof ICPPASTTemplateDeclaration)
-				return true;
-			node = node.getParent();
-		}
-		return false;
-	}
-
 	private boolean isFreeFunction() {
 		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
@@ -101,19 +61,8 @@ public class ToggleStrategyFactory {
 		return p.getFileExtension().equals("h") || p.getFileExtension().equals("hpp");
 	}
 
-	// special: Don't support decl AND def inside the class definition
 	private boolean isInClassSituation() {
-		return isWrappedInsideAClass(context.getDefinition()) && context.getDeclaration() == null;
-	}
-
-	private boolean isWrappedInsideAClass(IASTNode definition) {
-		IASTNode node = definition;
-		while (node != null) {
-			if (node instanceof ICPPASTCompositeTypeSpecifier)
-				return true;
-			node = node.getParent();
-		}
-		return false;
+		return ToggleNodeHelper.isWrappedInsideAClass(context.getDefinition()) && context.getDeclaration() == null;
 	}
 
 	private boolean isTemplateSituation() {
@@ -126,7 +75,7 @@ public class ToggleStrategyFactory {
 		return false;
 	}
 
-	private boolean isInImplementationSituation() throws NotSupportedException {
+	private boolean isInImplementationSituation() {
 		Path p = new Path(context.getDefinition().getContainingFilename());
 		if ((p.getFileExtension().equals("cpp") || p.getFileExtension().equals("c") || p.getFileExtension().equals("cxx"))) {
 			if (context.getDeclarationUnit() == null) {

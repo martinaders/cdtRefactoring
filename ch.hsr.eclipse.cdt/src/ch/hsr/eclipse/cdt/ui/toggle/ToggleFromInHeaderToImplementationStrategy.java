@@ -1,11 +1,8 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.core.runtime.CoreException;
@@ -23,7 +20,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private TextEditGroup infoText;
 	private boolean newfile;
 
-	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) throws CModelException, CoreException {
+	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context) {
 		this.infoText = new TextEditGroup("Toggle function body placement");
 		this.context = context;
 		this.siblingtu = context.getTUForSiblingFile();
