@@ -16,7 +16,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
  * tried to refactor.
  * 
  */
-public class NotSupportedException extends Throwable {
+public class NotSupportedException extends RuntimeException {
 
 	private static final long serialVersionUID = -4359705945683270L;
 

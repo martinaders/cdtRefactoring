@@ -75,16 +75,14 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				System.err.println("Failure during generation of changes. Toggled too fast?");
 			} finally {
 				undoChange.initializeValidationData(monitor);
-				undoManager.changePerformed(change, success);					
+				undoManager.changePerformed(change, success);
 				try {
 					if (success && undoChange != null) {
 						// Note: addUndo MUST be called AFTER changePerformed or
 						// the change won't be unlocked correctly. (17.11.2010)
-						System.out.println("add undo");
 						undoManager.addUndo("toggle function body", undoChange);
 					}
 				} catch (OperationCanceledException e) {
-					e.printStackTrace();
 				}
 			}
 			return JobStatus.OK_STATUS;

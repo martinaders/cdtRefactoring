@@ -20,7 +20,6 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModelUtil;
-import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamespaceDefinition;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
@@ -45,8 +44,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private TextEditGroup infoText;
 	private ASTLiteralNode includenode;
 
-	public ToggleFromInHeaderToImplementationStrategy(final ToggleRefactoringContext context, ICProject project) 
-				throws CModelException, CoreException, NotSupportedException {
+	public ToggleFromInHeaderToImplementationStrategy(final ToggleRefactoringContext context) {
 		this.infoText = new TextEditGroup("Toggle function body placement");
 		this.context = context;
 		impl_unit = context.getTUForSiblingFile();
@@ -62,12 +60,17 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		}
 	}
 
-	private IASTTranslationUnit loadTranslationUnit() throws NotSupportedException, CModelException, CoreException {
+	private IASTTranslationUnit loadTranslationUnit() {
 		String filename = context.getDeclaration().getContainingFilename();
 		filename = filename.replaceAll("\\w*.h$", "");
 		filename = filename + ToggleNodeHelper.getFilenameWithoutExtension(getNewFileName()) + ".cpp";
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
-		IASTTranslationUnit result = CoreModelUtil.findTranslationUnitForLocation(file.getFullPath(), null).getAST();
+		IASTTranslationUnit result = null;
+		try {
+			result = CoreModelUtil.findTranslationUnitForLocation(file.getFullPath(), null).getAST();
+		} catch (CModelException e) {
+		} catch (CoreException e) {
+		}
 		if (result == null)
 			throw new NotSupportedException("Cannot find translation unit for sibling file");
 		return result;
@@ -140,12 +143,16 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 				context.getDefinition()), infoText);
 	}
 	
-	private void createNewImplementationFile() throws CoreException {
+	private void createNewImplementationFile() {
 		CreateFileChange change;
 		String filename = getNewFileName();
-		change = new CreateFileChange(filename, new	Path(getPath()+filename), 
-				"", context.getSelectionFile().getCharset());
-		change.perform(new NullProgressMonitor());
+		try {
+			change = new CreateFileChange(filename, new	Path(getPath()+filename), 
+					"", context.getSelectionFile().getCharset());
+			change.perform(new NullProgressMonitor());
+		} catch (CoreException e) {
+			throw new NotSupportedException("Cannot create new filechange");
+		}
 	}
 
 	private IASTNode searchNamespaceInImpl(final IASTName name) {

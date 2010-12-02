@@ -50,7 +50,7 @@ public class ToggleRefactoringContext {
 	private IASTName selectionName;
 
 	public ToggleRefactoringContext(IIndex index, IFile file,
-			TextSelection selection) throws NotSupportedException {
+			TextSelection selection) {
 		this.index = index;
 		this.selectionFile = file;
 		System.out.print("Stage 1: ");
@@ -66,12 +66,12 @@ public class ToggleRefactoringContext {
 		System.out.print("complete\n\nStrategy: ");
 	}
 
-	public void findSelectedFunctionDeclarator(TextSelection selection)
-			throws NotSupportedException {
-		selectionName = new DeclaratorFinder(selection, selectionUnit).getName();
+	public void findSelectedFunctionDeclarator(TextSelection selection) {
+		selectionName = new DeclaratorFinder(selection, selectionUnit)
+				.getName();
 	}
 
-	public void findBinding() throws NotSupportedException {
+	public void findBinding() {
 		try {
 			binding = index.findBinding(selectionName);
 		} catch (CoreException e) {
@@ -81,7 +81,7 @@ public class ToggleRefactoringContext {
 	}
 
 	// Declaration may still be null afterwards, but thats ok.
-	public void findDeclaration() throws NotSupportedException {
+	public void findDeclaration() {
 		if (binding == null) {
 			targetDeclaration = findDeclarationWithVisitor(selectionName);
 			targetDefinition = null;
@@ -109,7 +109,7 @@ public class ToggleRefactoringContext {
 			System.out.print("(no declaration found) ");
 	}
 
-	public void findDefinition() throws NotSupportedException {
+	public void findDefinition() {
 		// fallback
 		if (binding == null) {
 			targetDefinition = findDefinitionWithVisitor(selectionName);
@@ -157,15 +157,18 @@ public class ToggleRefactoringContext {
 		return selectionFile;
 	}
 
-	public IASTTranslationUnit getTUForSiblingFile() throws CModelException,
-			CoreException {
+	public IASTTranslationUnit getTUForSiblingFile() {
 		IASTTranslationUnit unit = getDeclarationUnit();
 		if (unit == null)
 			unit = getDefinitionUnit();
-		return ToggleNodeHelper.getSiblingFile(getSelectionFile(),unit);
+		try {
+			return ToggleNodeHelper.getSiblingFile(getSelectionFile(), unit);
+		} catch (CoreException e) {
+			return null;
+		}
 	}
 	
-	private void findSelectionUnit() throws NotSupportedException {
+	private void findSelectionUnit() {
 		try {
 			selectionUnit = TranslationUnitHelper.loadTranslationUnit(
 					selectionFile, true);

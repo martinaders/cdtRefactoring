@@ -57,7 +57,7 @@ public class ToggleRefactoring extends CRefactoring {
 			prepareIndexer(pm);
 			pm.subTask("analyzing user text selection");
 			context = new ToggleRefactoringContext(getIndex(), file, selection);
-			strategy = new ToggleStrategyFactory(context).getAppropriateStategy(project);
+			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {
 		} catch (NotSupportedException e) {
 			System.err.println("not implemented: " + e.getMessage());
@@ -69,9 +69,13 @@ public class ToggleRefactoring extends CRefactoring {
 		return initStatus;
 	}
 
-	private void prepareIndexer(IProgressMonitor pm) throws NotSupportedException, CoreException, InterruptedException  {
+	private void prepareIndexer(IProgressMonitor pm) throws CoreException, InterruptedException  {
 		IIndexManager im = CCorePlugin.getIndexManager();
-//		im.joinIndexer(IIndexManager.FOREVER, pm);
+		while (!im.isProjectIndexed(project)) {
+			im.joinIndexer(500, pm);
+			if (pm.isCanceled())
+				throw new NotSupportedException("not able to work without the indexer");
+		}
 		if (!im.isProjectIndexed(project))
 			throw new NotSupportedException("not able to work without the indexer");
 		lockIndex();
