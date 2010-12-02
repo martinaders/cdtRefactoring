@@ -17,10 +17,12 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamespaceDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.CreateFileChange;
@@ -96,14 +98,15 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		IASTFunctionDefinition new_definition = copyDefinitionFromInHeader();
 		removeDefinitionFromHeader(collector);
 
-		IASTNode insertion_parent = null;
 		ASTRewrite impl_rewrite = collector.rewriterForTranslationUnit(impl_unit);
 		if (includenode != null) {
 			impl_rewrite.insertBefore(impl_unit, null, includenode, infoText);
 		}
-		IASTNode parent = getParentNamespace(context.getDeclaration());
 		
+		IASTNode insertion_parent = null;
+		IASTNode parent = getParentNamespace(context.getDeclaration());
 		if (parent instanceof ICPPASTNamespaceDefinition) {
+			adaptQualifiedNameToNamespaceLevel(new_definition, parent);
 			ICPPASTNamespaceDefinition parent_namespace = (ICPPASTNamespaceDefinition) parent; 
 			insertion_parent = searchNamespaceInImpl(parent_namespace.getName());
 			if (insertion_parent == null) {
@@ -116,6 +119,28 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			insertion_parent = impl_unit.getTranslationUnit();
 		}
 		addToImplementationFile(new_definition, insertion_parent, impl_rewrite);	
+	}
+
+	private void adaptQualifiedNameToNamespaceLevel(
+			IASTFunctionDefinition new_definition, IASTNode parent) {
+		if (parent instanceof ICPPASTNamespaceDefinition) {
+			ICPPASTNamespaceDefinition ns = (ICPPASTNamespaceDefinition) parent;
+			if (new_definition.getDeclarator().getName() instanceof ICPPASTQualifiedName) {
+				ICPPASTQualifiedName qname = (ICPPASTQualifiedName) new_definition.getDeclarator().getName();
+				ICPPASTQualifiedName qname_new = new CPPASTQualifiedName();
+				boolean start = false;
+				for(IASTName partname: qname.getNames()) {
+					if (partname.toString().equals(ns.getName().toString())) {
+						start = true;
+						continue;
+					}
+					if (start)
+						qname_new.addName(partname);
+				}
+				if (start)
+					new_definition.getDeclarator().setName(qname_new);
+			}
+		}
 	}
 
 	private String getIncludeStatement() {

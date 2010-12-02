@@ -168,11 +168,14 @@ int main() {
     return 0;
 }
 
-void N::A::foo()
+namespace N
 {
-    return;
-}
+    void A::foo()
+    {
+        return;
+    }
 
+}
 
 //!TestSimpleNamespaceFromImplementationToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
