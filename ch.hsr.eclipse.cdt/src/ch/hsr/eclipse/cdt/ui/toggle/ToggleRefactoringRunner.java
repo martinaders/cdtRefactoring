@@ -14,6 +14,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.internal.jobs.JobStatus;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -77,12 +78,13 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 				undoChange.initializeValidationData(monitor);
 				undoManager.changePerformed(change, success);
 				try {
-					if (success && undoChange != null) {
+					if (success && undoChange.isValid(monitor).isOK()) {
 						// Note: addUndo MUST be called AFTER changePerformed or
 						// the change won't be unlocked correctly. (17.11.2010)
 						undoManager.addUndo("toggle function body", undoChange);
 					}
 				} catch (OperationCanceledException e) {
+				} catch (CoreException e) {
 				}
 			}
 			return JobStatus.OK_STATUS;
