@@ -21,7 +21,6 @@ import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
-import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamespaceDefinition;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
@@ -32,7 +31,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.UIPlugin;
 
 @SuppressWarnings("restriction")
 public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefactoringStrategy {
@@ -42,21 +45,47 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private TextEditGroup infoText;
 	private ASTLiteralNode includenode;
 
-	public ToggleFromInHeaderToImplementationStrategy(ToggleRefactoringContext context, ICProject project) throws CModelException, CoreException {
+	public ToggleFromInHeaderToImplementationStrategy(final ToggleRefactoringContext context, ICProject project) 
+				throws CModelException, CoreException, NotSupportedException {
 		this.infoText = new TextEditGroup("Toggle function body placement");
 		this.context = context;
 		impl_unit = context.getTUForSiblingFile();
 		if (this.impl_unit == null) {
-			createNewImplementationFile(getNewFileName());
-			String filename = context.getDeclaration().getContainingFilename();
-			filename = filename.replaceAll("\\w*.h$", "");
-			filename = filename + ToggleNodeHelper.getFilenameWithoutExtension(getNewFileName()) + ".cpp";
-			
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
-			ITranslationUnit newfile = CoreModelUtil.findTranslationUnitForLocation(file.getFullPath(), project);
-			impl_unit = newfile.getAST();
-			includenode = new ASTLiteralNode(getIncludeStatement());
+			if (askUserForFileCreation(context)) {
+				createNewImplementationFile();
+				impl_unit = loadTranslationUnit();
+				includenode = new ASTLiteralNode(getIncludeStatement());
+			}
+			else {
+				throw new NotSupportedException("Cannot create new Implementation File");
+			}
 		}
+	}
+
+	private IASTTranslationUnit loadTranslationUnit() throws NotSupportedException, CModelException, CoreException {
+		String filename = context.getDeclaration().getContainingFilename();
+		filename = filename.replaceAll("\\w*.h$", "");
+		filename = filename + ToggleNodeHelper.getFilenameWithoutExtension(getNewFileName()) + ".cpp";
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
+		IASTTranslationUnit result = CoreModelUtil.findTranslationUnitForLocation(file.getFullPath(), null).getAST();
+		if (result == null)
+			throw new NotSupportedException("Cannot find translation unit for sibling file");
+		return result;
+	}
+
+	private boolean askUserForFileCreation(final ToggleRefactoringContext context) {
+		final Container<Boolean> answer = new Container<Boolean>();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = UIPlugin.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell();
+				boolean createnew = MessageDialog.openQuestion(shell, "New Implementation file?", 
+						"Create a new file named: " + getNewFileName() + " and move " + context.getDeclaration().getRawSignature() + "?");
+				answer.setObject(createnew);
+			}
+		};
+		PlatformUI.getWorkbench().getDisplay().syncExec(r);
+		return answer.getObject();
 	}
 
 	@Override
@@ -87,7 +116,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	}
 
 	private String getIncludeStatement() {
-		return "#include \"" + ToggleNodeHelper.getFilenameWithoutExtension(getNewFileName()) + ".h" + "\"";
+		return "#include \"" + ToggleNodeHelper.getFilenameWithoutExtension(getNewFileName()) + ".h\"";
 	}
 
 	private void addToImplementationFile(IASTFunctionDefinition new_definition,
@@ -111,8 +140,9 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 				context.getDefinition()), infoText);
 	}
 	
-	private void createNewImplementationFile(String filename) throws CoreException {
+	private void createNewImplementationFile() throws CoreException {
 		CreateFileChange change;
+		String filename = getNewFileName();
 		change = new CreateFileChange(filename, new	Path(getPath()+filename), 
 				"", context.getSelectionFile().getCharset());
 		change.perform(new NullProgressMonitor());
@@ -125,7 +155,6 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 					{
 						shouldVisitNamespaces = true;
 					}
-					
 					@Override
 					public int visit(ICPPASTNamespaceDefinition namespaceDefinition) {
 						if (name.toString().equals(namespaceDefinition.getName().toString())) {
@@ -160,7 +189,6 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 
 	private String getPath() {
 		String result = context.getSelectionFile().getFullPath().toOSString();
-		System.out.println("path: " + result);
 		return result.replaceAll("(\\w)*\\.(\\w)*", "");
 	}
 }
