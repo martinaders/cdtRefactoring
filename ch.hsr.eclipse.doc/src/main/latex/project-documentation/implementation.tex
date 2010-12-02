@@ -6,7 +6,7 @@
 This section introduces special tricks that were used to simplify testing and
 control performance.
 
-\subsection{Fuzzy whitespace recognition}
+\subsection{Fuzzy whitespace recognition for the test environment}
 
 As described in past theses at HSR, the refactoring testing environment
 needed an exact definition of the generated code. This was annoying because
@@ -50,4 +50,78 @@ to each other. The same developer laptop was used for before and after tests.
  All tests	& 5530ms & --ms & --\% \\
  Reference test	&    0ms & --ms & --\% \\
 \end{tabular}
+
+\subsection{Issues}
+
+This section describes special cases that have been omitted intentionally or due 
+to lack of time. In addition, found limitations by the CDT are described here.
+
+\subsubsection{Comments and macros}
+\textbf{Problem}: Nodes inside a translation unit have to be copied to be 
+changed since they are frozen. When nodes are copied, their surrounding comments 
+get lost during rewrite. This was annoying, since copying the function body 
+provided a straightforward solution for replacing a declaration with a 
+definition.
+
+Another issue were macros. Macros are working perfectly when copied and 
+rewritten inside the same translation unit. As soon as a macro is moved outside 
+to another translation unit, the macro will be expanded during rewrite. 
+
+\textbf{Cause}: The rewriter is using a method in \texttt{ASTCommenter} to get a 
+\texttt{NodeCommentMap} of the rewritten translation unit. If a node is copied, 
+it has another reference which won't be inside the comment map anymore. Thus, 
+when the rewriter writes the new node, it won't notice that the node was 
+replaced by another.
+
+\textbf{Solutions}:
+\begin{itemize}
+\item Get the raw signature of the code parts that should be copied and insert 
+them using an ASTLiteralNode. 
+
+Pro: It works without changing the CDT core and macros are not expanded. 
+
+Contra: Breaks indentation and inserts unneeded newlines. This solution was used 
+finally because whitespace issues may be dealt with the formatter.
+\item Do as \texttt{ExtractFunction} does: rewrite each statement inside the 
+function body separately. 
+
+Pro: automatic indentation. 
+
+Contra: touches the body although it does not need to be changed in any way. 
+\item Change the CDT: Inside the \texttt{ChangeGenerator.generateChange}, the 
+\texttt{NodeCommentMap} of the translation unit is fetched. By writing a patch, 
+it was possible to insert new mappings into this map. This allowed to move 
+comments of an old node to any newly created node. 
+
+Pro: automatic indentation, developer may choose where to put the comments, 
+every comment may be preserved. 
+
+Contra: does not deal with macros, five classes need to be changed in CDT, 
+comments need to be moved by hand. See the branch 'inject' inside the repository 
+to study this solution.
+\item Find and insert comments by hand using an IASTComment. 
+
+Pro: lets the developer decide where to put the comment. 
+
+Contra: Feature is commented-out in the 7.0.1 release of CDT, comments need to 
+be moved by hand.
+\item Other solutions may be possible. An idea could be to register the comments 
+during copy functions. This would require to change every copy function of every 
+IASTNode. 
+\end{itemize}
+
+\subsubsection{Toggling function-local functions}
+\textbf{Problem}: When function-local functions are allowed to be toggled, the 
+fuzzy selection detection may not be as intuitive to the user as intended. If 
+the cursor is inside a function body, the parent function definition should be 
+toggled.
+
+\textbf{Cause}: At least GCC allows to define functions inside a function, even 
+templated or namespaced ones or ones that are inside a class definition. In the 
+beginning, selection detection just found the nearest definition around the 
+selection.
+
+\textbf{Solution}: Function-local functions are skipped in favour of the next 
+parent that is a declaration that may be toggled. If no parent is found, the 
+refactoring aborts.
 
