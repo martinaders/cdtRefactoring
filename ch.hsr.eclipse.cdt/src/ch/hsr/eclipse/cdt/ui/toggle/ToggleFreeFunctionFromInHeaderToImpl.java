@@ -12,7 +12,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -20,38 +19,39 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringStrategy {
 
-	private IASTTranslationUnit siblingfile_translation_unit;
-	private IASTFunctionDefinition selectedDefinition;
-	private IASTTranslationUnit definition_unit;
+	private IASTTranslationUnit sibling_tu;
 	private TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
-	private final ToggleRefactoringContext fcontext;
+	private final ToggleRefactoringContext context;
+	private ASTLiteralNode includenode;
 
 	public ToggleFreeFunctionFromInHeaderToImpl(ToggleRefactoringContext context) {
-		this.fcontext = context;
+		this.context = context;
 		if (isScopedFreeFunction())
 			throw new NotSupportedException("namespaced+templated free functions not supported yet");
-		IASTTranslationUnit siblingTU = null;
-		siblingTU = context.getTUForSiblingFile();
-		if (siblingTU == null)
-			throw new NotSupportedException("Cannot decide where to put the code");
-		this.selectedDefinition = context.getDefinition();
-		this.definition_unit = context.getDefinitionUnit();
-		this.siblingfile_translation_unit = siblingTU;
+		sibling_tu = context.getTUForSiblingFile();
+		if (sibling_tu == null) {
+			ToggleFileCreator filecreator = new ToggleFileCreator(context, ".cpp");
+			if (filecreator.askUserForFileCreation(context)) {
+				filecreator.createNewFile();
+				sibling_tu = filecreator.loadTranslationUnit();
+				includenode = new ASTLiteralNode(filecreator.getIncludeStatement());
+			} else {
+				throw new NotSupportedException("Could not find sibling translation unit");
+			}
+		}
 	}
 	
 	private boolean isScopedFreeFunction() {
-		return isNamespacedOrTemplated(fcontext.getDefinition().getDeclarator(), fcontext.getDeclaration());
-	}
-	
-	private boolean isNamespacedOrTemplated(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
+		IASTFunctionDeclarator declarator = context.getDefinition().getDeclarator();
 		if (declarator.getName() instanceof ICPPASTQualifiedName)
-			declarator = backup;
+			declarator = context.getDeclaration();
 		IASTNode node = declarator;
 		while (node != null) {
 			if (node instanceof ICPPASTNamespaceDefinition
@@ -61,18 +61,26 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 		}
 		return false;
 	}
-
+	
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(definition_unit);
-		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(selectedDefinition);
-		astrewriter.replace(selectedDefinition, declaration, infoText);
-		
-		ASTRewrite otherrewrite = modifications
-		.rewriterForTranslationUnit(siblingfile_translation_unit);
-		
-		otherrewrite.insertBefore(
-				siblingfile_translation_unit.getTranslationUnit(), null,
-				selectedDefinition.copy(), infoText);
+		removeDefinitionFromHeader(modifications);
+		addDefinitionToImplementation(modifications);
+	}
+
+	private void addDefinitionToImplementation(
+			ModificationCollector modifications) {
+		ASTRewrite otherrewrite = modifications.rewriterForTranslationUnit(sibling_tu);
+		if (includenode != null) {
+			otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null, includenode, infoText);
+		}
+		otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null,
+				context.getDefinition().copy(), infoText);
+	}
+
+	private void removeDefinitionFromHeader(ModificationCollector modifications) {
+		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(context.getDefinition());
+		astrewriter.replace(context.getDefinition(), declaration, infoText);
 	}
 }

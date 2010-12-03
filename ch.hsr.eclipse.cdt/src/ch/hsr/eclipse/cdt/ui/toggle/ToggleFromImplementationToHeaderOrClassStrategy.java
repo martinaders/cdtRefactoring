@@ -13,36 +13,66 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromImplementationToClassStrategy implements ToggleRefactoringStrategy {
+public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRefactoringStrategy {
 
 	private ToggleRefactoringContext context;
 	protected TextEditGroup infoText;
+	private IASTTranslationUnit other_tu;
+	private ASTLiteralNode includenode;
 
-	public ToggleFromImplementationToClassStrategy(
+	public ToggleFromImplementationToHeaderOrClassStrategy(
 			ToggleRefactoringContext context) {
-		if (context.getDeclarationUnit() == null)
-			throw new NotSupportedException("Not supported if no declaration is found");
-		if (context.getDeclarationUnit() == null
-				|| context.getDeclarationUnit() == context.getDefinitionUnit())
-			throw new NotSupportedException(
-					"Definition and declaration both in a cpp file: not clear where to move definition.");
 		this.context = context;
 		this.infoText = new TextEditGroup("Toggle function body placement");
+		if (context.getDeclarationUnit() == null) {
+			if (context.getDefinition().getDeclarator().getName() instanceof ICPPASTQualifiedName)
+				throw new NotSupportedException("Not a free function. Cannot decide where to toggle");
+			other_tu = context.getTUForSiblingFile();
+			if (other_tu == null) {
+				ToggleFileCreator filecreator = new ToggleFileCreator(context, ".h");
+				if (filecreator.askUserForFileCreation(context)) {
+					filecreator.createNewFile();
+					other_tu = filecreator.loadTranslationUnit();
+					includenode = new ASTLiteralNode(filecreator.getIncludeStatement() + "\n\n");
+				} else {
+					throw new NotSupportedException("Cannot create new File");
+				}
+			}
+		}
 	}
-
+	
 	@Override
 	public void run(ModificationCollector modifications) {
 		removeDefinitionFromImplementation(modifications);
-		
-		addDefinitionToClass(modifications);
+		if (context.getDeclarationUnit() != null)
+			addDefinitionToClass(modifications);
+		else
+			addDefinitionToHeader(modifications);
 	}
 
+	private void addDefinitionToHeader(ModificationCollector modifications) {
+		ASTRewrite header_rewrite = modifications.rewriterForTranslationUnit(other_tu);
+		IASTFunctionDefinition newfunction = context.getDefinition().copy();
+		newfunction.setParent(other_tu);
+		header_rewrite.insertBefore(other_tu.getTranslationUnit(), null, newfunction, infoText);
+	}
+
+	private void addDefinitionToClass(ModificationCollector modifications) {
+		ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
+				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
+		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+	}
+	
 	private void removeDefinitionFromImplementation(
 			ModificationCollector modifications) {
 		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
@@ -51,13 +81,9 @@ public class ToggleFromImplementationToClassStrategy implements ToggleRefactorin
 			implast.remove(ns, infoText);
 		else
 			implast.remove(context.getDefinition(), infoText);
-	}
-	
-	private void addDefinitionToClass(ModificationCollector modifications) {
-		ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
-				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+		if (includenode != null) {
+			implast.insertBefore(context.getDefinitionUnit(), context.getDefinitionUnit().getChildren()[0], includenode, infoText);
+		}
 	}
 
 	private boolean isSingleElementInNamespace(ICPPASTNamespaceDefinition ns,

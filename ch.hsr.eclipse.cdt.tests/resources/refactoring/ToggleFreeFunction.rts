@@ -120,6 +120,73 @@ int freeFunction(int *a, int & b)
 }
 
 
+//!TestFreeFunctionToggleFromImplementationToHeaderWithOutDeclaration
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+int /*$*/freeFunction/*$$*/(int *a, int & b)
+try {
+    return 42;
+} catch (std::exception & e) 
+{
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+
+//@A.h
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+//=
+#include <iostream>
+
+class A {
+private:
+    int a;
+    int b;
+public:
+    A(int x, int y)
+    :a(x), b(y)
+    {}
+    ~A()
+    {
+    }
+};
+
+int freeFunction(int *a, int & b)
+try
+{
+    return 42;
+}
+catch(std::exception & e){
+}
+
+
+
 //!TestFreeFunction
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -143,3 +210,22 @@ int freeFunction()
     return 42;
 }
 
+//!TestQualifiedNameToggle
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+fatalerror=true
+//@A.cpp
+#include "A.h"
+
+int /*$*/A::freefunction/*$$*/()
+{
+    return 42;
+}
+//=
+#include "A.h"
+
+int A::freefunction()
+{
+    return 42;
+}

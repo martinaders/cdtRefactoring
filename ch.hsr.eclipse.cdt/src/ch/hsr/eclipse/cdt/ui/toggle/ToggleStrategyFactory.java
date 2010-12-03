@@ -27,7 +27,7 @@ public class ToggleStrategyFactory {
 		if (context.getDefinition() == null)
 			throw new NotSupportedException("cannot work without function defintion");
 		if (!context.getDefinitionUnit().isHeaderUnit())
-			return new ToggleFromImplementationToClassStrategy(context);
+			return new ToggleFromImplementationToHeaderOrClassStrategy(context);
 		if (isFreeFunction() && context.getDefinitionUnit().isHeaderUnit())
 			return new ToggleFreeFunctionFromInHeaderToImpl(context);
 		if (isInClassSituation())
