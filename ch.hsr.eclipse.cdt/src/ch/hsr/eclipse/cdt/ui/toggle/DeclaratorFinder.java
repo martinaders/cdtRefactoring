@@ -48,11 +48,7 @@ public class DeclaratorFinder {
 
 	private IASTFunctionDeclarator findDeclaratorInSelection(
 			TextSelection selection, IASTTranslationUnit unit) {
-		IASTFunctionDeclarator result = findAffectedNode(selection, unit);
-		if (result == null)
-			result = findAffectedNode(selection, unit);
-
-		return result;
+		return findAffectedNode(selection, unit);
 	}
 
 	private IASTFunctionDeclarator findAffectedNode(TextSelection selection,
