@@ -11,22 +11,16 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.model.CModelException;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
-import org.eclipse.cdt.internal.ui.refactoring.Container;
 import org.eclipse.cdt.internal.ui.refactoring.utils.TranslationUnitHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -82,11 +76,6 @@ public class ToggleRefactoringContext {
 
 	// Declaration may still be null afterwards, but thats ok.
 	public void findDeclaration() {
-		if (binding == null) {
-			targetDeclaration = findDeclarationWithVisitor(selectionName);
-			targetDefinition = null;
-			return;
-		}
 		try {
 			IIndexName[] decnames = index.findNames(binding,
 					IIndex.FIND_DECLARATIONS);
@@ -110,12 +99,6 @@ public class ToggleRefactoringContext {
 	}
 
 	public void findDefinition() {
-		// fallback
-		if (binding == null) {
-			targetDefinition = findDefinitionWithVisitor(selectionName);
-			targetDefinitionUnit = selectionUnit;
-			return;
-		}
 		try {
 			IIndexName[] defnames = index.findNames(binding,
 					IIndex.FIND_DEFINITIONS);
@@ -216,56 +199,4 @@ public class ToggleRefactoringContext {
 		}
 		return null;
 	}
-
-	private IASTFunctionDefinition findDefinitionWithVisitor(
-			final IASTName element_name2) {
-		System.err.println("fallback with visitor for definition");
-		final Container<IASTFunctionDefinition> container = new Container<IASTFunctionDefinition>();
-		selectionUnit.accept(new ASTVisitor(true) {
-			{
-				shouldVisitDeclarations = true;
-			}
-
-			@Override
-			public int visit(IASTDeclaration declaration) {
-				if (declaration instanceof ICPPASTFunctionDefinition) {
-					CPPASTFunctionDefinition func = (CPPASTFunctionDefinition) declaration;
-					IASTName name = func.getDeclarator().getName();
-					if (name.equals(element_name2)) {
-						container.setObject(func);
-						return PROCESS_ABORT;
-					}
-				}
-				return super.visit(declaration);
-			}
-		});
-		return container.getObject();
-	}
-
-	private IASTFunctionDeclarator findDeclarationWithVisitor(
-			final IASTName element_name2) {
-		System.err.println("fallback with vistitor for declaration");
-		final Container<IASTFunctionDeclarator> container = new Container<IASTFunctionDeclarator>();
-		selectionUnit.accept(new ASTVisitor(true) {
-			{
-				shouldVisitDeclarations = true;
-			}
-
-			@Override
-			public int visit(IASTDeclaration declaration) {
-				if (declaration instanceof IASTFunctionDeclarator) {
-					CPPASTFunctionDeclarator decl = (CPPASTFunctionDeclarator) declaration;
-					IASTName name = decl.getName();
-
-					if (name.equals(element_name2)) {
-						container.setObject(decl);
-						return PROCESS_ABORT;
-					}
-				}
-				return super.visit(declaration);
-			}
-		});
-		return container.getObject();
-	}
-
 }
