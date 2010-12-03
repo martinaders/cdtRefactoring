@@ -2,7 +2,7 @@
 \thispagestyle{fancy}
 
 From the three specified refactorings, \textit{Toggle Function Definition} has 
-been implemented in deep. This chapter explains how the refactoring was 
+been implemented in depth. This chapter explains how the refactoring was 
 implemented and which problems had to be solved during development.
 
 \section{Architecture}
@@ -46,7 +46,33 @@ for more details on the implementation.
 This section describes special cases that have been omitted intentionally or due 
 to lack of time. In addition, found limitations of the CDT are described here.
 
-\subsubsection{Constructor/Destructor bug}
+\subsubsection{Speed}
+\textbf{Problem}: Refactoring, especially the first run, was very slow in the 
+beginning. Including a big library slowed down the process even more.
+\textbf{Cause}: The first thought was that header file indexing was the cause. 
+However, the indexer option that skips already indexed headers is enabled in 
+\textit{CRefactoring}. In the end, it was found out that most of the time was 
+consumed by the \textit{checkInitialConditions} method of \textit{CRefactoring} 
+that checked for problems inside the translation unit.
+\textbf{Solution}: The super call to \textit{checkInitialConditions} was omitted.
+
+\subsubsection{Accessing standalone header files}
+\textbf{Problem}: Header files that are not included in any source file by 
+default were not found by the indexer. Thus, it was not possible to analyze the 
+source code of the affected header file.
+\textbf{Cause}: By default, the indexer preference option 
+\textit{IndexerPreferences.KEY\_INDEX\_UNUSED\_HEADERS\_WITH\_DEFAULT\_LANG} is 
+set to false. However, this option is needed for standalone header files to be 
+indexed.
+\textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
+true.
+
+\subsubsection{Handling newly created files}
+\textbf{Problem}: It is difficult do manipulate newly created files.
+\textbf{Cause}: --
+\textbf{Solution}: --
+
+\subsubsection{Constructor / destructor bug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
 overridden partially. This problem only occurs in exactly this situation (no 
@@ -54,7 +80,7 @@ paramenters, no initialization lists).
 \textbf{Cause}: Unknown. It seems to be some offset bug.
 \textbf{Solution}: None yet solved.
 
-\subsubsection{unneccessary newlines}
+\subsubsection{Unneccessary newlines}
 \textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
 by the rewriter.
 \textbf{Cause}: The rewriter inserts newlines before and after inserted nodes 
