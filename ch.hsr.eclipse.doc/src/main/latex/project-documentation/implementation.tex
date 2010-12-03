@@ -215,32 +215,64 @@ The changes made to the CDT test environment help writing new tests without
 having to care whether the ASTRewriter uses spaces or tabs for indention.
 Resulting code that looks the same now gives a green bar.
 
+\subsection{Testing issues}
+
+The whitespace issue was already discussed. Another issue is that the Doxygen 
+syntax \/\/\! may not be used in the test files since this syntax is used to 
+specify the test name.
+
+Testing error conditions is not comfortable. % TODO: solutions?
+
+All in all, the special refactoring test environment was a big help for 
+refactoring relaxedly.
+
 \subsection{Performance tests}
 
-Performance was tested using the org.eclipse.test.performance plugin. Four
-different scenarios have been chosen for comparison:
+The simplest way to assess the speed of the refactoring is to look at the junit 
+time measurements. The first test that is run takes more time and represents the 
+time needed for first time toggling when the refactoring infrastructure has to 
+be loaded. 
+
+All performance tests must be executed on the same developer machine, taking the 
+average time of three consecutive runs of all tests. Four scenarios have been 
+chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
-\item testWithIncludeStatements()
-\item testWithoutIncludeStatements()
-\item testInClassToInHeader()
-\item testInHeaderToInClass()
+\item First time toggling: includes loading of the infrastructure and will take 
+some more time.
+\item Toggle from in class to header: only one translation unit is affected by 
+this refactoring.
+\item Toggle from implementation header: two translation units are affected here.
+\item Average runtime: time to run all the tests (will vary due to new tests but 
+helpful for comparing effects of small changes between versions)
+\item Emtpy reference test: a dummy refactoring that won't load and analyze any 
+code. Shows what amount of time is consumed by the given refactoring 
+infrastructure.
 \end{enumerate}
 
-In addition, an all-together test has been included for quick performance
-comparison and a reference test that did nothing was run to measure the overhead
-of the performance test framework. Since in reality the refactorings are slower
-than the (repeated) measurements, resulting values should be considered relative
-to each other. The same developer laptop was used for before and after tests.
+Another technique to measure time more accurately was checked out. For this, the 
+org.eclipse.test.performance plugin was used. 
+
+\subsubsection{Results}
+
+It is difficult to compare the speed to other refactorings of CDT since wizards 
+are used for the other known refactorings. However, the goal was reached that 
+the refactoring is executing almost instantly.
+
+The following table shows speed improvements during the development of the 
+project:
 
 \begin{tabular}[t]{l|rrr}
  Scenario   & first draft & final result & improvement in \% \\
  \hline
- Scenario 1	&  364ms & --ms & --\% \\
- Scenario 2	&  337ms & --ms & --\% \\
- Scenario 3	&  335ms & --ms & --\% \\
- Scenario 4	&  323ms & --ms & --\% \\
- All tests	& 5530ms & --ms & --\% \\
- Reference test	&    0ms & --ms & --\% \\
+ first time toggling 	&  ---ms & --ms & --\% \\
+ toggle free function	&  ---ms & --ms & --\% \\
+ average runtime	&  ---ms & --ms & --\% \\
+ emtpy reference test	&  ---ms & --ms & --\% \\
 \end{tabular}
+
+The results from the \textit{org.eclipse.test.performance} speed tests were not 
+used in the end. Since in reality the refactorings are much slower than the 
+(repeated) measurements, resulting values may only be compared relative to each 
+other.
 
