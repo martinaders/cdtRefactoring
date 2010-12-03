@@ -14,7 +14,6 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
-import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.internal.jobs.JobStatus;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
