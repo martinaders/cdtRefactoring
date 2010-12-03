@@ -1,7 +1,6 @@
 \documentclass[a4paper,12pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
 \usepackage{graphicx}
-
 \usepackage{listings}
 \usepackage{color}
 \usepackage{hyperref}
@@ -26,6 +25,10 @@ captionpos=b}
 \rfoot{\thepage}
 \lfoot{\today}
 
+% fixes the problem that long words with underscores are not wrapped
+\let\underscore\_\newcommand{\myunderscore}{\renewcommand{\_}{\underscore\hspace{0pt}}}
+\myunderscore
+
 \title{One touch C++ code automation for Eclipse CDT \\ ~ \\ 
 \normalsize{Toggle Function Definition} }
 \titlehead{\includegraphics{logo_hsr_farbig.pdf}}
@@ -39,7 +42,6 @@ captionpos=b}
 \pagenumbering{roman}
 
 \begin{abstract}
-\thispagestyle{empty}
 During this semester thesis, a code automation tool has been developed for the 
 Eclipse C++ Development Toolkit (CDT) using the Eclipse refactoring mechanism. 
 The resulting plugin enables a C++ developer to move function definitions easily 
@@ -72,36 +74,40 @@ various places quick and user-friendly.
 \tableofcontents
 \thispagestyle{empty}
 \pagenumbering{arabic}
+\setcounter{page}{0}
 
 \include{introduction}
 \include{specification}
 \include{implementation}
+\include{interpretation}
+\include{conclusion}
 
-\chapter{Interpretation}
+\appendix
+
 \thispagestyle{fancy}
-
-\subsection{Personal review}
-
-\subsubsection{Martin Schwab}
-
-\subsubsection{Thomas Kallenberg}
-
-\chapter{Conclusions and future work}
+\chapter{Copyright agreement}
+% TODO: Add a copy of the signed document here.
 \thispagestyle{fancy}
-
-\chapter{Sources}
-\thispagestyle{fancy}
-A. Verhein, A. Simeon, "Werkzeugkasten Technische Berichte 1", 31.07.2008
-
-\chapter*{User agreement}
-\chapter*{Copyright agreement}
-\part{Appendix}
 \include{configurationmgnt}
-\chapter*{User Manual}
-\chapter*{Time managing}
-\chapter*{Glossary}
+\thispagestyle{fancy}
+\chapter{User Manual}
+To try out the toggle refactoring, install the plugin from the following update 
+site:
+
+http://sinv-56042.edu.hsr.ch/updatesite
+
+Select a function and press Ctrl-Alt-V to invoke the toggle refactoring.
 
 \thispagestyle{fancy}
-%\section{Poster}
+\chapter{Time management}
 
-\end{document}          
+\thispagestyle{fancy}
+\chapter{Glossary}
+
+\thispagestyle{fancy}
+% Use citations like this: AV08~\cite{AV08}.
+\bibliographystyle{alpha}
+\bibliography{main}
+
+\end{document}
+
