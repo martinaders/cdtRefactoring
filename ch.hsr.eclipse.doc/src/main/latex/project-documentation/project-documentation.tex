@@ -1,9 +1,9 @@
 \documentclass[a4paper,12pt]{scrreprt}
 \usepackage[utf8x]{inputenc}
 \usepackage{graphicx}
-
 \usepackage{listings}
 \usepackage{color}
+\usepackage{hyperref}
 \lstset{language=C++, numbers=left,
 numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small,
 rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname,
@@ -25,9 +25,12 @@ captionpos=b}
 \rfoot{\thepage}
 \lfoot{\today}
 
-\title{One touch C++ code automation for Eclipse CDT \\ ~ \\ \normalsize{toggle
-member function, Implement function, Override virtual member function} }
-%\subtitle{Toggle member function, Implement function, Override virtual member function}
+% fixes the problem that long words with underscores are not wrapped
+\let\underscore\_\newcommand{\myunderscore}{\renewcommand{\_}{\underscore\hspace{0pt}}}
+\myunderscore
+
+\title{One touch C++ code automation for Eclipse CDT \\ ~ \\ 
+\normalsize{Toggle Function Definition} }
 \titlehead{\includegraphics{logo_hsr_farbig.pdf}}
 \subject{semester thesis}
 \date{\today}
@@ -38,52 +41,39 @@ member function, Implement function, Override virtual member function} }
 \maketitle
 \pagenumbering{roman}
 
-\begin{abstract}
-\thispagestyle{empty}
-This Document describes the work and the result of our semester thesis, to
-develop multiple refactorings for the Eclipse CDT projects. The \textit{Toggle Member
-Function} refactoring to move C++ function definitions between various places and
-the re-implementation of the \textit{Implement Function}, to implement functions faster
-where possible. Various problems like performance are discussed and solutions
-are shown.
-\end{abstract}
-
-\chapter*{Management Summary}
-\thispagestyle{empty}
+\include{abstract}
 
 \tableofcontents
 \thispagestyle{empty}
 \pagenumbering{arabic}
+\setcounter{page}{0}
 
 \include{introduction}
 \include{specification}
 \include{implementation}
-
-\chapter{Interpretation}
-\thispagestyle{fancy}
-
-\subsection{Personal review}
-
-\subsubsection{Martin Schwab}
-
-\subsubsection{Thomas Kallenberg}
-
-\chapter{Conclusions and future work}
-\thispagestyle{fancy}
-
-\chapter{Sources}
-\thispagestyle{fancy}
-A. Verhein, A. Simeon, "Werkzeugkasten Technische Berichte 1", 31.07.2008
-
-\chapter*{User agreement}
-\chapter*{Copyright agreement}
-\part{Appendix}
+\include{interpretation}
+\include{conclusion}
+\appendix
+\include{usermanual}
 \include{configurationmgnt}
-\chapter*{User Manual}
-\chapter*{Time managing}
-\chapter*{Glossary}
 
+\include{timemanagement}
+
+\chapter{Copyright agreement}
 \thispagestyle{fancy}
-%\section{Poster}
+%\thispagestyle{fancy}
+% TODO: Add a copy of the signed document here.
+% \includepdf{agreement}
 
-\end{document}          
+\include{glossary}
+
+% Use citations like this: AV08~\cite{AV08}.
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{alpha}
+\bibliography{main}
+\thispagestyle{fancy}
+
+\end{document}
+

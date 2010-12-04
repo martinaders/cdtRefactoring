@@ -1,12 +1,65 @@
 \chapter{Implementation and Solution}
 \thispagestyle{fancy}
 
-\section{Testing and Performance}
+From the three specified refactorings, \textit{Toggle Function Definition} has 
+been implemented in depth. This chapter explains how the refactoring was 
+implemented and which problems had to be solved during development.
+
+\section{Implementation approach}
+
+At the beginning, as many cases as possible were collected on the project wiki to gain a view on what had to be realized, what we wanted to take in scope and what had nothing to do with toggling function definitions. Some cases were simple, some exotic. The simplest one, toggling from inside a class to the same file outside the class, was chosen to be implemented first. 
+
+Before that a skeletton plugin was built with a NullRefactoring to try whether it was possible to develop a separate plugin instead of directly manipulating the CDT source code. By this approach it was assured that the developed plugin may be deployed easily even without being integrated into CDT.
+
+After the first refactoring worked, more cases were added by priority.
+
+\section{Architecture}
+
+In Eclipse, most of the architecture is already given. Some specialities of the 
+toggle refactoring are presented in this section.
+
+\subsection{Basic call flow}
+Here's the place for some nice diagram to visualize the work.
+
+Activator -- ActionDelegate -- (Job) -- ToggleRefactoring -- Strategy
+
+\subsection{The strategies}
+The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
+considered, based on the user selection. The following strategies have been f
+implemented to cover the specified cases:
+
+\begin{itemize}
+\item ToggleFromImplementationToClassStrategy
+\item ToggleFreeFunctionFromInHeaderToImpl
+\item ToggleFromClassToInHeaderStrategy
+\item ToggleFromInHeaderToClassStrategy
+\item ToggleFromInHeaderToImplementationStrategy
+\end{itemize}
+
+\subsection{implications of not using a refactoring wizard}
+No wizard was used for this refactoring since it must be fast and may be 
+executed several times in succession. When using a wizard, the 
+\textit{RefactoringWizardOpenOperation} handles the execution of the refactoring 
+inside a separate job. Since the toggle refactoring does not use the wizard, a 
+separate job had to be scheduled by the ActionDelegate.
+
+In addition, the undo functionality had to be implemented separately. When the 
+changes are performed, they (surprisingly) also return the undo changes that are 
+needed by the UndoManager. The UndoManager is available through 
+\textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
+for more details on the implementation.
+
+\section{Testing and Performance environment}
 
 This section introduces special tricks that were used to simplify testing and
 control performance.
 
-\subsection{Fuzzy whitespace recognition}
+\subsection{A real-world test environment}
+The COAST source code uses modern C++ coding style and was hence used as test 
+environment for real-world tests.
+
+\subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
+recognition for the test environment}
 
 As described in past theses at HSR, the refactoring testing environment
 needed an exact definition of the generated code. This was annoying because
@@ -22,32 +75,42 @@ The changes made to the CDT test environment help writing new tests without
 having to care whether the ASTRewriter uses spaces or tabs for indention.
 Resulting code that looks the same now gives a green bar.
 
+\subsection{Testing issues}
+
+The whitespace issue was already discussed. Another issue is that the Doxygen 
+syntax //! may not be used in the test files since this syntax is used to 
+specify the test name.
+
+Testing error conditions is not comfortable. % TODO: solutions?
+
+All in all, the special refactoring test environment was a big help for 
+refactoring relaxedly.
+
 \subsection{Performance tests}
 
-Performance was tested using the org.eclipse.test.performance plugin. Four
-different scenarios have been chosen for comparison:
+The simplest way to assess the speed of the refactoring is to look at the junit 
+time measurements. The first test that is run takes more time and represents the 
+time needed for first time toggling when the refactoring infrastructure has to 
+be loaded. 
+
+All performance tests must be executed on the same developer machine, taking the 
+average time of three consecutive runs of all tests. Five scenarios have been 
+chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
-\item testWithIncludeStatements()
-\item testWithoutIncludeStatements()
-\item testInClassToInHeader()
-\item testInHeaderToInClass()
+\item First time toggling: includes loading of the infrastructure and will take 
+some more time.
+\item Toggle from in class to header: only one translation unit is affected by 
+this refactoring.
+\item Toggle from implementation header: two translation units are affected here.
+\item Average runtime: time to run all the tests (will vary due to new tests but 
+helpful for comparing effects of small changes between versions)
+\item Emtpy reference test: a dummy refactoring that won't load and analyze any 
+code. Shows what amount of time is consumed by the given refactoring 
+infrastructure.
 \end{enumerate}
 
-In addition, an all-together test has been included for quick performance
-comparison and a reference test that did nothing was run to measure the overhead
-of the performance test framework. Since in reality the refactorings are slower
-than the (repeated) measurements, resulting values should be considered relative
-to each other. The same developer laptop was used for before and after tests.
+Another technique to measure time more accurately was checked out. For this, the 
+org.eclipse.test.performance plugin was used. 
 
-\begin{tabular}[t]{l|rrr}
- Scenario   & first draft & final result & improvement in \% \\
- \hline
- Scenario 1	&  364ms & --ms & --\% \\
- Scenario 2	&  337ms & --ms & --\% \\
- Scenario 3	&  335ms & --ms & --\% \\
- Scenario 4	&  323ms & --ms & --\% \\
- All tests	& 5530ms & --ms & --\% \\
- Reference test	&    0ms & --ms & --\% \\
-\end{tabular}
 
