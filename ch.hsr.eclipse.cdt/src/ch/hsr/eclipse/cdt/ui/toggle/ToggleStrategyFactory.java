@@ -53,7 +53,7 @@ public class ToggleStrategyFactory {
 	}
 
 	private boolean isInClassSituation() {
-		return ToggleNodeHelper.isWrappedInsideAClass(context.getDefinition()) && context.getDeclaration() == null;
+		return ToggleNodeHelper.getParentCompositeTypeSpecifier(context.getDefinition()) != null && context.getDeclaration() == null;
 	}
 
 	private boolean isTemplateSituation() {

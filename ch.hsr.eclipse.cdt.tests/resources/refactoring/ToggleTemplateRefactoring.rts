@@ -65,13 +65,13 @@ class A {
 };
 
 
-//!TestTemplateFunctionInHeaderToInClass
+//!TestTemplateFunctionInHeaderToInClassWithTemplateSelected
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
 //@A.h
 class A {
-    template<typename T>
+    tem/*$*/plate/*$$*/<typename T>
     T foo() {
         return T();
     }
@@ -82,8 +82,7 @@ class A {
     T foo();
 };
 
-template<typename T>
-inline T A::foo()
+template<typename T> inline T A::foo()
 {
     return T();
 }

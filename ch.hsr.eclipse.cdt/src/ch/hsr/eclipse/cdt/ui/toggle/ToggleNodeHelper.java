@@ -236,7 +236,7 @@ public class ToggleNodeHelper extends NodeHelper {
 				nodes.push(((ICPPASTNamespaceDefinition) node).copy());
 				lastname = ((ICPPASTNamespaceDefinition) node).getName();
 			}
-			else if (node instanceof ICPPASTTemplateDeclaration) {
+			else if (shouldAddTemplateBrackets(node)) {
 				if (!nodes.isEmpty())
 					nodes.pop();
 				ICPPASTTemplateId templateid = ToggleNodeHelper.getTemplateParameter(node, lastname);
@@ -263,6 +263,11 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 		result.addName(declarator.getName().copy());
 		return result;
+	}
+
+	private static boolean shouldAddTemplateBrackets(IASTNode node) {
+		return node instanceof ICPPASTTemplateDeclaration
+				&& !(((ICPPASTTemplateDeclaration) node).getDeclaration() instanceof CPPASTFunctionDefinition);
 	}
 
 	static ICPPASTTemplateId getTemplateParameter(IASTNode node, IASTName name) {
@@ -329,13 +334,21 @@ public class ToggleNodeHelper extends NodeHelper {
 		return false;
 	}
 
-	public static boolean isWrappedInsideAClass(IASTNode definition) {
-		IASTNode node = definition;
+	/**
+	 * Looks inside parent nodes to find a class definition.
+	 * 
+	 * @param nodeInClass a node that may be nested inside a class definition.
+	 * @return the class definition node that the specified node is wrapped
+	 *         inside or null if the node is not inside a class definition.
+	 */
+	public static ICPPASTCompositeTypeSpecifier getParentCompositeTypeSpecifier(
+			IASTNode nodeInClass) {
+		IASTNode node = nodeInClass;
 		while (node != null) {
 			if (node instanceof ICPPASTCompositeTypeSpecifier)
-				return true;
+				return (ICPPASTCompositeTypeSpecifier) node;
 			node = node.getParent();
 		}
-		return false;
+		return null;
 	}
 }

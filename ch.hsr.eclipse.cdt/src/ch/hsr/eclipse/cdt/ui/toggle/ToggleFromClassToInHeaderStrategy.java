@@ -29,7 +29,10 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	private ToggleRefactoringContext fcontext;
 
 	public ToggleFromClassToInHeaderStrategy(ToggleRefactoringContext context) {
-		if (ToggleNodeHelper.isWrappedInsideAClass(context.getDefinition()) && ToggleNodeHelper.isWrappedInsideAClass(context.getDeclaration()))
+		if (ToggleNodeHelper.getParentCompositeTypeSpecifier(context
+				.getDefinition()) != null
+				&& ToggleNodeHelper.getParentCompositeTypeSpecifier(context
+						.getDeclaration()) != null)
 			throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
 		this.fcontext = context;
 	}
