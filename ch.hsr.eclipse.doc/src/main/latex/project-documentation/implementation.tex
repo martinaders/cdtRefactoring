@@ -18,12 +18,12 @@ After the first refactoring worked, more cases were added by priority.
 In Eclipse, most of the architecture is already given. Some specialities of the 
 toggle refactoring are presented in this section.
 
-\subsubsection{Basic call flow}
+\subsection{Basic call flow}
 Here's the place for some nice diagram to visualize the work.
 
 Activator -- ActionDelegate -- (Job) -- ToggleRefactoring -- Strategy
 
-\subsubsection{The strategies}
+\subsection{The strategies}
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
 considered, based on the user selection. The following strategies have been f
 implemented to cover the specified cases:
@@ -36,7 +36,7 @@ implemented to cover the specified cases:
 \item ToggleFromInHeaderToImplementationStrategy
 \end{itemize}
 
-\subsubsection{implications of not using a refactoring wizard}
+\subsection{implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
 executed several times in succession. When using a wizard, the 
 \textit{RefactoringWizardOpenOperation} handles the execution of the refactoring 
@@ -49,7 +49,7 @@ needed by the UndoManager. The UndoManager is available through
 \textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
 for more details on the implementation.
 
-\section{Testing and Performance}
+\section{Testing and Performance environment}
 
 This section introduces special tricks that were used to simplify testing and
 control performance.
