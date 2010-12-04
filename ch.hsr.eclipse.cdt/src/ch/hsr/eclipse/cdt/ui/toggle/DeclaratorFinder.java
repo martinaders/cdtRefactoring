@@ -75,7 +75,7 @@ public class DeclaratorFinder {
 		while (node != null) {
 			IASTFunctionDeclarator result = extractDeclarator(node);
 			if (node instanceof ICPPASTTemplateDeclaration)
-				result = extractDeclaratorFromTemplate((ICPPASTTemplateDeclaration) node);
+				result = extractDeclarator(((ICPPASTTemplateDeclaration) node).getDeclaration());
 			if (result != null)
 				return result;
 			node = node.getParent();
@@ -83,17 +83,9 @@ public class DeclaratorFinder {
 		return null;
 	}
 
-	private IASTFunctionDeclarator extractDeclaratorFromTemplate(
-			ICPPASTTemplateDeclaration node) {
-		for (IASTNode childnode : node.getChildren()) {
-			IASTFunctionDeclarator result = extractDeclarator(childnode);
-			if (result != null)
-				return result;
-		}
-		return null;
-	}
-
 	private IASTFunctionDeclarator extractDeclarator(IASTNode node) {
+		if (node instanceof ICPPASTTemplateDeclaration)
+			node = ((ICPPASTTemplateDeclaration) node).getDeclaration();
 		if (node instanceof IASTFunctionDeclarator)
 			return (IASTFunctionDeclarator) node;
 		if (node instanceof IASTFunctionDefinition)
