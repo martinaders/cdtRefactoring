@@ -224,25 +224,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 */
 	static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator, IASTNode limiter) {
 		IASTNode node = declarator;
-		Stack<IASTNode> nodes = new Stack<IASTNode>();
-		IASTName lastname = declarator.getName();
-		while(node.getParent() != null && node.getParent() != limiter) {
-			node = node.getParent();
-			if (node instanceof IASTCompositeTypeSpecifier) {
-				nodes.push(((IASTCompositeTypeSpecifier) node).copy());
-				lastname = ((IASTCompositeTypeSpecifier) node).getName();
-			}
-			else if (node instanceof ICPPASTNamespaceDefinition) {
-				nodes.push(((ICPPASTNamespaceDefinition) node).copy());
-				lastname = ((ICPPASTNamespaceDefinition) node).getName();
-			}
-			else if (node instanceof ICPPASTTemplateDeclaration) {
-				if (!nodes.isEmpty())
-					nodes.pop();
-				ICPPASTTemplateId templateid = ToggleNodeHelper.getTemplateParameter(node, lastname);
-				nodes.add(templateid);
-			} 
-		}
+		Stack<IASTNode> nodes = getQualifiedNames(declarator, limiter, node);
 		
 		CPPASTQualifiedName result = new CPPASTQualifiedName();
 		IASTName name;
@@ -263,6 +245,30 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 		result.addName(declarator.getName().copy());
 		return result;
+	}
+
+	private static Stack<IASTNode> getQualifiedNames(
+			IASTFunctionDeclarator declarator, IASTNode limiter, IASTNode node) {
+		Stack<IASTNode> nodes = new Stack<IASTNode>();
+		IASTName lastname = declarator.getName();
+		while(node.getParent() != null && node.getParent() != limiter) {
+			node = node.getParent();
+			if (node instanceof IASTCompositeTypeSpecifier) {
+				nodes.push(((IASTCompositeTypeSpecifier) node).copy());
+				lastname = ((IASTCompositeTypeSpecifier) node).getName();
+			}
+			else if (node instanceof ICPPASTNamespaceDefinition) {
+				nodes.push(((ICPPASTNamespaceDefinition) node).copy());
+				lastname = ((ICPPASTNamespaceDefinition) node).getName();
+			}
+			else if (node instanceof ICPPASTTemplateDeclaration) {
+				if (!nodes.isEmpty())
+					nodes.pop();
+				ICPPASTTemplateId templateid = ToggleNodeHelper.getTemplateParameter(node, lastname);
+				nodes.add(templateid);
+			} 
+		}
+		return nodes;
 	}
 
 	static ICPPASTTemplateId getTemplateParameter(IASTNode node, IASTName name) {
