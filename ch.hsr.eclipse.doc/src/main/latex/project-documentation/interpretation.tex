@@ -1,9 +1,52 @@
 \chapter{Interpretation}
 \thispagestyle{fancy}
 
+After implementation, a look back is made on what the resulting refactoring is 
+capable of and what may still need some improvement.
+
+\section{Features and limitations}
+
+
+\section{Test coverage}
+The test coverage tool Eclemma was a good help to find dead code and to think 
+about justification of code blocks. 
+
+Creating new files was not tested due to the dialog box popping up during 
+execution. If a refactoring has to be done with more user interaction, it should 
+be investigated how this may be tested.
+
+\section{Performance results}
+
+It is difficult to compare the speed to other refactorings of CDT since wizards 
+are used for the other known refactorings. However, the goal was reached that 
+the refactoring is executing almost instantly.
+
+The following table shows speed improvements during the development of the 
+project:
+
+\begin{tabular}[t]{l|rrr}
+ Scenario   & first draft & final result & improvement in \% \\
+ \hline
+ first time toggling 	&  ---ms & --ms & --\% \\
+ toggle free function	&  ---ms & --ms & --\% \\
+ average runtime	&  ---ms & --ms & --\% \\
+ emtpy reference test	&  ---ms & --ms & --\% \\
+\end{tabular}
+
+The results from the \textit{org.eclipse.test.performance} speed tests were not 
+used in the end. Since in reality the refactorings are much slower than the 
+(repeated) measurements, resulting values may only be compared relative to each 
+other.
+
 \section{Personal review}
 
+Some words from the authors about the developed plugin, project management, what 
+was fun and what not.
+
 \subsection{Martin Schwab}
+
+What I like about the developed refactoring is that it was possible to implement 
+it without complex wizards. 
 
 \subsection{Thomas Kallenberg}
 

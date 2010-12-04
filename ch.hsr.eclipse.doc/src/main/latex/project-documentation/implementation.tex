@@ -17,7 +17,7 @@ Activator -- ActionDelegate -- (Job) -- ToggleRefactoring -- Strategy
 
 \subsubsection{The strategies}
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the user selection. The following strategies have been 
+considered, based on the user selection. The following strategies have been f
 implemented to cover the specified cases:
 
 \begin{itemize}
@@ -50,7 +50,8 @@ control performance.
 The COAST source code uses modern C++ coding style and was hence used as test 
 environment for real-world tests.
 
-\subsection{Fuzzy whitespace recognition for the test environment}
+\subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
+recognition for the test environment}
 
 As described in past theses at HSR, the refactoring testing environment
 needed an exact definition of the generated code. This was annoying because
@@ -85,7 +86,7 @@ time needed for first time toggling when the refactoring infrastructure has to
 be loaded. 
 
 All performance tests must be executed on the same developer machine, taking the 
-average time of three consecutive runs of all tests. Four scenarios have been 
+average time of three consecutive runs of all tests. Five scenarios have been 
 chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
@@ -104,26 +105,4 @@ infrastructure.
 Another technique to measure time more accurately was checked out. For this, the 
 org.eclipse.test.performance plugin was used. 
 
-\subsubsection{Results}
-
-It is difficult to compare the speed to other refactorings of CDT since wizards 
-are used for the other known refactorings. However, the goal was reached that 
-the refactoring is executing almost instantly.
-
-The following table shows speed improvements during the development of the 
-project:
-
-\begin{tabular}[t]{l|rrr}
- Scenario   & first draft & final result & improvement in \% \\
- \hline
- first time toggling 	&  ---ms & --ms & --\% \\
- toggle free function	&  ---ms & --ms & --\% \\
- average runtime	&  ---ms & --ms & --\% \\
- emtpy reference test	&  ---ms & --ms & --\% \\
-\end{tabular}
-
-The results from the \textit{org.eclipse.test.performance} speed tests were not 
-used in the end. Since in reality the refactorings are much slower than the 
-(repeated) measurements, resulting values may only be compared relative to each 
-other.
 
