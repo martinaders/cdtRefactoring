@@ -42,6 +42,7 @@ import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
 import org.eclipse.cdt.core.index.IndexLocationFactory;
+import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
@@ -123,12 +124,10 @@ public class ToggleNodeHelper extends NodeHelper {
 		IASTStatement newbody = def.getBody().copy();
 		ICPPASTFunctionDefinition newfunc = null;
 		if (hasCatchHandlers(def)) {
-			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl,
-					newbody);
+			newfunc = new CPPASTFunctionWithTryBlock(newdeclspec, funcdecl,newbody);
 			copyCatchHandlers(def, newfunc);
 		} else {
-			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl,
-					newbody);
+			newfunc = new CPPASTFunctionDefinition(newdeclspec, funcdecl,newbody);
 		}
 	
 		if (hasInitializerList(def)) {
@@ -137,8 +136,7 @@ public class ToggleNodeHelper extends NodeHelper {
 		return newfunc;
 	}
 
-	static IASTNode getQualifiedNameDefinition(
-			IASTFunctionDefinition def, 
+	static IASTNode getQualifiedNameDefinition(IASTFunctionDefinition def, 
 			IASTTranslationUnit definition_unit, IASTNode namespace) {
 		
 		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def.getDeclSpecifier().copy();
@@ -223,34 +221,34 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * @return
 	 */
 	static ICPPASTQualifiedName getQualifiedName(IASTFunctionDeclarator declarator, IASTNode limiter) {
-		IASTNode node = declarator;
-		Stack<IASTNode> nodes = getQualifiedNames(declarator, limiter, node);
-		
+		Stack<IASTNode> nodes = getQualifiedNames(declarator, limiter, declarator);
+		CPPASTQualifiedName result = reAssembleQualifiedName(nodes);
+		result.addName(declarator.getName().copy());
+		return result;
+	}
+
+	private static CPPASTQualifiedName reAssembleQualifiedName(
+			Stack<IASTNode> nodes) {
 		CPPASTQualifiedName result = new CPPASTQualifiedName();
-		IASTName name;
 		while(!nodes.isEmpty()) {
 			IASTNode nnode = nodes.pop();
 			if (nnode instanceof IASTCompositeTypeSpecifier) {
-				name = ((IASTCompositeTypeSpecifier) nnode).getName();
-				result.addName(name);
+				result.addName(((IASTCompositeTypeSpecifier) nnode).getName());
 			}
 			else if (nnode instanceof ICPPASTNamespaceDefinition) {
-				name = ((ICPPASTNamespaceDefinition) nnode).getName(); 
-				result.addName(name);
+				result.addName(((ICPPASTNamespaceDefinition) nnode).getName());
 			}
 			else if (nnode instanceof ICPPASTTemplateId) {
-				ICPPASTTemplateId id = (ICPPASTTemplateId) nnode;
-				result.addName(id);
+				result.addName((ICPPASTTemplateId) nnode);
 			}
 		}
-		result.addName(declarator.getName().copy());
 		return result;
 	}
 
 	private static Stack<IASTNode> getQualifiedNames(
 			IASTFunctionDeclarator declarator, IASTNode limiter, IASTNode node) {
-		Stack<IASTNode> nodes = new Stack<IASTNode>();
 		IASTName lastname = declarator.getName();
+		Stack<IASTNode> nodes = new Stack<IASTNode>();
 		while(node.getParent() != null && node.getParent() != limiter) {
 			node = node.getParent();
 			if (node instanceof IASTCompositeTypeSpecifier) {
@@ -296,25 +294,45 @@ public class ToggleNodeHelper extends NodeHelper {
 		
 		IIndexFile thisfile = projectindex.getFile(asttu.getLinkage().getLinkageID(),IndexLocationFactory.getWorkspaceIFL(file));
 		String filename = ToggleNodeHelper.getFilenameWithoutExtension(file.getFullPath().toString());
-		if (file.getFileExtension().equals("h")) {
-			for (IIndexInclude include : projectindex.findIncludedBy(thisfile)) {
-				if (ToggleNodeHelper.getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(filename)) {
-					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(include.getIncludedBy().getLocation().getURI(), cProject);
-					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+		IIndexInclude[] include;
+		boolean headerflag = false;
+		if (asttu.isHeaderUnit()) {
+			include = projectindex.findIncludedBy(thisfile);
+			headerflag = true;
+		} else {
+			include = projectindex.findIncludes(thisfile);
+		}
+		
+		URI uri = getTranslationUnitOfSiblingFile(include, filename, headerflag);
+		return getTranslationUnitFromFile(cProject, projectindex, uri);
+	}
+	
+	
+	private static URI getTranslationUnitOfSiblingFile(IIndexInclude[] includes, 
+			String filename, boolean isheader) {
+		URI uri = null;
+		for(IIndexInclude include: includes) {
+			try {
+				if (isheader) {
+					uri = include.getIncludedBy().getLocation().getURI();
+				} else {
+					uri = include.getIncludesLocation().getURI();
 				}
-			}
-		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("c")) {
-			for (IIndexInclude include : projectindex.findIncludes(thisfile)) {
-				if (ToggleNodeHelper.getFilenameWithoutExtension(include.getFullName()).equals(
-						filename)) {
-					URI uri = include.getIncludesLocation().getURI();
-					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
-					return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
-					
+				if (ToggleNodeHelper.getFilenameWithoutExtension(uri.getRawPath()).equals(filename)) {
+					break;
 				}
+			} catch (CoreException e) {
+				throw new NotSupportedException("Could not get sibling translation unit");
 			}
 		}
-		return null;
+		return uri;
+	}
+
+	private static IASTTranslationUnit getTranslationUnitFromFile(
+			ICProject cProject, IIndex projectindex, URI uri)
+			throws CModelException, CoreException {
+		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
+		return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 	}
 
 	static String getFilenameWithoutExtension(String filename) {
