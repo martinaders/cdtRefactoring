@@ -5,6 +5,14 @@ From the three specified refactorings, \textit{Toggle Function Definition} has
 been implemented in depth. This chapter explains how the refactoring was 
 implemented and which problems had to be solved during development.
 
+\section{Implementation approach}
+
+At the beginning, as many cases as possible were collected on the project wiki to gain a view on what had to be realized, what we wanted to take in scope and what had nothing to do with toggling function definitions. Some cases were simple, some exotic. The simplest one, toggling from inside a class to the same file outside the class, was chosen to be implemented first. 
+
+Before that a skeletton plugin was built with a NullRefactoring to try whether it was possible to develop a separate plugin instead of directly manipulating the CDT source code. By this approach it was assured that the developed plugin may be deployed easily even without being integrated into CDT.
+
+After the first refactoring worked, more cases were added by priority.
+
 \section{Architecture}
 
 In Eclipse, most of the architecture is already given. Some specialities of the 
