@@ -80,10 +80,12 @@ class A {
 class A {
     template<typename T>
     T foo();
+
 };
 
 template<typename T> inline T A::foo()
 {
     return T();
 }
+
 
