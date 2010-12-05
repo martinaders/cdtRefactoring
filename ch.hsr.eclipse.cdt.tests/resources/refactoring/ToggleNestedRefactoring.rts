@@ -120,33 +120,3 @@ class A {
 
     };
 };
-//!TestNestedClassesWithQualifiedNamedDefinition
-//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
-//@.config
-filename=A.h
-//@A.h
-class N {
-	class M {
-		void freefunction();
-	};
-    void M::/*$*/freefunction/*$$*/() {
-    	return;
-    }
-};
-//=
-class N {
-	class M {
-		void freefunction();
-	};
-};
-//@A.cpp
-#include "A.h"
-//=
-#include "A.h"
-
-
-void N::M::freefunction()
-{
-    return;
-}
-
