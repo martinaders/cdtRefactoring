@@ -39,14 +39,10 @@ Emanuel Graf has been working on Eclipse refactorings for a long time. Since
 \section{What has been planned}
 
 During this semester thesis it was planned to introduce and improve one or more
-refactorings to the Eclipse CDT project. The priorities are as follows
+refactorings to the Eclipse CDT project. They will now be introduced by 
+priority.
 
-\begin{enumerate}
-\item Toggle (Member-) Function Implementation
-\item Re-implement Implement Function
-\item Override virtual Member Function
-\end{enumerate}
-
+\subsection{\textit{Toggle (Member-) Function Implementation}}
 There is a need for three toggling subfunctions to enable toggling circularly
 from \texttt{in-class}
 to \texttt{in-header} to \texttt{separate-file}  and back again to
@@ -54,17 +50,24 @@ to \texttt{in-header} to \texttt{separate-file}  and back again to
 implementation is fast enough there is no need for a configuration dialog which
 defines the order of the toggle subfunctions.
 
-Depending on the success of the implementation with those three variations of
-the
-first refactoring we continue with the re-implementation of  ``Implement
-Function'' and then ``Override virtual member function''.
+\subsection{\textit{Implement Member Function}}
+The current CDT plug-in already includes a \textit{Implement Member Function}.
+However, it is slow and does not fit together with the \textit{Move
+Implementation}. It breaks the coding flow for adding functionality to classes
+twice, which could be a reason not to use the toggle key. Therefore, toggle key
+will be supported by a new \textit{Implement Member Function} which achieves
+synergy with the toggle key.
 
-The re-implementation of ``implement function'' should be very fast. It should
-only create an empty block below the function signature. This newly created
-block can then be toggled to the implementation file.
+Depending on the success of the implementation with the first refactoring it is 
+planned to re-implement the \textit{Implement Function} refactoring.
 
-\section{Basic goals}
+\subsection{\textit{Override virtual member function}}
+This code genrator may share some functionality with the above ones. Its goal is 
+to help the user override multiple member functions of an inherited class.
 
+\section{Objectives}
+
+These are the basic aims for the project:
 \begin{itemize}
  \item Toggling between \texttt{in-class}, \texttt{in-header},
 \texttt{separate-file} and back again to \texttt{in-class} works for basic and
@@ -87,7 +90,7 @@ functionality can be added to Eclipse. A website describes in short the
 functionality and our project vision.
 \end{itemize}
 
-\section{Advanced goals}
+\subsection{Advanced objectives}
 All basic goals have been archived. Additionally:\newline
 \begin{itemize}
  \item Toggling function is fast. less than 1s
@@ -102,6 +105,13 @@ function signature.
 the block.
 \end{itemize}
 
+\subsection{Further objectives and outlook}
+
+If there is enough time an \textit{Override Virtual Function} is implemented.
+Additionally, content assist can be implemented. This could be part of a
+bachelor thesis which continues and completes the work done in this semester
+thesis.
+
 \section{Expected outcome}
 
 Implement member function and the toggle key are written to work in synergy.
@@ -110,13 +120,7 @@ a hot-key is used to implement the function. At this point the toggle key can
 be hit at any time to move the function to the appropriate position and
 continue with the next new member function.
 
-\section{High level goals and outlook}
-
-If there is enough time an \textit{Override Virtual Function} is implemented.
-Additionally, content assist can be implemented. This could be part of a
-bachelor thesis which continues and completes the work done in this semester
-thesis.
-
 \section{Project duration}
 The semester thesis starts on September 20th and has to be finished until
 December 23rd, 2010.
+

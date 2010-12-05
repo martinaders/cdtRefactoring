@@ -4,7 +4,7 @@ class A {
 	int x();
 };
  
-int A::x() { 
+inline int A::x() { 
 	/* implementation */ 
 }
 #endif

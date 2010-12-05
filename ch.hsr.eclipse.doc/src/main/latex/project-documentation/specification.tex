@@ -12,10 +12,29 @@ file or vice versa.
 
 \textit{Toggle Function Definition} moves the code of a member function between 
 different possible places, preserving the declaration statement inside the 
-header file. What the different places are and in which direction the code may 
-be moved is described in the following chapters. 
+header file. What the different places are, in which direction the code may be 
+moved and in which situation the refactoring may be invoked is described in the 
+following chapters. 
 
-\subsection{Three ways to implement a member function}
+\subsection{Activation}
+
+Most important is this basic rule: A function definition must exist.
+
+The refactoring may be activated as soon as the user is editing a C++ 
+translation unit and the cursor resides inside a function declaration or 
+definition. For the selected function, a function definition must exist in an 
+associated file. If no definition exists, the refactoring aborts. There may be 
+more than one declaration. If more than one declaration is selected, it is not 
+specified which one will be toggled.
+
+The refactoring should allow selections anywhere inside the function, be it 
+inside the signature, function (try) body, catch handlers or template 
+declarations. If functions are defined inside a function body which is 
+non-standard but allowed for some compilers, the outermost function parent 
+should be toggled.
+% TODO: This is not the case yet
+
+\subsection{Three positions for function definitions}
 
 In C++ there are three possible positions where a \marginline{\textit{in-class}}
 function definition may occur. Listing \ref{classheaderimpl} shows an example
@@ -28,18 +47,23 @@ most intuitive behaviour for Java developers. New code blocks created by
 label={classheaderimpl}]{classheader_implementation.h}
 
 %TODO: add a footnote for the 'extern' problem. (MS, 2.12.2010)
-The most common position \marginline{\textit{in-header}} for ``templated``
-member functions is described by listing \ref{outsideclass}. Due to the problem
-of the \texttt{extern} keyword, the definition must stay in the header
-file.
+To keep the interface clear, \marginline{\textit{in-header}} functions may be 
+placed outside the class definition but still in the same (header) file. Such a 
+function is called \textit{inlined}. For templates, this is the only position 
+where implementation may be placed outside the class definition due to problems 
+of the \textit{extern} keyword. Templated functions cannot be placed outside the 
+header file. The following listings show an example of what will be called 
+\textit{in-header situation} throughout this document.
 
 \lstinputlisting[caption={Implementation outside of the class in A.h},
 label={outsideclass}]{outside_class_implementation.h}
 
-To avoid changing header files, \marginline{\textit{in-file}} it is common to
-write implementation code inside a separate .cpp file. This third position of a
-member function definition is shown by listings \ref{twofilesolution_header} and
-\ref{twofilesolution_impl}.
+To \marginline{\textit{in-file}} separate implementation from the interface more 
+clearly, a separate source file may be used for the definitions while the 
+declarations remain in the header file. An example for this position of a 
+function definition is shown by listings \ref{twofilesolution_header} and
+\ref{twofilesolution_impl}. The position will be called 
+\textit{in-implementation} or \textit{in-file}.
 
 \begin{tabular}{p{5cm}p{.4cm}p{5cm}}
 \lstinputlisting[caption={A.h},
@@ -49,56 +73,48 @@ label={twofilesolution_header}]{implementation_file.h}
 label={twofilesolution_impl}]{implementation_file.c}
 \end{tabular}
 
-\subsection{How it works}
+\subsection{Basic scenarios}
 
 Depending on the current selections, different strategies need to be applied to 
-move the function definition. All supported toggling Situations and their 
+move the function definition. All supported toggling situations and their 
 special cases are listed in this chapter.
 
-\subsubsection{Toggling free functions}
-may be templated or namespaced and may be placed inside a cpp or a header file.
+\subsubsection{Free functions}
+For plain free functions, toggling shall happen between two positions:
+\begin{enumerate}
+\item Toggle from in-header to in-file
+\item Toggle from in-file to in-header
+\end{enumerate}
 
-\subsubsection{Toggling member functions}
+\subsubsection{Member functions}
+For functions inside classes, toggling is expected to be available for three 
+positions:
+\begin{enumerate}
+\item Toggle from in-class to in-header
+\item Toggle from in-header to in-file
+\item Toggle from in-file to in-class
+\end{enumerate}
 
-\textit{Toggle Function Definition} is used to move the implementation of a 
-member function between the positions described above. For a non-templated 
-member function, moving is done in the following order:
+\subsubsection{Templated member functions}
+An exception are templated member functions that may only be toggled inside the 
+same translation unit.
+\begin{enumerate}
+\item Toggle from in-class to in-header
+\item Toggle from in-header to in-class
+\end{enumerate}
 
-\begin{itemize}
- \item From inside of the class definition (header file)
- \item to outside of the class in the same header file, using the
-\textit{inline} keyword
- \item to a separate \textit{.cpp} file
- \item and back into the class definition / header file.
-\end{itemize}
+\subsection{Special case - namespaces}
 
-\subsubsection{Toggling templated member functions}
+Empty namespaces shall be deleted when toggling removed the last function 
+contained.
 
-Templated member functions \marginline{templates} usually cannot be placed into
-a separate file due to compiler restrictions. In case of a templated member
-function, the implementation is therefore only moved between the first two
-positions described.
+\section{\textit{Implement Member Function}}
 
-Switching from the \textit{in-class} to the \textit{in-file} position directly
-is not given a separate name nor key binding. Fast switching should make a
-separate mechanism redundant. 
+\subsection{Activation}
+This refactoring shall be active as soon as a function declaration is selected 
+that has no associated definition. A missing semicolon at the end of the 
+function declaration should not stop the mechanism to work.
 
-The active editor \marginline{editor} stays inside the same file after any of
-the described moves.
-
-\section{Re-Implementation of \textit{Implement Member Function}}
-
-\subsection[The need for a new \textit{Impl. Member Function}]{The need for a 
-new \textit{Implement Member Function}}
-
-The current CDT plug-in already includes a \textit{Implement Member Function}.
-However, it is slow and does not fit together with the \textit{Move
-Implementation}. It breaks the coding flow for adding functionality to classes
-twice, which could be a reason not to use the toggle key. Therefore, toggle key
-will be supported by a new \textit{Implement Member Function} which achieves
-synergy with the toggle key.
-
-\subsection{How it works}
 After writing a function declaration in the class definition, not yet written
 the ``;'', code completion can be used to create the function body with a
 appropriated default empty return statement.\newline
@@ -107,4 +123,15 @@ An already completed function declaration can be transformed to a function
 definition by using the ``Implement Member Function'' hot-key which creates a
 body with default empty return statement.
 
+\subsection{Expected result}
+As described above, functions may only be toggled when they provide a function 
+body. This refactoring shall provide a facility to create an empty function body 
+with a default return value to enable \textit{Toggle Function Definition}.
+
+The re-implementation of \textit{implement function} must be very fast. 
+
 \section{Override virtual member function}
+
+No deeper investigation has been done for this refactoring since it was not 
+implemented during the project.
+
