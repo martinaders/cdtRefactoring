@@ -86,6 +86,17 @@ Testing error conditions is not comfortable. % TODO: solutions?
 All in all, the special refactoring test environment was a big help for 
 refactoring relaxedly.
 
+\section{Test coverage}
+The test coverage tool Eclemma was a good help to find dead code and to think 
+about justification of code blocks. 
+
+Creating new files was not tested due to the dialog box popping up during 
+execution. If a refactoring has to be done with more user interaction, it
+should 
+be investigated how this may be tested.
+
+%todo: move this to project setup and link from here to there?
+
 \subsection{Performance tests}
 
 The simplest way to assess the speed of the refactoring is to look at the junit 
