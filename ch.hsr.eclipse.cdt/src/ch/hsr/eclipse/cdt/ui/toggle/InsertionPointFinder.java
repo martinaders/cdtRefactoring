@@ -89,7 +89,7 @@ public class InsertionPointFinder {
 				@Override
 				public int visit(IASTDeclaration declaration) {
 					if (declaration instanceof ICPPASTFunctionDefinition) {
-						if (declaration.getParent() != null && declaration.getParent() instanceof ICPPASTCompositeTypeSpecifier)
+						if (declaration.getParent() != null && ToggleNodeHelper.getParentCompositeTypeSpecifier(declaration) != null)
 							return PROCESS_CONTINUE;
 						definitions.add((ICPPASTFunctionDefinition) declaration);
 					}

@@ -65,3 +65,25 @@ class A {
 };
 
 
+//!TestTemplateFunctionInHeaderToInClassWithTemplateSelected
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    tem/*$*/plate/*$$*/<typename T>
+    T foo() {
+        return T();
+    }
+};
+//=
+class A {
+    template<typename T>
+    T foo();
+};
+
+template<typename T> inline T A::foo()
+{
+    return T();
+}
+
