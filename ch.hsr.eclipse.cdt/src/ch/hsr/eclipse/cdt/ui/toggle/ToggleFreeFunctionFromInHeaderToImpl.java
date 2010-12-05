@@ -12,8 +12,8 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
@@ -67,6 +67,12 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 		removeDefinitionFromHeader(modifications);
 		addDefinitionToImplementation(modifications);
 	}
+	
+	private void removeDefinitionFromHeader(ModificationCollector modifications) {
+		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		ASTLiteralNode declaration = new ASTLiteralNode(context.getDefinition().getDeclSpecifier().getRawSignature() + " " + context.getDefinition().getDeclarator().getRawSignature() + ";");
+		astrewriter.replace(context.getDefinition(), declaration, infoText);
+	}
 
 	private void addDefinitionToImplementation(
 			ModificationCollector modifications) {
@@ -74,13 +80,9 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 		if (includenode != null) {
 			otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null, includenode, infoText);
 		}
-		otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null,
-				context.getDefinition().copy(), infoText);
-	}
-
-	private void removeDefinitionFromHeader(ModificationCollector modifications) {
-		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		IASTSimpleDeclaration declaration = ToggleNodeHelper.createDeclarationFromDefinition(context.getDefinition());
-		astrewriter.replace(context.getDefinition(), declaration, infoText);
+		IASTFunctionDefinition newDefinition = context.getDefinition().copy();
+		ASTRewrite newRw = otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null,
+				newDefinition, infoText);
+		newRw.replace(newDefinition.getBody(), new ASTLiteralNode(context.getDefinition().getBody().getRawSignature()), infoText);
 	}
 }

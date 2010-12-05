@@ -18,7 +18,7 @@ public:
     }
 };
 
-int /*$*/freeFunction/*$$*/(int *a, int &b) {
+int /*$*/freeFunction/*$$*/(int *a, int & b) {
     return 42;
 }
 //=
@@ -38,7 +38,6 @@ public:
 };
 
 int freeFunction(int *a, int & b);
-
 //@A.cpp
 #include "A.h"
 
@@ -56,7 +55,6 @@ int freeFunction(int *a, int & b)
 {
     return 42;
 }
-
 
 //!TestFreeFunctionToggleFromImplementationToHeaderWithDeclaration
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -198,7 +196,6 @@ int /*$*/freeFunction/*$$*/()
 }
 //=
 int freeFunction();
-
 //@A.cpp
 #include "A.h"
 //=
@@ -209,7 +206,6 @@ int freeFunction()
 {
     return 42;
 }
-
 //!TestQualifiedNameToggle
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
