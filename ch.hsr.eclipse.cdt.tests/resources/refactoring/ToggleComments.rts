@@ -85,3 +85,42 @@ try
     // endOfCatch
 }
 
+//!TestInHeaderToImplComments
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void member();
+};
+inline void A::/*$*/member/*$$*/() try {
+    // returnComment
+    return;
+    // endOfBody
+}catch(int i) {
+    // catchComment
+    int x = 3;
+    // endOfCatch
+}
+//=
+class A {
+    void member();
+};
+
+//@A.cpp
+#include "A.h"
+//=
+#include "A.h"
+
+
+void A::member()
+try
+{
+    // returnComment
+    return;
+    // endOfBody
+} catch(int i) {
+    // catchComment
+    int x = 3;
+    // endOfCatch
+}

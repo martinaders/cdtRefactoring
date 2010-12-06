@@ -118,7 +118,6 @@ void A::func2()
 {
     return;
 }
-
 void A::func3()
 {
     return;

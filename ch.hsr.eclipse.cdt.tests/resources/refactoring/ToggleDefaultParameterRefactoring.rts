@@ -64,7 +64,6 @@ void A::member(int a, int b)
     return;
 }
 
-
 //!TestDefaultParameterInitializerInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config

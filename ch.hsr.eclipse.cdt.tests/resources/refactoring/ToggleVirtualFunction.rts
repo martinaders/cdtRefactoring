@@ -66,7 +66,6 @@ int A::foo()
     return 0;
 }
 
-
 //!TestVirtualSpecifierFromImplementationToHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config

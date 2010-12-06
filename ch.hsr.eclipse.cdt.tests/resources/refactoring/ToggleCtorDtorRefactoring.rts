@@ -90,7 +90,6 @@ A::A(int x, int y)
 {
 }
 
-
 //!TestConstructorToggleInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -211,7 +210,6 @@ int main() {
 A::~A()
 {
 }
-
 
 //!TestDestructorToggleInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest

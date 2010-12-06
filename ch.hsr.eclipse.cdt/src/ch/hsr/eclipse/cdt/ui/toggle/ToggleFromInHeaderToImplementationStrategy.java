@@ -16,6 +16,8 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.CPPASTVisitor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -113,7 +115,15 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(
 				context.getDeclarationUnit(), insertion_parent.getTranslationUnit(), 
 				context.getDeclaration());
-		impl_rewrite.insertBefore(insertion_parent, insertion_point, new_definition, infoText);
+		ASTRewrite newRw = impl_rewrite.insertBefore(insertion_parent, insertion_point, new_definition, infoText);
+		String bodyString = context.getDefinition().getBody().getRawSignature();
+		newRw.replace(new_definition.getBody(), new ASTLiteralNode(bodyString), infoText);
+		if (context.getDefinition() instanceof ICPPASTFunctionWithTryBlock) {
+			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock)context.getDefinition()).getCatchHandlers();
+			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock)new_definition).getCatchHandlers();
+			for (int i = 0; i < newCatches.length; i++)
+				newRw.replace(newCatches[i], new ASTLiteralNode(" " + oldCatches[i].getRawSignature()), infoText);
+		}
 	}
 
 	private CPPASTNamespaceDefinition createNamespace(
@@ -124,8 +134,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private void removeDefinitionFromHeader(ModificationCollector collector) {
 		ASTRewrite header_rewrite = collector.rewriterForTranslationUnit(
 				context.getDefinitionUnit());
-		header_rewrite.remove(ToggleNodeHelper.getParentRemovePoint(
-				context.getDefinition()), infoText);
+		header_rewrite.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
 	}
 
 	private IASTNode searchNamespaceInImpl(final IASTName name) {

@@ -71,7 +71,6 @@ namespace N
     {
         return;
     }
-
 }
 
 //!TestSimpleNamespaceInHeaderToImplementationWithNSDefinitionInImpl
@@ -123,7 +122,6 @@ namespace N
     {
         return;
     }
-
 }
 //!TestSimpleNamespaceInHeaderToImplementationWithNamespaceQualifiedName
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -171,9 +169,8 @@ namespace N
 {
     void A::foo()
     {
-        return;
-    }
-
+    return;
+}
 }
 
 //!TestSimpleNamespaceFromImplementationToInHeader

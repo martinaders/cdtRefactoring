@@ -76,7 +76,6 @@ int A::function()
     return 0;
 }
 
-
 //!TestSimpleFunctionInImplementationToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
