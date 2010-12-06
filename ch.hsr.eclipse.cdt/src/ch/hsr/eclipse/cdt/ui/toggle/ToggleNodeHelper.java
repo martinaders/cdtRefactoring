@@ -195,10 +195,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return newdefinition;
 	}
 
-	/**
-	 * Does not work for *every* function declarator; its parent needs to be a
-	 * simple declaration.
-	 */
 	static boolean isVirtual(IASTFunctionDeclarator fdec) {
 		if (fdec.getParent() instanceof IASTSimpleDeclaration) {
 			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
