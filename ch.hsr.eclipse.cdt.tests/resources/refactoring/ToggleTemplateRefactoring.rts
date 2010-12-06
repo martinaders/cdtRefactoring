@@ -29,7 +29,6 @@ template<typename T, typename U> inline T A<T,U>::B::member()
     return T();
 }
 
-
 //!TestTemplateFunctionInHeaderToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -87,5 +86,4 @@ template<typename T> inline T A::foo()
 {
     return T();
 }
-
 

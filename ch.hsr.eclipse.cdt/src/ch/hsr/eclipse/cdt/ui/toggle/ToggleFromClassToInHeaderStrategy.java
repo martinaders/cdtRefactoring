@@ -11,14 +11,24 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionWithTryBlock;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -46,17 +56,51 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		
 		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
 		simpledec.addDeclarator(funcdecl);
-		simpledec.setParent(fcontext.getDefinition().getParent());
+		IASTNode par = fcontext.getDefinition().getParent();
+		simpledec.setParent(par);
 
 		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
 		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
 		
 		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, 
-				fcontext.getDefinition().getDeclarator());
-		rewriter.insertBefore(parent_ns, insertion_point, 
-				ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), 
-						fcontext.getDefinitionUnit(), parent_ns), infoText);
+		String declSpecString = fcontext.getDefinition().getDeclSpecifier().getRawSignature();
+		String declarationString = declSpecString + " " + fcontext.getDefinition().getDeclarator().getRawSignature();
+		ArrayList<IASTComment> leadingComments = ASTCommenter.getCommentedNodeMap(fcontext.getDefinitionUnit()).getLeadingCommentsForNode(fcontext.getDefinition());
+		Collections.reverse(leadingComments);
+		for (IASTComment c : leadingComments)
+			declarationString = format(c.getRawSignature() + "\n    " + declarationString);
+
+		rewriter.replace(simpledec.getDeclSpecifier(), new ASTLiteralNode(""), infoText);
+		rewriter.replace(simpledec.getDeclarators()[0], new ASTLiteralNode(format(declarationString)), infoText);
+
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
+		ASTRewrite newRw = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
+		ICPPASTFunctionDefinition functionDefinition = null;
+		if (newDefinition instanceof ICPPASTTemplateDeclaration) {
+			ICPPASTTemplateDeclaration newTemplDefinition = (ICPPASTTemplateDeclaration)newDefinition;
+			functionDefinition = (ICPPASTFunctionDefinition) newTemplDefinition.getDeclaration();
+		} else {
+			functionDefinition = (ICPPASTFunctionDefinition)newDefinition;
+		}
+		newRw.replace(functionDefinition.getBody(), new ASTLiteralNode(format(fcontext.getDefinition().getBody().getRawSignature())), infoText);
+		if (functionDefinition instanceof ICPPASTFunctionWithTryBlock) {
+			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock)functionDefinition).getCatchHandlers();
+			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock)fcontext.getDefinition()).getCatchHandlers();
+			for (int i = 0; i < oldCatches.length; i++)
+				newRw.replace(newCatches[i], new ASTLiteralNode(format(oldCatches[i].getRawSignature())), infoText);
+		}
+	}
+
+	private String format(String rawSignature) {
+		String result = rawSignature.replace("\n        ", "\n    ");
+		result = result.replace("\n    	", "\n    ");
+		result = result.replace("\n	}", "\n}");
+		result = result.replace("\n    }", "\n}");
+		result = result.replace(") \n    {", ") {");
+		result = result.replace(")\n    {", ") {");
+		result = result.replace("        return;", "    return;");
+		return result;
 	}
 
 	private IASTNode getParentNamespace(IASTNode node) {

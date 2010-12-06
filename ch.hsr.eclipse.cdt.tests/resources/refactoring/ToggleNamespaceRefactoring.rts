@@ -23,9 +23,8 @@ namespace N {
     };
     inline void A::foo()
     {
-        return;
-    }
-
+    return;
+}
 }
 //!TestSimpleNamespaceInHeaderToImplementationWithinNSDefinition
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest

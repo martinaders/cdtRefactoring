@@ -28,11 +28,9 @@ inline void A::member(int a, int b)
 try
 {
     return;
-}
-catch(std::exception & e1){
+}catch (std::exception & e1) {
     return;
 }
-
 
 //!TestTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -171,14 +169,11 @@ inline void A::member(int a, int b)
 try
 {
     return;
-}
-catch(std::exception & e1){
+}catch (std::exception & e1) {
+    return;
+}catch (std::exception & e2) {
     return;
 }
-catch(std::exception & e2){
-    return;
-}
-
 
 //!TestMultipleTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest

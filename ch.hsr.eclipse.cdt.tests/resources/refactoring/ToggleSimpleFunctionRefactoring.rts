@@ -29,7 +29,6 @@ inline int A::function()
     return 0;
 }
 
-
 //!TestSimpleFunctionInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config

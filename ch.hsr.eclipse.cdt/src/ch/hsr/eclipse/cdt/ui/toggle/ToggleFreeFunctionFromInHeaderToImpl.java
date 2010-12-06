@@ -28,11 +28,11 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 
 	private IASTTranslationUnit sibling_tu;
 	private TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
-	private final ToggleRefactoringContext context;
+	private final ToggleRefactoringContext fcontext;
 	private ASTLiteralNode includenode;
 
 	public ToggleFreeFunctionFromInHeaderToImpl(ToggleRefactoringContext context) {
-		this.context = context;
+		this.fcontext = context;
 		if (isScopedFreeFunction())
 			throw new NotSupportedException("namespaced+templated free functions not supported yet");
 		sibling_tu = context.getTUForSiblingFile();
@@ -49,9 +49,9 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 	}
 	
 	private boolean isScopedFreeFunction() {
-		IASTFunctionDeclarator declarator = context.getDefinition().getDeclarator();
+		IASTFunctionDeclarator declarator = fcontext.getDefinition().getDeclarator();
 		if (declarator.getName() instanceof ICPPASTQualifiedName)
-			declarator = context.getDeclaration();
+			declarator = fcontext.getDeclaration();
 		IASTNode node = declarator;
 		while (node != null) {
 			if (node instanceof ICPPASTNamespaceDefinition
@@ -69,9 +69,9 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 	}
 	
 	private void removeDefinitionFromHeader(ModificationCollector modifications) {
-		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		ASTLiteralNode declaration = new ASTLiteralNode(context.getDefinition().getDeclSpecifier().getRawSignature() + " " + context.getDefinition().getDeclarator().getRawSignature() + ";");
-		astrewriter.replace(context.getDefinition(), declaration, infoText);
+		ASTRewrite astrewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
+		ASTLiteralNode declaration = new ASTLiteralNode(fcontext.getDefinition().getDeclSpecifier().getRawSignature() + " " + fcontext.getDefinition().getDeclarator().getRawSignature() + ";");
+		astrewriter.replace(fcontext.getDefinition(), declaration, infoText);
 	}
 
 	private void addDefinitionToImplementation(
@@ -80,9 +80,9 @@ public class ToggleFreeFunctionFromInHeaderToImpl implements ToggleRefactoringSt
 		if (includenode != null) {
 			otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null, includenode, infoText);
 		}
-		IASTFunctionDefinition newDefinition = context.getDefinition().copy();
+		IASTFunctionDefinition newDefinition = fcontext.getDefinition().copy();
 		ASTRewrite newRw = otherrewrite.insertBefore(sibling_tu.getTranslationUnit(), null,
 				newDefinition, infoText);
-		newRw.replace(newDefinition.getBody(), new ASTLiteralNode(context.getDefinition().getBody().getRawSignature()), infoText);
+		newRw.replace(newDefinition.getBody(), new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature()), infoText);
 	}
 }

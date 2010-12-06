@@ -23,7 +23,6 @@ inline int A::foo()
     return 0;
 }
 
-
 //!TestVirtualSpecifierFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config

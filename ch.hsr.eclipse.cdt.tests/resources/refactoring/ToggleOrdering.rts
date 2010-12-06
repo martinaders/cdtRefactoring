@@ -44,7 +44,6 @@ inline void A::func1()
 inline void A::func2()
 {
 }
-
 inline void A::func3()
 {
 }
@@ -147,7 +146,6 @@ public:
 template<typename T> inline void A<T>::func1()
 {
 }
-
 template<typename T> inline void A<T>::func3()
 {
 }
@@ -168,11 +166,9 @@ public:
 template<typename T> inline void A<T>::func1()
 {
 }
-
 template<typename T> inline void A<T>::func2()
 {
 }
-
 template<typename T> inline void A<T>::func3()
 {
 }
@@ -197,11 +193,9 @@ public:
 template<typename T> inline void A<T>::func1()
 {
 }
-
 template<typename T> inline void A<T>::/*$*/func2/*$$*/()
 {
 }
-
 template<typename T> inline void A<T>::func3()
 {
 }
@@ -225,8 +219,6 @@ public:
 template<typename T> inline void A<T>::func1()
 {
 }
-
-
 
 template<typename T> inline void A<T>::func3()
 {

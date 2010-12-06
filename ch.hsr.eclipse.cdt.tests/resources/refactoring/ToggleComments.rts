@@ -46,3 +46,42 @@ void member()
 {
     return;
 }
+//!TestInClassInHeaderComments
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template <typename T>
+class A {
+    // firstLeading
+    // secondLeading
+    T /*$*/member/*$$*/() try {
+        // returnComment
+        return T();
+        // endOfBody
+	} catch(int i) {
+        // catchComment
+        int x = 3;
+        // endOfCatch
+	}
+};
+//=
+template <typename T>
+class A {
+    // firstLeading
+    // secondLeading
+    T member();
+};
+
+template<typename T> inline T A<T>::member()
+try
+{
+    // returnComment
+    return T();
+    // endOfBody
+}catch(int i) {
+    // catchComment
+    int x = 3;
+    // endOfCatch
+}
+

@@ -19,7 +19,6 @@ inline void A::member()
     return;
 }
 
-
 //!TestSubstringSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -41,7 +40,6 @@ inline void A::member()
     return;
 }
 
-
 //!TestBodySelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -62,7 +60,6 @@ inline void A::member()
 {
     return;
 }
-
 
 //!TestBodySelectionWithConfusingName
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -87,7 +84,6 @@ inline void A::member()
     return;
 }
 
-
 //!TestLeftBorderSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -108,7 +104,6 @@ inline void A::member()
 {
     return;
 }
-
 
 //!TestRightBorderSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -131,7 +126,6 @@ inline void A::member()
     return;
 }
 
-
 //!TestOverlappingSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -152,5 +146,4 @@ inline void A::member()
 {
     return;
 }
-
 
