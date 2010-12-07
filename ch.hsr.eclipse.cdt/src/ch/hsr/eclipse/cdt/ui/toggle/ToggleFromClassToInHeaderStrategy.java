@@ -12,11 +12,10 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -49,43 +48,53 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	}
 
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
-		IASTFunctionDeclarator funcdecl = fcontext.getDefinition().getDeclarator().copy();
-		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) fcontext.getDefinition().getDeclSpecifier().copy();
-		
-		CPPNodeFactory factory = new CPPNodeFactory();
-		
-		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
-		simpledec.addDeclarator(funcdecl);
-		IASTNode par = fcontext.getDefinition().getParent();
-		simpledec.setParent(par);
+		IASTTranslationUnit uunit = fcontext.getDefinitionUnit();
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(uunit);
+		IASTFunctionDefinition oldDefinition = fcontext.getDefinition();
+		IASTSimpleDeclaration newDeclaration = createDeclarationOf(oldDefinition);
 
-		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
+		IASTNode parent_ns = getParentNamespace(oldDefinition);
 		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
 		
-		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		String declSpecString = fcontext.getDefinition().getDeclSpecifier().getRawSignature();
-		String declarationString = declSpecString + " " + fcontext.getDefinition().getDeclarator().getRawSignature();
-		ArrayList<IASTComment> leadingComments = ASTCommenter.getCommentedNodeMap(fcontext.getDefinitionUnit()).getLeadingCommentsForNode(fcontext.getDefinition());
-		Collections.reverse(leadingComments);
-		for (IASTComment c : leadingComments)
-			declarationString = format(c.getRawSignature() + "\n    " + declarationString);
+		rewriter.replace(oldDefinition, newDeclaration, infoText);
+		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(""), infoText);
 
-		rewriter.replace(simpledec.getDeclSpecifier(), new ASTLiteralNode(""), infoText);
-		rewriter.replace(simpledec.getDeclarators()[0], new ASTLiteralNode(format(declarationString)), infoText);
+		String declSpecString = oldDefinition.getDeclSpecifier().getRawSignature();
+		String declarationString = declSpecString + " " + oldDefinition.getDeclarator().getRawSignature();
+		declarationString = getComments(uunit, oldDefinition) + declarationString;
+		rewriter.replace(newDeclaration.getDeclarators()[0], new ASTLiteralNode(format(declarationString)), infoText);
 
-		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
-		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, oldDefinition.getDeclarator());
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(oldDefinition, uunit, parent_ns);
 		ASTRewrite newRw = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 		ICPPASTFunctionDefinition functionDefinition = null;
 		functionDefinition = findFuncDef(newDefinition);
-		newRw.replace(functionDefinition.getBody(), new ASTLiteralNode(format(fcontext.getDefinition().getBody().getRawSignature())), infoText);
+		newRw.replace(functionDefinition.getBody(), new ASTLiteralNode(format(oldDefinition.getBody().getRawSignature())), infoText);
 		if (functionDefinition instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock)functionDefinition).getCatchHandlers();
-			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock)fcontext.getDefinition()).getCatchHandlers();
+			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock)oldDefinition).getCatchHandlers();
 			for (int i = 0; i < oldCatches.length; i++)
 				newRw.replace(newCatches[i], new ASTLiteralNode(format(oldCatches[i].getRawSignature())), infoText);
 		}
+	}
+
+	private IASTSimpleDeclaration createDeclarationOf(
+			IASTFunctionDefinition node) {
+		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) node.getDeclSpecifier().copy();
+		IASTSimpleDeclaration simpledec = new CPPNodeFactory().newSimpleDeclaration(spec);
+		simpledec.addDeclarator(node.getDeclarator().copy());
+		simpledec.setParent(node.getParent());
+		return simpledec;
+	}
+
+	private String getComments(IASTTranslationUnit tu,
+			IASTFunctionDefinition node) {
+		ArrayList<IASTComment> leadingComments = ASTCommenter
+				.getCommentedNodeMap(tu).getLeadingCommentsForNode(node);
+		String comments = "";
+		for (IASTComment c : leadingComments)
+			comments += c.getRawSignature() + "\n    ";
+		return comments;
 	}
 
 	private ICPPASTFunctionDefinition findFuncDef(IASTNode newDefinition) {
