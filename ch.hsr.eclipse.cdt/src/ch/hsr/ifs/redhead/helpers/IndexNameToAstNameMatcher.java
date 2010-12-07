@@ -9,7 +9,6 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.index.IIndex;
-import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexName;
 import org.eclipse.cdt.core.parser.util.CharArrayUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -18,7 +17,6 @@ public class IndexNameToAstNameMatcher extends ASTVisitor {
 	private IASTName result;
 	private IBinding bindingToFind;
 	private char[] charNameToFind;
-	private IIndex index;
 	private IASTFileLocation locationToFind;
 
 	public IndexNameToAstNameMatcher(IASTTranslationUnit tu,
@@ -26,7 +24,6 @@ public class IndexNameToAstNameMatcher extends ASTVisitor {
 		super(true);
 		locationToFind = indexName.getFileLocation();
 		bindingToFind = index.findBinding(indexName);
-		this.index = index;
 		charNameToFind = bindingToFind.getNameCharArray();
 		shouldVisitImplicitNames = true;
 		shouldVisitImplicitNameAlternates = true;
