@@ -56,9 +56,8 @@ class A {
     class B {
         T member()
         {
-            return T();
-        }
-
+        return T();
+    }
     };
 
 };

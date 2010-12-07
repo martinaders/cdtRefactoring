@@ -124,3 +124,35 @@ try
     int x = 3;
     // endOfCatch
 }
+//!TestInHeaderToClassComments
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T>
+class A {
+	// Top comment
+    virtual T operator ()(const char *string);
+};
+
+template<typename T> inline T A<T>::/*$*/operator/*$$*/ ()(const char *string) try {
+    // another comment
+    return T();
+} catch (int i) {
+	int x = 3;
+}
+//=
+template<typename T>
+class A {
+	// Top comment
+    virtual T operator ()(const char *string)
+    try
+    {
+        // another comment
+        return T();
+    } catch (int i) {
+    	int x = 3;
+    }
+};
+
+
