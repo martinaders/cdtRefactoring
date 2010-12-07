@@ -104,6 +104,7 @@ public class ToggleRefactoringContext {
 			if (defnames.length > 1)
 				throw new NotSupportedException("one-definition-rule broken");
 			for (IIndexName iname : defnames) {
+				
 				IASTTranslationUnit unit = getTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
 						unit, iname, index);

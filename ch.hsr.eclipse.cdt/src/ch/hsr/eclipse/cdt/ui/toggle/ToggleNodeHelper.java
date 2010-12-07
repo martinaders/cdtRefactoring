@@ -13,6 +13,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -149,9 +150,8 @@ public class ToggleNodeHelper extends NodeHelper {
 		removeParameterInitializations(funcdecl);
 		ICPPASTFunctionDefinition newfunc = assembleFunctionDefinitionWithBody(newdeclspec, funcdecl, def);
 	
-		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration(def);
+		ICPPASTTemplateDeclaration templdecl = getTemplateDeclaration(def, newfunc);
 		if (templdecl != null) {
-			templdecl.setDeclaration(newfunc);
 			templdecl.setParent(definition_unit);
 			return templdecl;
 		} else {
@@ -160,13 +160,40 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 	}
 
-	static ICPPASTTemplateDeclaration getTemplateDeclaration(IASTNode node) {
+	static ICPPASTTemplateDeclaration getTemplateDeclaration(IASTNode node, ICPPASTFunctionDefinition newfunc) {
+		ArrayList<ICPPASTTemplateDeclaration> templdecs = getAllTemplateDeclaration(node);
+		return reassemleTemplateDeclarationOrder(templdecs, newfunc);
+	}
+
+	private static ICPPASTTemplateDeclaration reassemleTemplateDeclarationOrder(
+			ArrayList<ICPPASTTemplateDeclaration> templdecs, ICPPASTFunctionDefinition newfunc) {
+		ListIterator<ICPPASTTemplateDeclaration> iter1 = templdecs.listIterator();
+		ICPPASTTemplateDeclaration child = null;
+		while(iter1.hasNext()) {
+			child = iter1.next();
+			child.setDeclaration(newfunc);
+			ListIterator<ICPPASTTemplateDeclaration> iter2 = iter1;
+			if (iter2.hasNext()) {
+				ICPPASTTemplateDeclaration parent = iter2.next();
+				child.setParent(parent);
+				parent.setDeclaration(child);
+				child = parent;
+			}
+		}
+		return child;
+	}
+
+	private static ArrayList<ICPPASTTemplateDeclaration> getAllTemplateDeclaration(
+			IASTNode node) {
+		ArrayList<ICPPASTTemplateDeclaration> templdecs = new ArrayList<ICPPASTTemplateDeclaration>();
+		
 		while (node.getParent() != null) {
 			node = node.getParent();
-			if (node instanceof ICPPASTTemplateDeclaration)
-				return (ICPPASTTemplateDeclaration) node.copy();
+			if (node instanceof ICPPASTTemplateDeclaration) {
+				templdecs.add((ICPPASTTemplateDeclaration) node.copy());
+			}
 		}
-		return null;
+		return templdecs;
 	}
 
 	static IASTNode getParentInsertionPoint(IASTNode node,
@@ -205,9 +232,8 @@ public class ToggleNodeHelper extends NodeHelper {
 
 	static IASTNode getParentRemovePoint(IASTFunctionDefinition definition) {
 		IASTNode toremove = definition;
-		if (toremove.getParent() != null
-				&& toremove.getParent() instanceof ICPPASTTemplateDeclaration)
-			toremove = definition.getParent();
+		while (toremove.getParent() != null && toremove.getParent() instanceof ICPPASTTemplateDeclaration)
+			toremove = toremove.getParent();
 		return toremove;
 	}
 

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.eclipse.cdt.core.dom.ast.IASTComment;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
@@ -77,12 +78,7 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
 		ASTRewrite newRw = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 		ICPPASTFunctionDefinition functionDefinition = null;
-		if (newDefinition instanceof ICPPASTTemplateDeclaration) {
-			ICPPASTTemplateDeclaration newTemplDefinition = (ICPPASTTemplateDeclaration)newDefinition;
-			functionDefinition = (ICPPASTFunctionDefinition) newTemplDefinition.getDeclaration();
-		} else {
-			functionDefinition = (ICPPASTFunctionDefinition)newDefinition;
-		}
+		functionDefinition = findFuncDef(newDefinition);
 		newRw.replace(functionDefinition.getBody(), new ASTLiteralNode(format(fcontext.getDefinition().getBody().getRawSignature())), infoText);
 		if (functionDefinition instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock)functionDefinition).getCatchHandlers();
@@ -90,6 +86,19 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 			for (int i = 0; i < oldCatches.length; i++)
 				newRw.replace(newCatches[i], new ASTLiteralNode(format(oldCatches[i].getRawSignature())), infoText);
 		}
+	}
+
+	private ICPPASTFunctionDefinition findFuncDef(IASTNode newDefinition) {
+		if (newDefinition instanceof ICPPASTFunctionDefinition)
+			return (ICPPASTFunctionDefinition) newDefinition;
+		IASTNode node = newDefinition;
+		while (node != null && node instanceof ICPPASTTemplateDeclaration) {
+			IASTDeclaration declaration = ((ICPPASTTemplateDeclaration)node).getDeclaration();
+			node = declaration;
+			if (declaration instanceof ICPPASTFunctionDefinition)
+				return (ICPPASTFunctionDefinition) declaration;
+		}
+		return null;
 	}
 
 	private String format(String rawSignature) {
