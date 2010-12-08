@@ -401,4 +401,29 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 		return null;
 	}
+
+	/**
+	 * Will extract the innermost ICPPASTFunctionDefinition out of a template declaration.
+	 * 
+	 * template<typename T>				// <-- input this node
+	 * template<typename U>
+	 * void function(T t, U u) { ... }  // <-- will find this node here 
+	 * 
+	 * @param declaration the template declaration that should be searched for the function definition.
+	 * @return null if a declaration is found instead of a definition.
+	 */
+	public static ICPPASTFunctionDefinition getFunctionDefinition(ICPPASTTemplateDeclaration declaration) {
+		IASTNode node = declaration;
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration) {
+				ICPPASTTemplateDeclaration templdec = (ICPPASTTemplateDeclaration) node;
+				node = templdec.getDeclaration();
+			} else if (declaration instanceof ICPPASTFunctionDefinition) {
+				return (ICPPASTFunctionDefinition) declaration;
+			} else {
+				return null;
+			}
+		}
+		return null;
+	}
 }
