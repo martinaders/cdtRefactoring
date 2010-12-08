@@ -39,6 +39,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
+import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
@@ -55,9 +56,11 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleNodeHelper extends NodeHelper {
@@ -427,5 +430,19 @@ public class ToggleNodeHelper extends NodeHelper {
 			}
 		}
 		return null;
+	}
+
+	public static void restoreCatchHandlers(ASTRewrite rewriter,
+			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
+		if (newDefinition instanceof ICPPASTFunctionWithTryBlock) {
+			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock) newDefinition)
+					.getCatchHandlers();
+			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock) oldDefinition)
+					.getCatchHandlers();
+			for (int i = 0; i < oldCatches.length; i++)
+				rewriter.replace(newCatches[i], new ASTLiteralNode(
+						oldCatches[i].getRawSignature()), infoText);
+		}
 	}
 }

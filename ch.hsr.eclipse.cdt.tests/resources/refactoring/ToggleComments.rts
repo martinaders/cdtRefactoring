@@ -21,3 +21,29 @@ inline void A::member()
         return;
     }
 
+//!ClassToHeaderCatchComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/() try
+    {
+        return;
+    } catch (int i) {
+        // catch comment
+    }
+};
+//=
+class A {
+    void member();
+};
+
+inline void A::member()
+try
+{
+        return;
+    }catch (int i) {
+        // catch comment
+    }
+
