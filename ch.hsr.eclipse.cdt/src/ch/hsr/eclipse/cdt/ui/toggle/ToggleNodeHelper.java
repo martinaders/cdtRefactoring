@@ -412,7 +412,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * @param declaration the template declaration that should be searched for the function definition.
 	 * @return null if a declaration is found instead of a definition.
 	 */
-	public static ICPPASTFunctionDefinition getFunctionDefinition(ICPPASTTemplateDeclaration declaration) {
+	public static ICPPASTFunctionDefinition getFunctionDefinition(IASTNode declaration) {
 		IASTNode node = declaration;
 		while (node != null) {
 			if (node instanceof ICPPASTTemplateDeclaration) {
