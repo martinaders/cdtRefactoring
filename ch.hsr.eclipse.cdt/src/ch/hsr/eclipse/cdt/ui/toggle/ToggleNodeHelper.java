@@ -418,8 +418,10 @@ public class ToggleNodeHelper extends NodeHelper {
 			if (node instanceof ICPPASTTemplateDeclaration) {
 				ICPPASTTemplateDeclaration templdec = (ICPPASTTemplateDeclaration) node;
 				node = templdec.getDeclaration();
-			} else if (declaration instanceof ICPPASTFunctionDefinition) {
-				return (ICPPASTFunctionDefinition) declaration;
+				continue;
+			}
+			if (node instanceof ICPPASTFunctionDefinition) {
+				return (ICPPASTFunctionDefinition) node;
 			} else {
 				return null;
 			}
