@@ -89,3 +89,68 @@ template<typename T> inline T A::foo()
 }
 
 
+//!TestComplexTemplateFunctionFromInClassToInheader
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T, typename S>
+class A 
+{
+public:
+	template<typename U, typename V>
+	void /*$*/foo/*$$*/(const U & u, const V &v)
+	{
+		return;
+	}
+};
+//=
+template<typename T, typename S>
+class A 
+{
+public:
+	template<typename U, typename V>
+	void foo(const U & u, const V &v);
+
+};
+
+template<typename T, typename S> template<typename U, typename V> inline void A<T,S>::foo(const U & u, const V & v)
+{
+    return;
+}
+
+
+//!TestComplexTemplateFunctionFromInHeaderToInClass
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T, typename S>
+class A 
+{
+public:
+    template<typename U, typename V>
+    void /*$*/foo/*$$*/(const U & u, const V &v);
+
+};
+
+template<typename T, typename S> template<typename U, typename V> inline void A<T,S>::foo(const U & u, const V & v)
+{
+    return;
+}
+//=
+template<typename T, typename S>
+class A 
+{
+public:
+    template<typename U, typename V>
+    void foo(const U & u, const V &v)
+    {
+        return;
+    }
+
+
+
+};
+
+

@@ -10,6 +10,7 @@ void /*$*/member/*$$*/()
 }
 //=
 void member();
+
 //@A.cpp
 #include "A.h"
 //=
