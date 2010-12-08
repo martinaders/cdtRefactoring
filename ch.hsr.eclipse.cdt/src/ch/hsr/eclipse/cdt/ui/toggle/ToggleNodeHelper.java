@@ -17,6 +17,7 @@ import java.util.ListIterator;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -57,6 +58,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -432,6 +434,9 @@ public class ToggleNodeHelper extends NodeHelper {
 		return null;
 	}
 
+	/**
+	 * Restore catch handlers that lost their comments with their original content.
+	 */
 	public static void restoreCatchHandlers(ASTRewrite rewriter,
 			ICPPASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
@@ -440,9 +445,34 @@ public class ToggleNodeHelper extends NodeHelper {
 					.getCatchHandlers();
 			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock) oldDefinition)
 					.getCatchHandlers();
-			for (int i = 0; i < oldCatches.length; i++)
+			for (int i = 0; i < oldCatches.length; i++) {
 				rewriter.replace(newCatches[i], new ASTLiteralNode(
 						oldCatches[i].getRawSignature()), infoText);
+			}
 		}
+	}
+
+	/**
+	 * Restores comments inside the body of a function that were lost during a rewrite.
+	 */
+	public static void restoreBody(ASTRewrite newRewriter,
+			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
+		ASTLiteralNode bodyWithComments = new ASTLiteralNode(oldDefinition.getBody().getRawSignature());
+		newRewriter.replace(newDefinition.getBody(), bodyWithComments, infoText);
+	}
+
+	/**
+	 * Fetches all leading comments of a node as a string, separated by some
+	 * specified string.
+	 */
+	public static String getLeadingComments(IASTTranslationUnit unit,
+			IASTNode existingNode, String separator) {
+		String comments = "";
+		ArrayList<IASTComment> leadingComments = ASTCommenter
+				.getCommentedNodeMap(unit).getLeadingCommentsForNode(
+						existingNode);
+		for (IASTComment c : leadingComments)
+			comments = c.getRawSignature() + separator + comments;
+		return comments;
 	}
 }

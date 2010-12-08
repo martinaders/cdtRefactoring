@@ -47,3 +47,26 @@ try
         // catch comment
     }
 
+//!ClassToHeaderTopComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    // Top comment
+    void /*$*/member/*$$*/()
+    {
+        return;
+    }
+};
+//=
+class A {
+    // Top comment
+    void member();
+};
+
+inline void A::member()
+{
+        return;
+    }
+

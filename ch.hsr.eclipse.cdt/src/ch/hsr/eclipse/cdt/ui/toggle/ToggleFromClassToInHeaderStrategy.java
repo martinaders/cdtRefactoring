@@ -11,6 +11,7 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -52,17 +53,16 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 		
 		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition(newDefinition);
-		addCommentsToBody(newRewriter, newDefinitionWithoutTemplate);
-		
 		IASTFunctionDefinition oldDefinition = fcontext.getDefinition();
+		ToggleNodeHelper.restoreBody(newRewriter, newDefinitionWithoutTemplate, oldDefinition, infoText);
+		
 		ToggleNodeHelper.restoreCatchHandlers(newRewriter,
 				newDefinitionWithoutTemplate, oldDefinition, infoText);
-	}
-
-	private void addCommentsToBody(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinitionWithoutTemplate) {
-		ASTLiteralNode bodyWithComments = new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature());
-		newRewriter.replace(newDefinitionWithoutTemplate.getBody(), bodyWithComments, infoText);
+		
+		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		assert(!newDeclSpec.isEmpty());
+		String comments = ToggleNodeHelper.getLeadingComments(fcontext.getDefinitionUnit(), fcontext.getDefinition(), "\n");
+		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
