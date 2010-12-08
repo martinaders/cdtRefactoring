@@ -60,7 +60,6 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 				newDefinitionWithoutTemplate, oldDefinition, infoText);
 		
 		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
-		assert(!newDeclSpec.isEmpty());
 		String comments = ToggleNodeHelper.getLeadingComments(fcontext.getDefinitionUnit(), fcontext.getDefinition(), "\n");
 		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
