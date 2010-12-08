@@ -51,6 +51,11 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 		
 		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition(newDefinition);
+		addCommentsToBody(newRewriter, newDefinitionWithoutTemplate);
+	}
+
+	private void addCommentsToBody(ASTRewrite newRewriter,
+			ICPPASTFunctionDefinition newDefinitionWithoutTemplate) {
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature());
 		newRewriter.replace(newDefinitionWithoutTemplate.getBody(), bodyWithComments, infoText);
 	}
