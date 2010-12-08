@@ -16,9 +16,11 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -46,7 +48,14 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
-		rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
+		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
+		
+		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = null;
+		if (newDefinition instanceof ICPPASTFunctionDefinition)
+			newDefinitionWithoutTemplate = (ICPPASTFunctionDefinition) newDefinition;
+
+		ASTLiteralNode bodyWithComments = new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature());
+		newRewriter.replace(newDefinitionWithoutTemplate.getBody(), bodyWithComments, infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {

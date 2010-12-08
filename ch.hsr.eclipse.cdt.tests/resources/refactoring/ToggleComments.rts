@@ -1,25 +1,24 @@
-//!Empty
+//!ClassToHeaderBodyComment
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
 filename=A.h
 //@A.h
-void /*$*/member/*$$*/()
-{
-    int i = 3;
-    return;
-}
+class A {
+    void /*$*/member/*$$*/()
+    {
+        // return comment
+        return;
+    }
+};
 //=
-void member();
+class A {
+    void member();
+};
 
-//@A.cpp
-#include "A.h"
-//=
-#include "A.h"
+inline void A::member() {
+        // return comment
+        return;
+    }
 
 
-void member()
-{
-    int i = 3;
-    return;
-}
 
