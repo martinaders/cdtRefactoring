@@ -51,18 +51,27 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
 		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 		
-		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = getDefinitionOfTemplate(newDefinition);
+		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = null;
+		if (newDefinition instanceof ICPPASTTemplateDeclaration) {
+			newDefinitionWithoutTemplate = getFunctionDefinition((ICPPASTTemplateDeclaration) newDefinition);
+		}
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature());
 		newRewriter.replace(newDefinitionWithoutTemplate.getBody(), bodyWithComments, infoText);
 	}
 
-	private ICPPASTFunctionDefinition getDefinitionOfTemplate(IASTNode declaration) {
-		if (declaration instanceof ICPPASTFunctionDefinition)
-			return (ICPPASTFunctionDefinition) declaration;
-		if (!(declaration instanceof ICPPASTTemplateDeclaration))
-			return null;
-		ICPPASTTemplateDeclaration template = (ICPPASTTemplateDeclaration) declaration;
-		return getDefinitionOfTemplate(template.getDeclaration());
+	public static ICPPASTFunctionDefinition getFunctionDefinition(ICPPASTTemplateDeclaration declaration) {
+		IASTNode node = declaration;
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration) {
+				ICPPASTTemplateDeclaration templdec = (ICPPASTTemplateDeclaration) node;
+				node = templdec.getDeclaration();
+			} else if (declaration instanceof ICPPASTFunctionDefinition) {
+				return (ICPPASTFunctionDefinition) declaration;
+			} else {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
