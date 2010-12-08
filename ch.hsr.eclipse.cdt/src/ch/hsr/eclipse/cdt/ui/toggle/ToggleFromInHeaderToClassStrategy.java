@@ -25,6 +25,12 @@ public class ToggleFromInHeaderToClassStrategy implements
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
 		this.context = context;
 		this.infoText =  new TextEditGroup("Toggle function body placement");
+		if (isFreeFunction(context))
+			throw new NotSupportedException("Cannot toggle templated free function");
+	}
+
+	private boolean isFreeFunction(ToggleRefactoringContext context) {
+		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
 
 	@Override

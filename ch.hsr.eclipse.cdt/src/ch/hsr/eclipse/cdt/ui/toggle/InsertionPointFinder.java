@@ -43,6 +43,8 @@ public class InsertionPointFinder {
 	}
 	
 	private static void findRightPlace() {
+		if (allafterdeclarations == null || alldefinitionsoutside == null)
+			return;
 		for(ICPPASTFunctionDeclarator decl: allafterdeclarations) {
 			String decl_name = decl.getName().toString();
 			for(ICPPASTFunctionDefinition def: alldefinitionsoutside) {
@@ -68,7 +70,8 @@ public class InsertionPointFinder {
 
 	private static void findAllDeclarationsAfterInClass(IASTTranslationUnit classunit, IASTFunctionDeclarator funcdecl) {
 		ICPPASTCompositeTypeSpecifier klass = getklass(classunit);
-		allafterdeclarations = getDeclarationsInClass(klass, funcdecl);
+		if (klass != null)
+			allafterdeclarations = getDeclarationsInClass(klass, funcdecl);
 	}
 	
 	/**
