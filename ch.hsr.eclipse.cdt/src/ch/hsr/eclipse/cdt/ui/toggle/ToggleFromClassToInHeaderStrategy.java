@@ -54,6 +54,8 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = null;
 		if (newDefinition instanceof ICPPASTTemplateDeclaration) {
 			newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition((ICPPASTTemplateDeclaration) newDefinition);
+		} else if (newDefinition instanceof ICPPASTFunctionDefinition) {
+			newDefinitionWithoutTemplate = (ICPPASTFunctionDefinition) newDefinition;
 		}
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(fcontext.getDefinition().getBody().getRawSignature());
 		newRewriter.replace(newDefinitionWithoutTemplate.getBody(), bodyWithComments, infoText);

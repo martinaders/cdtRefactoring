@@ -15,10 +15,10 @@ class A {
     void member();
 };
 
-inline void A::member() {
+inline void A::member()
+{
         // return comment
         return;
     }
-
 
 
