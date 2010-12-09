@@ -13,7 +13,6 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.ListIterator;
 import java.util.Stack;
 
@@ -69,6 +68,8 @@ import org.eclipse.text.edits.TextEditGroup;
 @SuppressWarnings("restriction")
 public class ToggleNodeHelper extends NodeHelper {
 
+	private static String LINE_SEPARATOR = System.getProperty("line.separator");
+	
 	static boolean hasCatchHandlers(IASTNode node) {
 		return node instanceof ICPPASTFunctionWithTryBlock;
 	}
@@ -453,47 +454,23 @@ public class ToggleNodeHelper extends NodeHelper {
 			}
 		}
 	}
-
+	
 	/**
 	 * Restores comments inside the body of a function that were lost during a rewrite.
 	 */
 	public static void restoreBody(ASTRewrite newRewriter,
+			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
+		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, infoText);
+		
+		restoreCatchHandlers(newRewriter,
+				newDefinition, oldDefinition, infoText);
+	}
+
+	private static void restoreBodyOnly(ASTRewrite newRewriter,
 			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(oldDefinition.getBody().getRawSignature());
 		newRewriter.replace(newDefinition.getBody(), bodyWithComments, infoText);
-	}
-
-	/**
-	 * Fetches all leading comments of a node as a string, separated by some
-	 * specified string.
-	 */
-	public static String getLeadingComments(IASTTranslationUnit unit,
-			IASTNode existingNode, String separator) {
-		String comments = "";
-		ArrayList<IASTComment> leadingComments = ASTCommenter
-				.getCommentedNodeMap(unit).getLeadingCommentsForNode(
-						existingNode);
-		Collections.reverse(leadingComments);
-		for (IASTComment c : leadingComments)
-			comments = c.getRawSignature() + separator + comments;
-		return comments;
-	}
-
-	/**
-	 * Fetches all trailing comments of a node as a string, separated by some
-	 * specified string.
-	 */
-	public static String getTrailingComments(
-			IASTTranslationUnit unit,
-			IASTNode existingNode, String separator) {
-		String comments = "";
-		NodeCommentMap commentedNodeMap = ASTCommenter
-				.getCommentedNodeMap(unit);
-		ArrayList<IASTComment> trailingComments = commentedNodeMap.getTrailingCommentsForNode(
-						existingNode);
-		for (IASTComment c : trailingComments)
-			comments = c.getRawSignature() + separator + comments;
-		return comments;
 	}
 
 	/**
@@ -505,18 +482,42 @@ public class ToggleNodeHelper extends NodeHelper {
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
 			TextEditGroup infoText) {
 		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
-		String comments = getLeadingComments(oldUnit, oldDefinition, "\n");
+		String comments = getCommentsAsString(getLeadingComments(oldDefinition, oldUnit));
 		if (!comments.isEmpty())
 			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
 
+	private static ArrayList<IASTComment> getLeadingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
+		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
+		return commentedNodeMap.getLeadingCommentsForNode(existingNode);
+	}
+	
 	/**
 	 * Appends trailing comments of an existing node to another node.
 	 */
 	public static void restoreTrailingComments(ASTRewrite rewriter, IASTNode parent_ns,
 			IASTNode insertion_point,
 			IASTNode existingNode,
-			IASTTranslationUnit definitionUnit, TextEditGroup infoText) {
+			IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+		IASTNode commentNode = findNodeWithComments(existingNode);
+		String comments = getCommentsAsString(getTrailingComments(commentNode, oldUnit));
+		if (!comments.isEmpty())
+			rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
+	}
+	
+	private static ArrayList<IASTComment> getTrailingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
+		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
+		return commentedNodeMap.getTrailingCommentsForNode(existingNode);
+	}
+	
+	private static String getCommentsAsString(ArrayList<IASTComment> commentList) {
+		String comments = "";
+		for (IASTComment c : commentList)
+			comments += c.getRawSignature() + LINE_SEPARATOR;
+		return comments;
+	}
+
+	private static IASTNode findNodeWithComments(IASTNode existingNode) {
 		IASTNode commentNode = existingNode;
 		if (existingNode instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTFunctionWithTryBlock tryBlock = (ICPPASTFunctionWithTryBlock)existingNode;
@@ -528,8 +529,6 @@ public class ToggleNodeHelper extends NodeHelper {
 			IASTFunctionDefinition func = (IASTFunctionDefinition)existingNode;
 			commentNode = func.getBody();
 		}
-		String comments = getTrailingComments(definitionUnit, commentNode, "\n");
-		if (!comments.isEmpty())
-			rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
+		return commentNode;
 	}
 }

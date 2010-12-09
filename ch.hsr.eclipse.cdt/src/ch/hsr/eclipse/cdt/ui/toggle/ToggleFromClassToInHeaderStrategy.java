@@ -14,7 +14,6 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -46,23 +45,24 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
 		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
 		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
-		
+
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
 		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
-		
+
 		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition(newDefinition);
-		IASTFunctionDefinition oldDefinition = fcontext.getDefinition();
-		ToggleNodeHelper.restoreBody(newRewriter, newDefinitionWithoutTemplate, oldDefinition, infoText);
-		
-		ToggleNodeHelper.restoreCatchHandlers(newRewriter,
-				newDefinitionWithoutTemplate, oldDefinition, infoText);
-		
+		ToggleNodeHelper.restoreBody(newRewriter, newDefinitionWithoutTemplate, fcontext.getDefinition(), infoText);
+
+		restoreComments(rewriter, newDeclaration, parent_ns, insertion_point);
+	}
+
+	private void restoreComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration, IASTNode parent_ns,
+			IASTNode insertion_point) {
 		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration, fcontext.getDefinition(),
 				fcontext.getDefinitionUnit(), infoText);
-
 		ToggleNodeHelper.restoreTrailingComments(rewriter, parent_ns, insertion_point,
-				oldDefinition, fcontext.getDefinitionUnit(), infoText);
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(), infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
