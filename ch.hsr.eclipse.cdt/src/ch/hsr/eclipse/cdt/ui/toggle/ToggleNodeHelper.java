@@ -454,15 +454,19 @@ public class ToggleNodeHelper extends NodeHelper {
 	 */
 	public static void restoreCatchHandlers(ASTRewrite rewriter,
 			ICPPASTFunctionDefinition newDefinition,
-			IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
+			IASTFunctionDefinition oldDefinition, TextEditGroup infoText, IASTTranslationUnit oldUnit) {
 		if (newDefinition instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock) newDefinition)
 					.getCatchHandlers();
 			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock) oldDefinition)
 					.getCatchHandlers();
+			String lead = "";
+			String trail = "";
 			for (int i = 0; i < oldCatches.length; i++) {
+				lead = getCommentsAsString(getLeadingComments(oldCatches[i], oldUnit)); 
+				trail = getCommentsAsString(getTrailingComments(oldCatches[i], oldUnit));					
 				rewriter.replace(newCatches[i], new ASTLiteralNode(
-						oldCatches[i].getRawSignature()), infoText);
+						lead + oldCatches[i].getRawSignature() + trail), infoText);
 			}
 		}
 	}
@@ -472,16 +476,18 @@ public class ToggleNodeHelper extends NodeHelper {
 	 */
 	public static void restoreBody(ASTRewrite newRewriter,
 			ICPPASTFunctionDefinition newDefinition,
-			IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
-		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, infoText);
+			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, oldUnit, infoText);
 		
 		restoreCatchHandlers(newRewriter,
-				newDefinition, oldDefinition, infoText);
+				newDefinition, oldDefinition, infoText, oldUnit);
 	}
 
 	private static void restoreBodyOnly(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, TextEditGroup infoText) {
-		ASTLiteralNode bodyWithComments = new ASTLiteralNode(oldDefinition.getBody().getRawSignature());
+			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+		String leadingComments = getCommentsAsString(getLeadingComments(oldDefinition.getBody(), oldUnit));
+		String trailingComments = getCommentsAsString(getTrailingComments(oldDefinition.getBody(), oldUnit));
+		ASTLiteralNode bodyWithComments = new ASTLiteralNode(leadingComments + oldDefinition.getBody().getRawSignature() + trailingComments);
 		newRewriter.replace(newDefinition.getBody(), bodyWithComments, infoText);
 	}
 
@@ -503,20 +509,7 @@ public class ToggleNodeHelper extends NodeHelper {
 		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
 		return commentedNodeMap.getLeadingCommentsForNode(existingNode);
 	}
-	
-	/**
-	 * Appends trailing comments of an existing node to another node.
-	 */
-	public static void restoreTrailingComments(ASTRewrite rewriter, IASTNode parent_ns,
-			IASTNode insertion_point,
-			IASTNode existingNode,
-			IASTTranslationUnit oldUnit, TextEditGroup infoText) {
-		IASTNode commentNode = findNodeWithComments(existingNode);
-		String comments = getCommentsAsString(getTrailingComments(commentNode, oldUnit));
-		if (!comments.isEmpty())
-			rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
-	}
-	
+
 	private static ArrayList<IASTComment> getTrailingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
 		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
 		return commentedNodeMap.getTrailingCommentsForNode(existingNode);
@@ -527,20 +520,5 @@ public class ToggleNodeHelper extends NodeHelper {
 		for (IASTComment c : commentList)
 			comments += c.getRawSignature() + LINE_SEPARATOR;
 		return comments;
-	}
-
-	private static IASTNode findNodeWithComments(IASTNode existingNode) {
-		IASTNode commentNode = existingNode;
-		if (existingNode instanceof ICPPASTFunctionWithTryBlock) {
-			ICPPASTFunctionWithTryBlock tryBlock = (ICPPASTFunctionWithTryBlock)existingNode;
-			ICPPASTCatchHandler[] catchHandlers = tryBlock.getCatchHandlers();
-			if (catchHandlers.length > 0) {
-				commentNode = catchHandlers[catchHandlers.length - 1];
-			}
-		} else if (existingNode instanceof IASTFunctionDefinition) {
-			IASTFunctionDefinition func = (IASTFunctionDefinition)existingNode;
-			commentNode = func.getBody();
-		}
-		return commentNode;
 	}
 }

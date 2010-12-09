@@ -140,10 +140,8 @@ class A {
 inline void A::member()
 {
         return;
-    }
+    }// Trailing comment
 
-
-// Trailing comment
 
 //!ClassToHeaderTrailingCommentWithTryBlock
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -167,8 +165,39 @@ try
 {
         return;
     }catch (int e) {
-    }
+    }// Trailing comment
 
 
-// Trailing comment
+//!ClassToHeaderTrailingMultipleCommentsInTryBlock
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    int /*$*/member/*$$*/() try
+    {
+        // aans
+    } /* one */ catch (int i) {
+        // zwaa
+    } /* two */ catch (int j) {
+        // draa
+    } /* three */
+};
+//=
+class A {
+    int member();
+};
+
+inline int A::member()
+try
+{
+        // aans
+    }/* one */
+catch (int i) {
+        // zwaa
+    }/* two */
+catch (int j) {
+        // draa
+    }/* three */
+
 

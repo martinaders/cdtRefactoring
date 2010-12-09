@@ -50,19 +50,14 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
 		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
 
-		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition(newDefinition);
-		ToggleNodeHelper.restoreBody(newRewriter, newDefinitionWithoutTemplate, fcontext.getDefinition(), infoText);
-
-		restoreComments(rewriter, newDeclaration, parent_ns, insertion_point);
-	}
-
-	private void restoreComments(ASTRewrite rewriter,
-			IASTSimpleDeclaration newDeclaration, IASTNode parent_ns,
-			IASTNode insertion_point) {
-		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration, fcontext.getDefinition(),
-				fcontext.getDefinitionUnit(), infoText);
-		ToggleNodeHelper.restoreTrailingComments(rewriter, parent_ns, insertion_point,
-				fcontext.getDefinition(), fcontext.getDefinitionUnit(), infoText);
+		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper
+				.getFunctionDefinition(newDefinition);
+		ToggleNodeHelper.restoreBody(newRewriter, funcDefinition,
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(),
+				infoText);
+		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration,
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(),
+				infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
