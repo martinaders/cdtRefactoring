@@ -60,6 +60,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -484,12 +485,12 @@ public class ToggleNodeHelper extends NodeHelper {
 	 */
 	public static String getTrailingComments(
 			IASTTranslationUnit unit,
-			IASTFunctionDefinition existingNode, String separator) {
+			IASTNode existingNode, String separator) {
 		String comments = "";
-		ArrayList<IASTComment> trailingComments = ASTCommenter
-				.getCommentedNodeMap(unit).getTrailingCommentsForNode(
+		NodeCommentMap commentedNodeMap = ASTCommenter
+				.getCommentedNodeMap(unit);
+		ArrayList<IASTComment> trailingComments = commentedNodeMap.getTrailingCommentsForNode(
 						existingNode);
-		Collections.reverse(trailingComments);
 		for (IASTComment c : trailingComments)
 			comments = c.getRawSignature() + separator + comments;
 		return comments;
@@ -505,7 +506,8 @@ public class ToggleNodeHelper extends NodeHelper {
 			TextEditGroup infoText) {
 		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
 		String comments = getLeadingComments(oldUnit, oldDefinition, "\n");
-		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+		if (!comments.isEmpty())
+			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
 
 	/**
@@ -513,9 +515,21 @@ public class ToggleNodeHelper extends NodeHelper {
 	 */
 	public static void restoreTrailingComments(ASTRewrite rewriter, IASTNode parent_ns,
 			IASTNode insertion_point,
-			IASTFunctionDefinition oldDefinition,
+			IASTNode existingNode,
 			IASTTranslationUnit definitionUnit, TextEditGroup infoText) {
-		String comments = getTrailingComments(definitionUnit, oldDefinition, "\n");
-		rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
+		IASTNode commentNode = existingNode;
+		if (existingNode instanceof ICPPASTFunctionWithTryBlock) {
+			ICPPASTFunctionWithTryBlock tryBlock = (ICPPASTFunctionWithTryBlock)existingNode;
+			ICPPASTCatchHandler[] catchHandlers = tryBlock.getCatchHandlers();
+			if (catchHandlers.length > 0) {
+				commentNode = catchHandlers[catchHandlers.length - 1];
+			}
+		} else if (existingNode instanceof IASTFunctionDefinition) {
+			IASTFunctionDefinition func = (IASTFunctionDefinition)existingNode;
+			commentNode = func.getBody();
+		}
+		String comments = getTrailingComments(definitionUnit, commentNode, "\n");
+		if (!comments.isEmpty())
+			rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
 	}
 }

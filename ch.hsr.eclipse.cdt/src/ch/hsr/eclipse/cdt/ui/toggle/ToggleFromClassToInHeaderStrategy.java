@@ -60,7 +60,7 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		
 		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration, fcontext.getDefinition(),
 				fcontext.getDefinitionUnit(), infoText);
-		
+
 		ToggleNodeHelper.restoreTrailingComments(rewriter, parent_ns, insertion_point,
 				oldDefinition, fcontext.getDefinitionUnit(), infoText);
 	}

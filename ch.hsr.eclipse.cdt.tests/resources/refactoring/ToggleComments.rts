@@ -21,6 +21,31 @@ inline void A::member()
         return;
     }
 
+//!ClassToHeaderTopCommentOrder
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    // First Top Comment
+    // Second Top Comment
+    void /*$*/member/*$$*/()
+    {
+        return;
+    }
+};
+//=
+class A {
+    // First Top Comment
+    // Second Top Comment
+    void member();
+};
+
+inline void A::member()
+{
+        return;
+    }
+
 //!ClassToHeaderCatchComment
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -95,4 +120,55 @@ template<typename T> inline T A::member()
 {
         return T();
     }
+
+//!ClassToHeaderTrailingComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/()
+    {
+        return;
+    } // Trailing comment
+};
+//=
+class A {
+    void member();
+};
+
+inline void A::member()
+{
+        return;
+    }
+
+
+// Trailing comment
+
+//!ClassToHeaderTrailingCommentWithTryBlock
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/() try
+    {
+        return;
+    } catch (int e) {
+    } // Trailing comment
+};
+//=
+class A {
+    void member();
+};
+
+inline void A::member()
+try
+{
+        return;
+    }catch (int e) {
+    }
+
+
+// Trailing comment
 
