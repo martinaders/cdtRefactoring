@@ -11,11 +11,13 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
@@ -38,25 +40,39 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	}
 
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
-		IASTFunctionDeclarator funcdecl = fcontext.getDefinition().getDeclarator().copy();
-		ICPPASTDeclSpecifier spec = (ICPPASTDeclSpecifier) fcontext.getDefinition().getDeclSpecifier().copy();
-		
-		CPPNodeFactory factory = new CPPNodeFactory();
-		
-		IASTSimpleDeclaration simpledec = factory.newSimpleDeclaration(spec);
-		simpledec.addDeclarator(funcdecl);
-		simpledec.setParent(fcontext.getDefinition().getParent());
-
+		IASTSimpleDeclaration newDeclaration = getNewDeclaration();
 		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
 		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
-		
-		rewriter.replace(fcontext.getDefinition(), simpledec, infoText);
-		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, 
-				fcontext.getDefinition().getDeclarator());
-		rewriter.insertBefore(parent_ns, insertion_point, 
-				ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), 
-						fcontext.getDefinitionUnit(), parent_ns), infoText);
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
+
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
+		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
+		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
+
+		ICPPASTFunctionDefinition newDefinitionWithoutTemplate = ToggleNodeHelper.getFunctionDefinition(newDefinition);
+		ToggleNodeHelper.restoreBody(newRewriter, newDefinitionWithoutTemplate, fcontext.getDefinition(), infoText);
+
+		restoreComments(rewriter, newDeclaration, parent_ns, insertion_point);
+	}
+
+	private void restoreComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration, IASTNode parent_ns,
+			IASTNode insertion_point) {
+		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration, fcontext.getDefinition(),
+				fcontext.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreTrailingComments(rewriter, parent_ns, insertion_point,
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(), infoText);
+	}
+
+	private IASTSimpleDeclaration getNewDeclaration() {
+		CPPNodeFactory factory = new CPPNodeFactory();
+		IASTDeclSpecifier newDeclSpecifier = fcontext.getDefinition().getDeclSpecifier().copy();
+		IASTSimpleDeclaration newDeclaration = factory.newSimpleDeclaration(newDeclSpecifier);
+		IASTFunctionDeclarator newDeclarator = fcontext.getDefinition().getDeclarator().copy();
+		newDeclaration.addDeclarator(newDeclarator);
+		newDeclaration.setParent(fcontext.getDefinition().getParent());
+		return newDeclaration;
 	}
 
 	private IASTNode getParentNamespace(IASTNode node) {
