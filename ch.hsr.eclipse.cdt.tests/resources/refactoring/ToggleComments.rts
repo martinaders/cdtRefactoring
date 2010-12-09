@@ -70,3 +70,29 @@ inline void A::member()
         return;
     }
 
+//!ClassToHeaderTemplateTopComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    // Top comment
+    template<typename T>
+    T /*$*/member/*$$*/()
+    {
+        return T();
+    }
+};
+//=
+class A {
+    // Top comment
+    template<typename T>
+    T member();
+
+};
+
+template<typename T> inline T A::member()
+{
+        return T();
+    }
+

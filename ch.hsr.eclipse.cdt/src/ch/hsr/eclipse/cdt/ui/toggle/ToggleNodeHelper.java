@@ -475,4 +475,17 @@ public class ToggleNodeHelper extends NodeHelper {
 			comments = c.getRawSignature() + separator + comments;
 		return comments;
 	}
+
+	/**
+	 * Takes all leading comments of a function declaration and inserts them at
+	 * the beginning of another function definition.
+	 */
+	public static void restoreLeadingComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration,
+			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
+			TextEditGroup infoText) {
+		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		String comments = getLeadingComments(oldUnit, oldDefinition, "\n");
+		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
 }
