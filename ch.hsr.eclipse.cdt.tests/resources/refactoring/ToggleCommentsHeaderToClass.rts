@@ -1,0 +1,25 @@
+//!HeaderToClassBodyComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T>
+class A {
+    T /*$*/member/*$$*/();
+};
+
+template<typename T> inline T A<T>::member() {
+    // body comment
+    return T();
+}
+//=
+template<typename T>
+class A {
+    T member()
+    {
+    // body comment
+    return T();
+}
+};
+
+

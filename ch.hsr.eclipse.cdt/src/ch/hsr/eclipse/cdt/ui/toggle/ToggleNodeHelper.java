@@ -441,7 +441,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * Restore catch handlers that lost their comments with their original content.
 	 */
 	public static void restoreCatchHandlers(ASTRewrite rewriter,
-			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, TextEditGroup infoText, IASTTranslationUnit oldUnit) {
 		if (newDefinition instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock) newDefinition)
@@ -463,7 +463,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * Restores comments inside the body of a function that were lost during a rewrite.
 	 */
 	public static void restoreBody(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
 		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, oldUnit, infoText);
 		
@@ -472,7 +472,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	}
 
 	private static void restoreBodyOnly(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+			IASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
 		String leadingComments = getCommentsAsString(getLeadingComments(oldDefinition.getBody(), oldUnit));
 		String trailingComments = getCommentsAsString(getTrailingComments(oldDefinition.getBody(), oldUnit));
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(leadingComments + oldDefinition.getBody().getRawSignature() + trailingComments);
@@ -484,13 +484,13 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * the beginning of another function definition.
 	 */
 	public static void restoreLeadingComments(ASTRewrite rewriter,
-			IASTSimpleDeclaration newDeclaration,
+			IASTDeclSpecifier newDeclaration,
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
 			TextEditGroup infoText) {
-		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		String newDeclSpec = newDeclaration.toString();
 		String comments = getCommentsAsString(getLeadingComments(oldDefinition, oldUnit));
 		if (!comments.isEmpty())
-			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+			rewriter.replace(newDeclaration, new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
 
 	private static ArrayList<IASTComment> getLeadingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
