@@ -143,7 +143,9 @@ public class ToggleNodeHelper extends NodeHelper {
 		ICPPASTDeclSpecifier newdeclspec = (ICPPASTDeclSpecifier) def.getDeclSpecifier().copy();
 		newdeclspec.setVirtual(false);
 		newdeclspec.setInline(true);
+		newdeclspec.setStorageClass(IASTDeclSpecifier.sc_unspecified);
 		IASTFunctionDeclarator funcdecl = def.getDeclarator().copy();
+		
 	
 		funcdecl.setName(ToggleNodeHelper.getQualifiedName(def.getDeclarator(), namespace));
 		
@@ -216,8 +218,10 @@ public class ToggleNodeHelper extends NodeHelper {
 		declspec.setInline(false);
 		if (ToggleNodeHelper.isVirtual(dec))
 			declspec.setVirtual(true);
+		declspec.setStorageClass(getStorageClass(dec));
 		
 		IASTFunctionDefinition newdefinition = assembleFunctionDefinitionWithBody(declspec, declarator, def);
+		
 		newdefinition.setParent(getParentInsertionPoint(def, insertionunit));
 		return newdefinition;
 	}
@@ -232,6 +236,14 @@ public class ToggleNodeHelper extends NodeHelper {
 			return ((ICPPASTDeclSpecifier) dec.getDeclSpecifier()).isVirtual();
 		}
 		return false;
+	}
+	
+	static int getStorageClass(IASTFunctionDeclarator fdec) {
+		if (fdec.getParent() instanceof IASTSimpleDeclaration) {
+			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
+			return ((ICPPASTDeclSpecifier) dec.getDeclSpecifier()).getStorageClass();
+		}
+		return -1;
 	}
 
 	static IASTNode getParentRemovePoint(IASTFunctionDefinition definition) {
