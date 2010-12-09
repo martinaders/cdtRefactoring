@@ -13,6 +13,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ListIterator;
 import java.util.Stack;
 
@@ -471,7 +472,25 @@ public class ToggleNodeHelper extends NodeHelper {
 		ArrayList<IASTComment> leadingComments = ASTCommenter
 				.getCommentedNodeMap(unit).getLeadingCommentsForNode(
 						existingNode);
+		Collections.reverse(leadingComments);
 		for (IASTComment c : leadingComments)
+			comments = c.getRawSignature() + separator + comments;
+		return comments;
+	}
+
+	/**
+	 * Fetches all trailing comments of a node as a string, separated by some
+	 * specified string.
+	 */
+	public static String getTrailingComments(
+			IASTTranslationUnit unit,
+			IASTFunctionDefinition existingNode, String separator) {
+		String comments = "";
+		ArrayList<IASTComment> trailingComments = ASTCommenter
+				.getCommentedNodeMap(unit).getTrailingCommentsForNode(
+						existingNode);
+		Collections.reverse(trailingComments);
+		for (IASTComment c : trailingComments)
 			comments = c.getRawSignature() + separator + comments;
 		return comments;
 	}
@@ -487,5 +506,16 @@ public class ToggleNodeHelper extends NodeHelper {
 		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
 		String comments = getLeadingComments(oldUnit, oldDefinition, "\n");
 		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
+
+	/**
+	 * Appends trailing comments of an existing node to another node.
+	 */
+	public static void restoreTrailingComments(ASTRewrite rewriter, IASTNode parent_ns,
+			IASTNode insertion_point,
+			IASTFunctionDefinition oldDefinition,
+			IASTTranslationUnit definitionUnit, TextEditGroup infoText) {
+		String comments = getTrailingComments(definitionUnit, oldDefinition, "\n");
+		rewriter.insertBefore(parent_ns, insertion_point, new ASTLiteralNode(comments), infoText);
 	}
 }
