@@ -482,15 +482,45 @@ public class ToggleNodeHelper extends NodeHelper {
 	/**
 	 * Takes all leading comments of a function declaration and inserts them at
 	 * the beginning of another function definition.
+	 * @param iastTranslationUnit may be null
+	 * @param iastFunctionDeclarator may be null
 	 */
 	public static void restoreLeadingComments(ASTRewrite rewriter,
-			IASTDeclSpecifier newDeclaration,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
-			TextEditGroup infoText) {
-		String newDeclSpec = newDeclaration.toString();
-		String comments = getCommentsAsString(getLeadingComments(oldDefinition, oldUnit));
+			IASTFunctionDeclarator oldDeclaration, IASTTranslationUnit oldDeclarationUnit, TextEditGroup infoText) {
+		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDeclaration), oldDeclarationUnit));
+		comments += getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldUnit));
 		if (!comments.isEmpty())
-			rewriter.replace(newDeclaration, new ASTLiteralNode(comments + newDeclSpec), infoText);
+			rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
+	
+	public static void restoreLeadingComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration,
+			IASTFunctionDefinition oldDefinition,
+			IASTTranslationUnit oldDefUnit, TextEditGroup infoText) {
+		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldDefUnit));
+		if (!comments.isEmpty())
+			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
+	
+	private static IASTNode getParentTemplateDeclaration(
+			IASTNode def) {
+		if (def == null)
+			return null;
+		IASTNode lastSeen = def;
+		IASTNode node = def.getParent();
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration || node instanceof IASTSimpleDeclaration) {
+				lastSeen = node;
+				node = node.getParent();
+				continue;
+			}
+			return lastSeen;
+		}
+		return lastSeen;
 	}
 
 	private static ArrayList<IASTComment> getLeadingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {

@@ -12,6 +12,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
@@ -43,7 +44,11 @@ public class ToggleFromInHeaderToClassStrategy implements
 				context.getDefinition(), context.getDefinitionUnit());
 		rewriter.replace(context.getDeclaration().getParent(),
 				newDefinition, infoText);
-		ToggleNodeHelper.restoreBody(rewriter, newDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
-//		ToggleNodeHelper.restoreLeadingComments(rewriter, newDefinition.getDeclSpecifier(), context.getDefinition(), context.getDefinitionUnit(), infoText);
+		
+		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper.getFunctionDefinition(newDefinition);
+		ToggleNodeHelper.restoreBody(rewriter, funcDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(rewriter, newDefinition, 
+				context.getDefinition(), context.getDefinitionUnit(), context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 }
