@@ -28,3 +28,35 @@ void A::member()
     // body comment
     return;
 }
+//!HeaderToImplTryCatchComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+class A {
+    void /*$*/member/*$$*/();
+};
+
+inline void A::member() try {
+    // body comment
+    return;
+} catch /*1*/ (int e) { /*2*/ }
+catch /*3*/ (int e) { /*4*/ }
+//=
+class A {
+    void member();
+};
+
+
+//@A.cpp
+#include "A.h"
+//=
+#include "A.h"
+
+
+void A::member()
+try
+{
+    // body comment
+    return;
+}catch /*1*/ (int e) { /*2*/ }catch /*3*/ (int e) { /*4*/ }
