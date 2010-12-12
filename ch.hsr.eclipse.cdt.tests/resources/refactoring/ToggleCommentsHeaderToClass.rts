@@ -126,3 +126,29 @@ class A {
 
 // 2nd Top Comment
 
+//!HeaderToClassBodyComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T>
+class A {
+    T /*$*/member/*$$*/();
+};
+
+// Top comment
+template<typename T> inline T A<T>::member() {
+    return T();
+}
+//=
+template<typename T>
+class A {
+    // Top comment
+T member()
+    {
+    return T();
+}
+};
+
+// Top comment
+
