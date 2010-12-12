@@ -482,8 +482,6 @@ public class ToggleNodeHelper extends NodeHelper {
 	/**
 	 * Takes all leading comments of a function declaration and inserts them at
 	 * the beginning of another function definition.
-	 * @param iastTranslationUnit may be null
-	 * @param iastFunctionDeclarator may be null
 	 */
 	public static void restoreLeadingComments(ASTRewrite rewriter,
 			IASTFunctionDefinition newDefinition,
@@ -492,10 +490,17 @@ public class ToggleNodeHelper extends NodeHelper {
 		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
 		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDeclaration), oldDeclarationUnit));
 		comments += getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldUnit));
-		if (!comments.isEmpty())
+		if (comments.isEmpty())
+			return;
+		IASTNode parent = getParentTemplateDeclaration(newDefinition);
+		if (parent instanceof ICPPASTTemplateDeclaration) {
+			newDeclSpec = parent.getRawSignature();
+			rewriter.replace(parent, new ASTLiteralNode(comments + newDeclSpec), infoText);
+		} else {
 			rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+		}
 	}
-	
+
 	public static void restoreLeadingComments(ASTRewrite rewriter,
 			IASTSimpleDeclaration newDeclaration,
 			IASTFunctionDefinition oldDefinition,
@@ -506,7 +511,7 @@ public class ToggleNodeHelper extends NodeHelper {
 			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
 	}
 	
-	private static IASTNode getParentTemplateDeclaration(
+	public static IASTNode getParentTemplateDeclaration(
 			IASTNode def) {
 		if (def == null)
 			return null;
@@ -538,5 +543,17 @@ public class ToggleNodeHelper extends NodeHelper {
 		for (IASTComment c : commentList)
 			comments += c.getRawSignature() + LINE_SEPARATOR;
 		return comments;
+	}
+
+	public static IASTSimpleDeclaration getSimpleDeclaration(
+			IASTFunctionDeclarator declarator) {
+		IASTNode node = declarator;
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof IASTSimpleDeclaration) {
+				return (IASTSimpleDeclaration) node;
+			}
+		}
+		return null;
 	}
 }

@@ -58,3 +58,71 @@ T member()
 // Third comment
 // Fourth comment
 
+//!HeaderToClassTryCatchComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename T>
+class A {
+    T /*$*/member/*$$*/();
+};
+
+template<typename T> inline T A<T>::member() try {
+    // body comment
+    return T();
+} catch(int e) {
+    // Catch 1
+} catch(int e) {
+    // Catch 2
+}
+//=
+template<typename T>
+class A {
+    T member()
+    try
+    {
+    // body comment
+    return T();
+}catch(int e) {
+    // Catch 1
+}catch(int e) {
+    // Catch 2
+}
+};
+
+
+//!HeaderToClassMultiTemplateComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+template<typename S, typename T>
+class A {
+    // Top Comment
+    template<typename U, typename V>
+    T /*$*/member/*$$*/();
+};
+
+// 2nd Top Comment
+template<typename S, typename T>
+template<typename U, typename V>
+inline T A<S, T>::member() {
+    // body comment
+    return T();
+}
+//=
+template<typename S, typename T>
+class A {
+    // Top Comment
+    template<typename U, typename V>
+    T member()
+    {
+    // body comment
+    return T();
+}
+
+};
+
+// 2nd Top Comment
+

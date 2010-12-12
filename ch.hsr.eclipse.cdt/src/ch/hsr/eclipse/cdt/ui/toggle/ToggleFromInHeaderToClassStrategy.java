@@ -12,7 +12,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
@@ -39,16 +41,24 @@ public class ToggleFromInHeaderToClassStrategy implements
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context
 				.getDefinitionUnit());
-		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
+		IASTNode parentRemovePoint = ToggleNodeHelper.getParentRemovePoint(context.getDefinition());
+		rewriter.remove(parentRemovePoint, infoText);
 		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition( context.getDeclaration(), 
 				context.getDefinition(), context.getDefinitionUnit());
-		rewriter.replace(context.getDeclaration().getParent(),
+		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getSimpleDeclaration(context.getDeclaration());
+		ASTRewrite newRewriter = rewriter.replace(fullDeclaration,
 				newDefinition, infoText);
-		
-		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper.getFunctionDefinition(newDefinition);
-		ToggleNodeHelper.restoreBody(rewriter, funcDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
-		ToggleNodeHelper.restoreLeadingComments(rewriter, newDefinition, 
-				context.getDefinition(), context.getDefinitionUnit(), context.getDeclaration(), context.getDeclarationUnit(),
-				infoText);
+		IASTNode parentTemplateDeclaration = ToggleNodeHelper.getParentTemplateDeclaration(context.getDeclaration());
+		if (parentTemplateDeclaration instanceof ICPPASTTemplateDeclaration) {
+			ToggleNodeHelper.restoreBody(newRewriter, newDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		} else {
+			ToggleNodeHelper.restoreBody(rewriter, newDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+			
+			ToggleNodeHelper.restoreLeadingComments(
+					rewriter, newDefinition, 
+					context.getDefinition(), context.getDefinitionUnit(),
+					context.getDeclaration(), context.getDeclarationUnit(),
+					infoText);
+		}
 	}
 }
