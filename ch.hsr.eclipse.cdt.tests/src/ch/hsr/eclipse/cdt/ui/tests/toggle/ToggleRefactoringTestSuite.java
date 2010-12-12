@@ -8,6 +8,7 @@ public class ToggleRefactoringTestSuite extends TestSuite {
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new ToggleRefactoringTestSuite();
+		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToImpl", "resources/refactoring/ToggleCommentsHeaderToImpl.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToClass", "resources/refactoring/ToggleCommentsHeaderToClass.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsClassToHeader", "resources/refactoring/ToggleCommentsClassToHeader.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleErrorRefactoring", "resources/refactoring/ToggleErrorRefactoring.rts"));
