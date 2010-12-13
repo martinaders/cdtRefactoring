@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.eclipse.cdt.core.dom.ast.IASTComment;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -37,16 +36,12 @@ public class ToggleFromInHeaderToClassStrategy implements
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
 		this.context = context;
 		this.infoText =  new TextEditGroup("Toggle function body placement");
-		declaration = getParentSimpleDeclaration(context.getDeclaration());
-		if (declaration == null) {
-			throw new NotSupportedException("Parent needs to be a SimpleDeclaration.");
-		}
+		if (isFreeFunction(context))
+			throw new NotSupportedException("Cannot toggle templated free function");
 	}
 
-	private CPPASTSimpleDeclaration getParentSimpleDeclaration(IASTFunctionDeclarator node) {
-		if (node == null || node.getParent() == null || !(node.getParent() instanceof CPPASTSimpleDeclaration))
-			return null;
-		return (CPPASTSimpleDeclaration) node.getParent();
+	private boolean isFreeFunction(ToggleRefactoringContext context) {
+		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
 
 	@Override
