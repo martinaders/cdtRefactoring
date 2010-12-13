@@ -4,7 +4,10 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{hyperref}
-\usepackage{pst-uml}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shadows}
+\usepackage{lscape}
+\usepackage[underline=true,rounded corners=false]{pgf-umlsd}
 \lstset{language=C++, numbers=left, numberstyle=\tiny\color{black}, 
 frame=shadowbox, basicstyle=\small\ttfamily, rulesepcolor=\color{gray}, 
 backgroundcolor=\color{lightgray}, keywordstyle=\color{keyword_color}, 
@@ -44,6 +47,27 @@ commentstyle=\color{comment_color}, title=\lstname, captionpos=b}
 \pagenumbering{roman}
 
 \include{abstract}
+
+%\begin{landscape}
+\begin{figure}
+  \begin{sequencediagram}
+    \newthread{del}{:TActionDelegate}
+    \newinst{run}{:TRefactoringRunner}
+    %\newthread{job}{:RefactoringJob}
+    %\newinst[1]{ctx}{:ToggleRefactoringContext}
+    %\newinst[1]{fac}{:ToggleStrategyFactory}
+    
+    \begin{call}{del}{initiali}{run}{return value}
+    \end{call}
+    \begin{call}{del}{kreieren}{run}{}
+      \newinst{ref}{:TRefactoring}
+    \end{call}
+  \end{sequencediagram}
+
+  \caption{Basic call flow when toggling a function definition}
+\end{figure}
+%\end{landscape}
+
 
 \tableofcontents
 \thispagestyle{empty}
