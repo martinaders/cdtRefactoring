@@ -26,8 +26,8 @@ class A {
 
 template<typename T, typename U> inline T A<T,U>::B::member()
 {
-    return T();
-}
+        return T();
+    }
 
 //!TestTemplateFunctionInHeaderToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -56,8 +56,8 @@ class A {
     class B {
         T member()
         {
-        return T();
-    }
+    return T();
+}
     };
 
 };
@@ -83,8 +83,8 @@ class A {
 
 template<typename T> inline T A::foo()
 {
-    return T();
-}
+        return T();
+    }
 
 //!TestComplexTemplateFunctionFromInClassToInheader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -113,8 +113,8 @@ public:
 
 template<typename T, typename S> template<typename U, typename V> inline void A<T,S>::foo(const U & u, const V & v)
 {
-    return;
-}
+        return;
+    }
 
 //!TestComplexTemplateFunctionFromInHeaderToInClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -142,9 +142,8 @@ public:
     template<typename U, typename V>
     void foo(const U & u, const V &v)
     {
-        return;
-    }
-
+    return;
+}
 
 
 };

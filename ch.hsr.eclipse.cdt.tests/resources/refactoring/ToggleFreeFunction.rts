@@ -117,7 +117,6 @@ int freeFunction(int *a, int & b)
     return 42;
 }
 
-
 //!TestFreeFunctionToggleFromImplementationToHeaderWithOutDeclaration
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -179,10 +178,9 @@ int freeFunction(int *a, int & b)
 try
 {
     return 42;
+}catch (std::exception & e) 
+{
 }
-catch(std::exception & e){
-}
-
 
 
 //!TestFreeFunction
@@ -225,3 +223,54 @@ int A::freefunction()
 {
     return 42;
 }
+
+//!TestNamespacedFreeFunction
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.h
+//@A.h
+#ifndef A_H_
+#define A_H_
+
+#include <iostream>
+
+namespace N {
+    void /*$*/freefunction/*$$*/()
+    {
+        return;
+    }
+}
+
+#endif /* A_H_ */
+//=
+#ifndef A_H_
+#define A_H_
+
+#include <iostream>
+
+namespace N {
+    void freefunction();
+}
+
+#endif /* A_H_ */
+//@A.cpp
+#include "A.h"
+
+int main() {
+    return 0;
+}
+//=
+#include "A.h"
+
+int main() {
+    return 0;
+}
+
+namespace N
+{
+    void freefunction()
+    {
+        return;
+    }
+}
+

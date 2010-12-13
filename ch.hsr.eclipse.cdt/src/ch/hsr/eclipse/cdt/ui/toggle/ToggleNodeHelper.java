@@ -17,6 +17,7 @@ import java.util.ListIterator;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -39,6 +40,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
+import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
@@ -55,13 +57,19 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTQualifiedName;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTypeId;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 import org.eclipse.cdt.internal.ui.refactoring.utils.NodeHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ToggleNodeHelper extends NodeHelper {
 
+	private static String LINE_SEPARATOR = System.getProperty("line.separator");
+	
 	static boolean hasCatchHandlers(IASTNode node) {
 		return node instanceof ICPPASTFunctionWithTryBlock;
 	}
@@ -394,6 +402,153 @@ public class ToggleNodeHelper extends NodeHelper {
 			if (node instanceof ICPPASTCompositeTypeSpecifier)
 				return (ICPPASTCompositeTypeSpecifier) node;
 			node = node.getParent();
+		}
+		return null;
+	}
+
+	/**
+	 * Will extract the innermost ICPPASTFunctionDefinition out of a template declaration.
+	 * 
+	 * template<typename T>				// <-- input this node
+	 * template<typename U>
+	 * void function(T t, U u) { ... }  // <-- will find this node here 
+	 * 
+	 * @param declaration the template declaration that should be searched for the function definition.
+	 * @return null if a declaration is found instead of a definition.
+	 */
+	public static ICPPASTFunctionDefinition getFunctionDefinition(IASTNode declaration) {
+		IASTNode node = declaration;
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration) {
+				ICPPASTTemplateDeclaration templdec = (ICPPASTTemplateDeclaration) node;
+				node = templdec.getDeclaration();
+				continue;
+			}
+			if (node instanceof ICPPASTFunctionDefinition) {
+				return (ICPPASTFunctionDefinition) node;
+			} else {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Restore catch handlers that lost their comments with their original content.
+	 */
+	public static void restoreCatchHandlers(ASTRewrite rewriter,
+			IASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition oldDefinition, TextEditGroup infoText, IASTTranslationUnit oldUnit) {
+		if (newDefinition instanceof ICPPASTFunctionWithTryBlock) {
+			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock) newDefinition)
+					.getCatchHandlers();
+			ICPPASTCatchHandler[] oldCatches = ((ICPPASTFunctionWithTryBlock) oldDefinition)
+					.getCatchHandlers();
+			String lead = "";
+			String trail = "";
+			for (int i = 0; i < oldCatches.length; i++) {
+				lead = getCommentsAsString(getLeadingComments(oldCatches[i], oldUnit)); 
+				trail = getCommentsAsString(getTrailingComments(oldCatches[i], oldUnit));					
+				rewriter.replace(newCatches[i], new ASTLiteralNode(
+						lead + oldCatches[i].getRawSignature() + trail), infoText);
+			}
+		}
+	}
+	
+	/**
+	 * Restores comments inside the body of a function that were lost during a rewrite.
+	 */
+	public static void restoreBody(ASTRewrite newRewriter,
+			IASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, oldUnit, infoText);
+		
+		restoreCatchHandlers(newRewriter,
+				newDefinition, oldDefinition, infoText, oldUnit);
+	}
+
+	private static void restoreBodyOnly(ASTRewrite newRewriter,
+			IASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+		String leadingComments = getCommentsAsString(getLeadingComments(oldDefinition.getBody(), oldUnit));
+		String trailingComments = getCommentsAsString(getTrailingComments(oldDefinition.getBody(), oldUnit));
+		ASTLiteralNode bodyWithComments = new ASTLiteralNode(leadingComments + oldDefinition.getBody().getRawSignature() + trailingComments);
+		newRewriter.replace(newDefinition.getBody(), bodyWithComments, infoText);
+	}
+
+	/**
+	 * Takes all leading comments of a function declaration and inserts them at
+	 * the beginning of another function definition.
+	 */
+	public static void restoreLeadingComments(ASTRewrite rewriter,
+			IASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
+			IASTFunctionDeclarator oldDeclaration, IASTTranslationUnit oldDeclarationUnit, TextEditGroup infoText) {
+		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDeclaration), oldDeclarationUnit));
+		comments += getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldUnit));
+		if (comments.isEmpty())
+			return;
+		IASTNode parent = getParentTemplateDeclaration(newDefinition);
+		if (parent instanceof ICPPASTTemplateDeclaration) {
+			newDeclSpec = parent.getRawSignature();
+			rewriter.replace(parent, new ASTLiteralNode(comments + newDeclSpec), infoText);
+		} else {
+			rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+		}
+	}
+
+	public static void restoreLeadingComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration,
+			IASTFunctionDefinition oldDefinition,
+			IASTTranslationUnit oldDefUnit, TextEditGroup infoText) {
+		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldDefUnit));
+		if (!comments.isEmpty())
+			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
+	
+	public static IASTNode getParentTemplateDeclaration(
+			IASTNode def) {
+		if (def == null)
+			return null;
+		IASTNode lastSeen = def;
+		IASTNode node = def.getParent();
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration || node instanceof IASTSimpleDeclaration) {
+				lastSeen = node;
+				node = node.getParent();
+				continue;
+			}
+			return lastSeen;
+		}
+		return lastSeen;
+	}
+
+	private static ArrayList<IASTComment> getLeadingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
+		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
+		return commentedNodeMap.getLeadingCommentsForNode(existingNode);
+	}
+
+	private static ArrayList<IASTComment> getTrailingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
+		NodeCommentMap commentedNodeMap = ASTCommenter.getCommentedNodeMap(oldUnit);
+		return commentedNodeMap.getTrailingCommentsForNode(existingNode);
+	}
+	
+	private static String getCommentsAsString(ArrayList<IASTComment> commentList) {
+		String comments = "";
+		for (IASTComment c : commentList)
+			comments += c.getRawSignature() + LINE_SEPARATOR;
+		return comments;
+	}
+
+	public static IASTSimpleDeclaration getSimpleDeclaration(
+			IASTFunctionDeclarator declarator) {
+		IASTNode node = declarator;
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof IASTSimpleDeclaration) {
+				return (IASTSimpleDeclaration) node;
+			}
 		}
 		return null;
 	}

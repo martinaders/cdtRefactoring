@@ -129,8 +129,7 @@ class A {
     A(int x, int y)
     :a(x), b(y)
     {
-    }
-
+}
     ~A()
     {
     }
@@ -254,9 +253,8 @@ class A {
     {}
     ~A()
     {
-        int x;
-        int y;
-        return;
-    }
-
+    int x;
+    int y;
+    return;
+}
 };

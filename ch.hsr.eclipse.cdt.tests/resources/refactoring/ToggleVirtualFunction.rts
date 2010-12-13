@@ -20,8 +20,8 @@ class A {
 
 inline int A::foo()
 {
-    return 0;
-}
+        return 0;
+    }
 
 //!TestVirtualSpecifierFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -82,9 +82,8 @@ class A {
 class A {
     virtual int foo()
     {
-        return 0;
-    }
-
+    return 0;
+}
 };
 //@A.cpp
 #include "A.h"
