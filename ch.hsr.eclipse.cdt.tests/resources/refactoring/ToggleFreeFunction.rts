@@ -57,7 +57,6 @@ int freeFunction(int *a, int & b)
     return 42;
 }
 
-
 //!TestFreeFunctionToggleFromImplementationToHeaderWithDeclaration
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -118,7 +117,6 @@ int freeFunction(int *a, int & b)
 {
     return 42;
 }
-
 
 //!TestFreeFunctionToggleFromImplementationToHeaderWithOutDeclaration
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -181,10 +179,9 @@ int freeFunction(int *a, int & b)
 try
 {
     return 42;
+}catch (std::exception & e) 
+{
 }
-catch(std::exception & e){
-}
-
 
 
 //!TestFreeFunction
@@ -209,7 +206,6 @@ int freeFunction()
 {
     return 42;
 }
-
 //!TestQualifiedNameToggle
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -278,6 +274,5 @@ namespace N
     {
         return;
     }
-
 }
 
