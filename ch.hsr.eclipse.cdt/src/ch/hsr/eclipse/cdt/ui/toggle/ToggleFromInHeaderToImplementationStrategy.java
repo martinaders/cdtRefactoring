@@ -62,7 +62,6 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			IASTSimpleDeclaration newdeclarator = ToggleNodeHelper.createDeclarationFromDefinition(context.getDefinition());
 			ASTRewrite rewrite = collector.rewriterForTranslationUnit(context.getDefinitionUnit());
 			rewrite.replace(context.getDefinition(), newdeclarator, infoText);
-			// TODO: Retain top comments in declaration
 		}
 
 		ASTRewrite impl_rewrite = collector.rewriterForTranslationUnit(impl_unit);
@@ -137,6 +136,11 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 				declarator);
 		ASTRewrite newRewriter = impl_rewrite.insertBefore(insertion_parent, insertion_point, new_definition, infoText);
 		ToggleNodeHelper.restoreBody(newRewriter, new_definition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(
+				newRewriter, new_definition, 
+				context.getDefinition(), context.getDefinitionUnit(),
+				context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 
 	private CPPASTNamespaceDefinition createNamespace(
