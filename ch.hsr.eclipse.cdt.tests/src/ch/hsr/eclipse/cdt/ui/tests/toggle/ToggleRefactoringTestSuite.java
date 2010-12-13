@@ -8,10 +8,6 @@ public class ToggleRefactoringTestSuite extends TestSuite {
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new ToggleRefactoringTestSuite();
-		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsImplToHeader", "resources/refactoring/ToggleCommentsImplToHeader.rts"));
-		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToImpl", "resources/refactoring/ToggleCommentsHeaderToImpl.rts"));
-		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToClass", "resources/refactoring/ToggleCommentsHeaderToClass.rts"));
-		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsClassToHeader", "resources/refactoring/ToggleCommentsClassToHeader.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleErrorRefactoring", "resources/refactoring/ToggleErrorRefactoring.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleSelectionTest", "resources/refactoring/ToggleSelection.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleSimpleFunctionRefactoringTest", "resources/refactoring/ToggleSimpleFunctionRefactoring.rts"));
@@ -25,6 +21,10 @@ public class ToggleRefactoringTestSuite extends TestSuite {
 		suite.addTest(ExternalRefactoringTester.suite("ToggleFreeFunctionTest", "resources/refactoring/ToggleFreeFunction.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleVirtualFunctionTest", "resources/refactoring/ToggleVirtualFunction.rts"));
 		suite.addTest(ExternalRefactoringTester.suite("ToggleOrderintTest", "resources/refactoring/ToggleOrdering.rts"));
+		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsImplToHeader", "resources/refactoring/ToggleCommentsImplToHeader.rts"));
+		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToImpl", "resources/refactoring/ToggleCommentsHeaderToImpl.rts"));
+		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsHeaderToClass", "resources/refactoring/ToggleCommentsHeaderToClass.rts"));
+		suite.addTest(ExternalRefactoringTester.suite("ToggleCommentsClassToHeader", "resources/refactoring/ToggleCommentsClassToHeader.rts"));
 		return suite;
 	}
 
