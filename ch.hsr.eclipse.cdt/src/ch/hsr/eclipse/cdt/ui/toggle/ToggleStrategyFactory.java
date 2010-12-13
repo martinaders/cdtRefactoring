@@ -11,7 +11,7 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 
 public class ToggleStrategyFactory {
@@ -37,20 +37,18 @@ public class ToggleStrategyFactory {
 	}
 	
 	private boolean isinHeaderSituation() {
-		return (context.getDefinition() != null) && (context.getDefinitionUnit().isHeaderUnit());
+		return (context.getDefinition() != null) 
+			&& (context.getDefinitionUnit().isHeaderUnit());
 	}
 
 	private boolean isInClassSituation() {
-		return ToggleNodeHelper.getParentCompositeTypeSpecifier(context.getDefinition()) != null && context.getDeclaration() == null;
+		return (context.getDeclaration() == null) && 
+			(ToggleNodeHelper.getAncestorOfType(context.getDefinition(), 
+					IASTCompositeTypeSpecifier.class) != null);
 	}
 
 	private boolean isTemplateSituation() {
-		IASTNode node = context.getDefinition();
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTTemplateDeclaration)
-				return true;
-		}
-		return false;
+		return (ToggleNodeHelper.getAncestorOfType(context.getDefinition(), 
+				ICPPASTTemplateDeclaration.class) != null);
 	}
 }

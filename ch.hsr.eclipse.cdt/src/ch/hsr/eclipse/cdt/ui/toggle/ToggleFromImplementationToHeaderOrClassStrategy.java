@@ -12,7 +12,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
@@ -88,7 +87,7 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 	private void removeDefinitionFromImplementation(
 			ModificationCollector modifications) {
 		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		ICPPASTNamespaceDefinition ns = getNamespaceDefinition(context.getDefinition());
+		ICPPASTNamespaceDefinition ns = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTNamespaceDefinition.class);
 		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition()))
 			implast.remove(ns, infoText);
 		else
@@ -101,14 +100,5 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 	private boolean isSingleElementInNamespace(ICPPASTNamespaceDefinition ns,
 			IASTFunctionDefinition definition) {
 		return ns.getChildren().length == 2 && (ns.contains(definition));
-	}
-
-	private ICPPASTNamespaceDefinition getNamespaceDefinition(IASTNode node) {
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTNamespaceDefinition)
-				return (ICPPASTNamespaceDefinition) node;
-		}
-		return null;
 	}
 }

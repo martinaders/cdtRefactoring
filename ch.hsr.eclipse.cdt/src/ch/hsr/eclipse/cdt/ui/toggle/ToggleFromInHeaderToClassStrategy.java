@@ -11,11 +11,15 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -34,7 +38,14 @@ public class ToggleFromInHeaderToClassStrategy implements
 	}
 
 	private boolean isFreeFunction(ToggleRefactoringContext context) {
-		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
+		return isNotInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
+	}
+	
+	boolean isNotInsideAClass(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
+		if (declarator.getName() instanceof ICPPASTQualifiedName) {
+			declarator = backup;
+		}
+		return (ToggleNodeHelper.getAncestorOfType(declarator, IASTCompositeTypeSpecifier.class) == null);
 	}
 
 	@Override
@@ -45,7 +56,9 @@ public class ToggleFromInHeaderToClassStrategy implements
 		rewriter.remove(parentRemovePoint, infoText);
 		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition( context.getDeclaration(), 
 				context.getDefinition(), context.getDefinitionUnit());
-		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getSimpleDeclaration(context.getDeclaration());
+		IASTNode node = context.getDeclaration();
+		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getAncestorOfType(node, CPPASTSimpleDeclaration.class);
+		
 		ASTRewrite newRewriter = rewriter.replace(fullDeclaration,
 				newDefinition, infoText);
 		IASTNode parentTemplateDeclaration = ToggleNodeHelper.getParentTemplateDeclaration(context.getDeclaration());

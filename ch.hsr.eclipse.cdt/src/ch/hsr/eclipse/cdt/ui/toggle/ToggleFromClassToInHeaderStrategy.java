@@ -17,6 +17,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -31,24 +32,26 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	private ToggleRefactoringContext fcontext;
 
 	public ToggleFromClassToInHeaderStrategy(ToggleRefactoringContext context) {
-		if (ToggleNodeHelper.getParentCompositeTypeSpecifier(context
-				.getDefinition()) != null
-				&& ToggleNodeHelper.getParentCompositeTypeSpecifier(context
-						.getDeclaration()) != null)
+		if (ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTCompositeTypeSpecifier.class) != null
+			    && ToggleNodeHelper.getAncestorOfType(context.getDeclaration(), ICPPASTCompositeTypeSpecifier.class) != null)
 			throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
 		this.fcontext = context;
 	}
 
 	public void run(ModificationCollector modifications) {
 		IASTSimpleDeclaration newDeclaration = getNewDeclaration();
-		IASTNode parent_ns = getParentNamespace(fcontext.getDefinition());
-		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parent_ns);
-		IASTTranslationUnit unit = parent_ns.getTranslationUnit();
+		
+		IASTNode parentNamespace = ToggleNodeHelper.getAncestorOfType(fcontext.getDefinition(), ICPPASTNamespaceDefinition.class);
+		if (parentNamespace == null)
+			parentNamespace = fcontext.getDefinitionUnit();
+		
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parentNamespace);
+		IASTTranslationUnit unit = parentNamespace.getTranslationUnit();
 		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
 
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
-		ASTRewrite newRewriter = rewriter.insertBefore(parent_ns, insertion_point, newDefinition, infoText);
+		ASTRewrite newRewriter = rewriter.insertBefore(parentNamespace, insertion_point, newDefinition, infoText);
 
 		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper
 				.getFunctionDefinition(newDefinition);
@@ -67,14 +70,5 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 		newDeclaration.addDeclarator(newDeclarator);
 		newDeclaration.setParent(fcontext.getDefinition().getParent());
 		return newDeclaration;
-	}
-
-	private IASTNode getParentNamespace(IASTNode node) {
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTNamespaceDefinition)
-				return node;
-		}
-		return fcontext.getDefinitionUnit();
 	}
 }

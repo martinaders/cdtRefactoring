@@ -206,17 +206,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return templdecs;
 	}
 
-	static IASTNode getParentInsertionPoint(IASTNode node,
-			IASTTranslationUnit alternative) {
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTCompositeTypeSpecifier) {
-				return (ICPPASTCompositeTypeSpecifier) node;
-			}
-		}
-		return alternative;
-	}
-
 	static IASTFunctionDefinition createInClassDefinition(
 			IASTFunctionDeclarator dec, 
 			IASTFunctionDefinition def, 
@@ -230,7 +219,11 @@ public class ToggleNodeHelper extends NodeHelper {
 		
 		IASTFunctionDefinition newdefinition = assembleFunctionDefinitionWithBody(declspec, declarator, def);
 		
-		newdefinition.setParent(getParentInsertionPoint(def, insertionunit));
+		IASTNode parent = getAncestorOfType(def, ICPPASTCompositeTypeSpecifier.class);
+		if (parent != null)
+			newdefinition.setParent(parent);
+		else
+			newdefinition.setParent(insertionunit);
 		return newdefinition;
 	}
 
@@ -388,36 +381,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return filename;
 	}
 
-	static boolean isInsideAClass(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
-		if (declarator.getName() instanceof ICPPASTQualifiedName)
-			declarator = backup;
-		IASTNode node = declarator;
-		while(node != null) {
-			if (node instanceof IASTCompositeTypeSpecifier)
-				return true;
-			node = node.getParent();
-		}
-		return false;
-	}
-
-	/**
-	 * Looks inside parent nodes to find a class definition.
-	 * 
-	 * @param nodeInClass a node that may be nested inside a class definition.
-	 * @return the class definition node that the specified node is wrapped
-	 *         inside or null if the node is not inside a class definition.
-	 */
-	public static ICPPASTCompositeTypeSpecifier getParentCompositeTypeSpecifier(
-			IASTNode nodeInClass) {
-		IASTNode node = nodeInClass;
-		while (node != null) {
-			if (node instanceof ICPPASTCompositeTypeSpecifier)
-				return (ICPPASTCompositeTypeSpecifier) node;
-			node = node.getParent();
-		}
-		return null;
-	}
-
 	/**
 	 * Will extract the innermost ICPPASTFunctionDefinition out of a template declaration.
 	 * 
@@ -526,7 +489,8 @@ public class ToggleNodeHelper extends NodeHelper {
 		IASTNode lastSeen = def;
 		IASTNode node = def.getParent();
 		while (node != null) {
-			if (node instanceof ICPPASTTemplateDeclaration || node instanceof IASTSimpleDeclaration) {
+			if (node instanceof ICPPASTTemplateDeclaration || 
+					node instanceof IASTSimpleDeclaration) {
 				lastSeen = node;
 				node = node.getParent();
 				continue;
@@ -553,14 +517,13 @@ public class ToggleNodeHelper extends NodeHelper {
 		return comments;
 	}
 
-	public static IASTSimpleDeclaration getSimpleDeclaration(
-			IASTFunctionDeclarator declarator) {
-		IASTNode node = declarator;
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof IASTSimpleDeclaration) {
-				return (IASTSimpleDeclaration) node;
+	@SuppressWarnings("unchecked")
+	public static <T> T getAncestorOfType(IASTNode node, Class<?> T) {
+		while(node != null) {
+			if (T.isInstance(node)) {
+				return (T) node;
 			}
+			node = node.getParent();
 		}
 		return null;
 	}

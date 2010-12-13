@@ -24,6 +24,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
 import org.eclipse.cdt.internal.ui.refactoring.Container;
 
@@ -92,7 +93,7 @@ public class InsertionPointFinder {
 				@Override
 				public int visit(IASTDeclaration declaration) {
 					if (declaration instanceof ICPPASTFunctionDefinition) {
-						if (declaration.getParent() != null && ToggleNodeHelper.getParentCompositeTypeSpecifier(declaration) != null)
+							if (declaration.getParent() != null && ToggleNodeHelper.getAncestorOfType(declaration, CPPASTCompositeTypeSpecifier.class) != null)
 							return PROCESS_CONTINUE;
 						definitions.add((ICPPASTFunctionDefinition) declaration);
 					}

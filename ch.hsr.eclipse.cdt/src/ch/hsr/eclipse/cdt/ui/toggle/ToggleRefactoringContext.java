@@ -43,8 +43,7 @@ public class ToggleRefactoringContext {
 	private IIndexBinding binding;
 	private IASTName selectionName;
 
-	public ToggleRefactoringContext(IIndex index, IFile file,
-			TextSelection selection) {
+	public ToggleRefactoringContext(IIndex index, IFile file, TextSelection selection) {
 		this.index = index;
 		this.selectionFile = file;
 		System.out.print("Stage 1: ");
@@ -60,8 +59,7 @@ public class ToggleRefactoringContext {
 	}
 
 	public void findSelectedFunctionDeclarator(TextSelection selection) {
-		selectionName = new DeclaratorFinder(selection, selectionUnit)
-				.getName();
+		selectionName = new DeclaratorFinder(selection, selectionUnit).getName();
 	}
 
 	public void findBinding() {
@@ -69,15 +67,15 @@ public class ToggleRefactoringContext {
 			binding = index.findBinding(selectionName);
 		} catch (CoreException e) {
 		}
-		if (binding == null)
+		if (binding == null) {
 			System.err.println("no binding was found, hopefully falling back to visitors");
+		}
 	}
 
 	// Declaration may still be null afterwards, but thats ok.
 	public void findDeclaration() {
 		try {
-			IIndexName[] decnames = index.findNames(binding,
-					IIndex.FIND_DECLARATIONS);
+			IIndexName[] decnames = index.findNames(binding, IIndex.FIND_DECLARATIONS);
 			if (decnames.length > 1)
 				throw new NotSupportedException(
 						"multiple declarations would result in ambiguous results");
@@ -99,12 +97,11 @@ public class ToggleRefactoringContext {
 
 	public void findDefinition() {
 		try {
-			IIndexName[] defnames = index.findNames(binding,
-					IIndex.FIND_DEFINITIONS);
-			if (defnames.length > 1)
+			IIndexName[] defnames = index.findNames(binding, IIndex.FIND_DEFINITIONS);
+			if (defnames.length > 1) {
 				throw new NotSupportedException("one-definition-rule broken");
+			}
 			for (IIndexName iname : defnames) {
-				
 				IASTTranslationUnit unit = getTUForNameinFile(iname);
 				IASTName astname = IndexToASTNameHelper.findMatchingASTName(
 						unit, iname, index);
@@ -158,45 +155,31 @@ public class ToggleRefactoringContext {
 		} catch (Exception e) {
 		}
 		if (selectionUnit == null)
-			throw new NotSupportedException(
-					"not able to work without translation unit");
+			throw new NotSupportedException("not able to work without translation unit");
 	}
 
 	private IASTTranslationUnit getTUForNameinFile(IIndexName iname)
 			throws CModelException, CoreException {
-		if (isSameFileAsInTU(iname))
+		if (isSameFileAsInTU(iname)) {
 			return selectionUnit;
-		IASTTranslationUnit asttu = null;
+		}
 		IPath path = new Path(iname.getFileLocation().getFileName());
-		asttu = TranslationUnitHelper
-				.loadTranslationUnit(path.toString(), true);
-		return asttu;
+		return TranslationUnitHelper.loadTranslationUnit(path.toString(), true);
 	}
 
 	private boolean isSameFileAsInTU(IIndexName iname) {
-		return iname.getFileLocation().getFileName()
-				.equals(selectionUnit.getFileLocation().getFileName());
+		return iname.getFileLocation().getFileName().equals(
+				selectionUnit.getFileLocation().getFileName());
 	}
 
 	private IASTFunctionDeclarator findFunctionDeclarator(IASTNode node) {
 		if (node instanceof IASTSimpleDeclaration) {
-			return (IASTFunctionDeclarator) ((IASTSimpleDeclaration) node)
-					.getDeclarators()[0];
+			return (IASTFunctionDeclarator) ((IASTSimpleDeclaration) node).getDeclarators()[0];
 		}
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof IASTFunctionDeclarator)
-				return (IASTFunctionDeclarator) node;
-		}
-		return null;
+		return ToggleNodeHelper.getAncestorOfType(node, IASTFunctionDeclarator.class);
 	}
 
 	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
-		while (node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof IASTFunctionDefinition)
-				return (IASTFunctionDefinition) node;
-		}
-		return null;
+		return ToggleNodeHelper.getAncestorOfType(node, IASTFunctionDefinition.class);
 	}
 }

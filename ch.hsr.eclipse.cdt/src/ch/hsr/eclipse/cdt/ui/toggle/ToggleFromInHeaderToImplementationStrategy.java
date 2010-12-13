@@ -69,14 +69,14 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 			impl_rewrite.insertBefore(impl_unit, null, includenode, infoText);
 		}
 		
-		IASTNode insertion_parent = null;
-		IASTNode parent = null;
-		if (context.getDeclaration() != null)
-			parent = getParentNamespace(context.getDeclaration());
-		else
-			parent = getParentNamespace(context.getDefinition());
+		IASTNode toquery = context.getDeclaration();
+		if (toquery == null) {
+			toquery = context.getDefinition();
+		}
 		
-		if (parent instanceof ICPPASTNamespaceDefinition) {
+		IASTNode insertion_parent = null;
+		IASTNode parent = ToggleNodeHelper.getAncestorOfType(toquery, ICPPASTNamespaceDefinition.class);
+		if (parent != null) {
 			adaptQualifiedNameToNamespaceLevel(new_definition, parent);
 			ICPPASTNamespaceDefinition parent_namespace = (ICPPASTNamespaceDefinition) parent; 
 			insertion_parent = searchNamespaceInImpl(parent_namespace.getName());
@@ -171,14 +171,5 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 					}
 		});
 		return result.getObject();
-	}
-
-	private IASTNode getParentNamespace(IASTNode node) {
-		while(node.getParent() != null) {
-			node = node.getParent();
-			if (node instanceof ICPPASTNamespaceDefinition)
-				return node;
-		}
-		return context.getDefinitionUnit();
 	}
 }

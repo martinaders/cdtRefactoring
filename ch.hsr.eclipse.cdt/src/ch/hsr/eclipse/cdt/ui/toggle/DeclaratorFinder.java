@@ -97,11 +97,6 @@ public class DeclaratorFinder {
 	}
 
 	private boolean isPartOfAStatement(IASTNode node) {
-		while (node != null) {
-			if (node instanceof IASTStatement)
-				return true;
-			node = node.getParent();
-		}
-		return false;
+		return ToggleNodeHelper.getAncestorOfType(node, IASTStatement.class) != null;
 	}
 }
