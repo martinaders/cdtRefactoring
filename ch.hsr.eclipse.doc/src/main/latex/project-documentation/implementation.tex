@@ -136,7 +136,7 @@ protected void configureRefactoring(
 }
 \end{lstlisting}
 
-The \textit{runTest} method may assert that an error has occurred by using:
+The \textit{runTest} method may then assert that an error has occurred by using:
 \begin{lstlisting}[language=java]
 RefactoringStatus initialConditions = 
     refactoring.checkInitialConditions(
@@ -145,21 +145,8 @@ if (fatalError)
   assertConditionsFatalError(initialConditions);
 \end{lstlisting}
 
-This may later be used in configureRefactoring
-
 All in all, the special refactoring test environment developed by \cite{GB06} 
 was a big help for refactoring relaxedly.
-
-\section{Test coverage}
-The test coverage tool Eclemma was a good help to find dead code and to think 
-about justification of code blocks. 
-
-Creating new files was not tested due to the dialog box popping up during 
-execution. If a refactoring has to be done with more user interaction, it
-should 
-be investigated how this may be tested.
-
-%todo: move this to project setup and link from here to there?
 
 \subsection{Performance tests}
 
