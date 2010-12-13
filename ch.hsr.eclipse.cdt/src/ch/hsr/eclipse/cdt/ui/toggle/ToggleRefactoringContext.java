@@ -15,6 +15,11 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorEndifStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfndefStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorObjectStyleMacroDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.index.IIndex;
@@ -26,7 +31,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.UIPlugin;
 
 import ch.hsr.ifs.redhead.helpers.IndexToASTNameHelper;
 
@@ -60,6 +69,44 @@ public class ToggleRefactoringContext {
 		System.out.print("complete\n\nStrategy: ");
 	}
 
+	private boolean hasUnsupportedNodes(IASTTranslationUnit unit) {
+		for(IASTPreprocessorStatement ppstmt: unit.getAllPreprocessorStatements()) {
+			if (ppstmt instanceof IASTPreprocessorIncludeStatement ||
+					ppstmt instanceof IASTPreprocessorEndifStatement) {
+				continue;
+			}
+			else if (ppstmt instanceof IASTPreprocessorObjectStyleMacroDefinition) {
+				String name = ((IASTPreprocessorObjectStyleMacroDefinition) ppstmt)
+					.getName().toString();
+				if (!name.contains("_H_")) {
+					return true;
+				}
+			}
+			else if (ppstmt instanceof IASTPreprocessorIfndefStatement) {
+				String name = ((IASTPreprocessorIfndefStatement) ppstmt)
+					.getRawSignature();
+				if (!name.contains("_H_")) {
+					return true;
+				}
+			}
+			else {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void warn() {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = UIPlugin.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell();
+				MessageDialog.openWarning(shell, "Macro found", "Your code contains Macros. These could be removed from your code!");
+			}
+		};
+		PlatformUI.getWorkbench().getDisplay().syncExec(r);
+	}
+
 	public void findSelectedFunctionDeclarator(TextSelection selection) {
 		selectionName = new DeclaratorFinder(selection, selectionUnit)
 				.getName();
@@ -89,6 +136,8 @@ public class ToggleRefactoringContext {
 				if (astname != null) {
 					targetDeclaration = findFunctionDeclarator(astname);
 					targetDeclarationUnit = selectionUnit;
+					if (hasUnsupportedNodes(targetDeclarationUnit));
+						warn();
 					break;
 				}
 			}
@@ -112,6 +161,8 @@ public class ToggleRefactoringContext {
 				if (astname != null) {
 					targetDefinition = findFunctionDefinition(astname);
 					targetDefinitionUnit = unit;
+					if (hasUnsupportedNodes(targetDefinitionUnit))
+						warn();
 					break;
 				}
 			}
