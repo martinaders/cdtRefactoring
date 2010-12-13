@@ -38,6 +38,7 @@ public:
 };
 
 int freeFunction(int *a, int & b);
+
 //@A.cpp
 #include "A.h"
 
@@ -194,6 +195,7 @@ int /*$*/freeFunction/*$$*/()
 }
 //=
 int freeFunction();
+
 //@A.cpp
 #include "A.h"
 //=
