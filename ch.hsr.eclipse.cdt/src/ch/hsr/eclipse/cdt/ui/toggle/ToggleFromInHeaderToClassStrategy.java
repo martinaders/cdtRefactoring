@@ -16,10 +16,6 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
-import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -29,7 +25,6 @@ public class ToggleFromInHeaderToClassStrategy implements
 
 	private TextEditGroup infoText;
 	private ToggleRefactoringContext context;
-	private CPPASTSimpleDeclaration declaration;
 
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
 		this.context = context;
