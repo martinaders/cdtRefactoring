@@ -71,6 +71,7 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
 				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+		ToggleNodeHelper.restoreBody(headerast, newdefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
 	}
 	
 	private void removeDefinitionFromImplementation(

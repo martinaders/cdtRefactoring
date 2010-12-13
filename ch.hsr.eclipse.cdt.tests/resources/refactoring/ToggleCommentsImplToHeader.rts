@@ -1,0 +1,28 @@
+//!ImplToHeaderBodyComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+void A::/*$*/member/*$$*/()
+{
+    // body comment
+    return;
+}
+//=
+#include "A.h"
+
+
+//@A.h
+class A {
+    void member();
+};
+//=
+class A {
+    void member()
+    {
+    // body comment
+    return;
+}
+};
