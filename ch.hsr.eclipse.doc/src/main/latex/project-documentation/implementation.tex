@@ -7,11 +7,18 @@ implemented and which problems had to be solved during development.
 
 \section{Implementation approach}
 
-At the beginning, as many cases as possible were collected on the project wiki to gain a view on what had to be realized, what we wanted to take in scope and what had nothing to do with toggling function definitions. Some cases were simple, some exotic. The simplest one, toggling from inside a class to the same file outside the class, was chosen to be implemented first. 
+At the beginning, as many cases as possible were collected on the project wiki 
+to gain a view on what had to be realized, what was planned to take into scope 
+and what had nothing to do with toggling function definitions. Some cases were 
+simple, some exotic. The simplest one, toggling from inside a class to the same 
+file outside the class, was chosen to be implemented first. 
 
-Before that a skeletton plugin was built with a NullRefactoring to try whether it was possible to develop a separate plugin instead of directly manipulating the CDT source code. By this approach it was assured that the developed plugin may be deployed easily even without being integrated into CDT.
+Before that, a skeleton plugin was built with a NullRefactoring to try whether 
+it was possible to develop a separate plugin instead of directly manipulating 
+the CDT source code. By this approach it was assured that the developed plugin 
+may be deployed easily even without being integrated into CDT.
 
-After the first refactoring worked, more cases were added by priority.
+After the first refactoring was implemented, more cases were added by priority. 
 
 \section{Architecture}
 
@@ -49,12 +56,12 @@ needed by the UndoManager. The UndoManager is available through
 \textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
 for more details on the implementation.
 
-\section{Testing and Performance environment}
+\section{Testing and performance environment}
 
-This section introduces special tricks that were used to simplify testing and
-control performance.
+This section introduces strategies to simplify testing and monitoring of 
+performance.
 
-\subsection{A real-world test environment}
+\subsection{A real world test environment}
 The COAST~\cite{COAST} source code was used as test environment for real-world 
 tests as it uses a lot of C++ code that can be toggled.
 
@@ -160,14 +167,13 @@ average time of three consecutive runs of all tests. Five scenarios have been
 chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
-\item First time toggling: includes loading of the infrastructure and will take 
+\item First time toggling: Includes loading of the infrastructure and will take 
 some more time.
-\item Toggle from in class to header: only one translation unit is affected by 
-this refactoring.
-\item Toggle from implementation header: two translation units are affected here.
-\item Average runtime: time to run all the tests (will vary due to new tests but 
-helpful for comparing effects of small changes between versions)
-\item Emtpy reference test: a dummy refactoring that won't load and analyze any 
+\item Toggle from in class to header: Only one file is affected by this 
+refactoring. This represents the least complex refactoring and should be the 
+quickest one beside the reference test.
+\item Toggle from implementation header: Two files are affected here.
+\item Emtpy reference test: A dummy refactoring that won't load and analyze any 
 code. Shows what amount of time is consumed by the given refactoring 
 infrastructure.
 \end{enumerate}
