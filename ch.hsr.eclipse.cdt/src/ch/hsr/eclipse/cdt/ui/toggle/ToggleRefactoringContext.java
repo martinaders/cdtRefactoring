@@ -66,7 +66,6 @@ public class ToggleRefactoringContext {
 		findDeclaration();
 		System.out.print("complete\nStage 5: ");
 		findDefinition();
-		System.out.print("complete\n\nStrategy: ");
 	}
 
 	private boolean hasUnsupportedNodes(IASTTranslationUnit unit) {

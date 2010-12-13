@@ -16,9 +16,8 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 
 //!TestSubstringSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -38,9 +37,8 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 
 //!TestBodySelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -60,9 +58,8 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 
 //!TestBodySelectionWithConfusingName
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -83,10 +80,9 @@ class A {
 
 inline void A::member()
 {
-    int abcd = 42;
-    return;
-}
-
+        int abcd = 42;
+        return;
+    }
 
 //!TestLeftBorderSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -106,9 +102,8 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 
 //!TestRightBorderSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -128,9 +123,8 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 
 //!TestOverlappingSelection
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -150,7 +144,6 @@ class A {
 
 inline void A::member()
 {
-    return;
-}
-
+        return;
+    }
 

@@ -27,12 +27,11 @@ class A {
 inline void A::member(int a, int b)
 try
 {
-    return;
-}
-catch(std::exception & e1){
-    return;
-}
-
+        return;
+    }catch (std::exception & e1) 
+    {
+        return;
+    }
 
 //!TestTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -80,11 +79,9 @@ void A::member(int a, int b)
 try
 {
     return;
-}
-catch(std::exception & e1){
+}catch(std::exception & e1){
     return;
 }
-
 
 //!TestTryCatchFromInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -131,12 +128,11 @@ class A {
     void member()
     try
     {
-        return;
-    }
-    catch(std::exception & e1){
-        return;
-    }
-
+    return;
+}catch(std::exception & e1)
+{
+    return;
+}
 };
 //!TestMultipleTryCatchFromInClassToInHeader
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -170,15 +166,14 @@ class A {
 inline void A::member(int a, int b)
 try
 {
-    return;
-}
-catch(std::exception & e1){
-    return;
-}
-catch(std::exception & e2){
-    return;
-}
-
+        return;
+    }catch (std::exception & e1) 
+    {
+        return;
+    }catch (std::exception & e2)
+    {
+        return;
+    }
 
 //!TestMultipleTryCatchFromInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -229,14 +224,11 @@ void A::member(int a, int b)
 try
 {
     return;
-}
-catch(std::exception & e1){
+}catch(std::exception & e1){
+    return;
+}catch(std::exception & e2){
     return;
 }
-catch(std::exception & e2){
-    return;
-}
-
 
 //!TestMultipleTryCatchFromInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -287,13 +279,12 @@ class A {
     void member()
     try
     {
-        return;
-    }
-    catch(std::exception & e1){
-        return;
-    }
-    catch(std::exception & e2){
-        return;
-    }
-
+    return;
+}catch(std::exception & e1)
+{
+    return;
+}catch(std::exception & e2)
+{
+    return;
+}
 };

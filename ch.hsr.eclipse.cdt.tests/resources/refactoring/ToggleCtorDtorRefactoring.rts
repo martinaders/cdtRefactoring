@@ -33,9 +33,7 @@ public:
 
 inline A::A(int x, int y)
 :a(x), b(y)
-{
-}
-
+{}
 
 //!TestConstructorToggleInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -92,7 +90,6 @@ A::A(int x, int y)
 {
 }
 
-
 //!TestConstructorToggleInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -132,8 +129,7 @@ class A {
     A(int x, int y)
     :a(x), b(y)
     {
-    }
-
+}
     ~A()
     {
     }
@@ -165,9 +161,7 @@ public:
 };
 
 inline A::~A()
-{
-}
-
+{}
 
 //!TestDestructorToggleInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -216,7 +210,6 @@ A::~A()
 {
 }
 
-
 //!TestDestructorToggleInImplementationToClass
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
 //@.config
@@ -260,9 +253,8 @@ class A {
     {}
     ~A()
     {
-        int x;
-        int y;
-        return;
-    }
-
+    int x;
+    int y;
+    return;
+}
 };

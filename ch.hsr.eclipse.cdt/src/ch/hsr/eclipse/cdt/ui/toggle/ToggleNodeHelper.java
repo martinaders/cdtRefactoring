@@ -234,10 +234,6 @@ public class ToggleNodeHelper extends NodeHelper {
 		return newdefinition;
 	}
 
-	/**
-	 * Does not work for *every* function declarator; its parent needs to be a
-	 * simple declaration.
-	 */
 	static boolean isVirtual(IASTFunctionDeclarator fdec) {
 		if (fdec.getParent() instanceof IASTSimpleDeclaration) {
 			IASTSimpleDeclaration dec = (IASTSimpleDeclaration) fdec.getParent();
@@ -453,7 +449,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * Restore catch handlers that lost their comments with their original content.
 	 */
 	public static void restoreCatchHandlers(ASTRewrite rewriter,
-			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, TextEditGroup infoText, IASTTranslationUnit oldUnit) {
 		if (newDefinition instanceof ICPPASTFunctionWithTryBlock) {
 			ICPPASTCatchHandler[] newCatches = ((ICPPASTFunctionWithTryBlock) newDefinition)
@@ -475,7 +471,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * Restores comments inside the body of a function that were lost during a rewrite.
 	 */
 	public static void restoreBody(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinition,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
 		restoreBodyOnly(newRewriter, newDefinition, oldDefinition, oldUnit, infoText);
 		
@@ -484,7 +480,7 @@ public class ToggleNodeHelper extends NodeHelper {
 	}
 
 	private static void restoreBodyOnly(ASTRewrite newRewriter,
-			ICPPASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
+			IASTFunctionDefinition newDefinition, IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit, TextEditGroup infoText) {
 		String leadingComments = getCommentsAsString(getLeadingComments(oldDefinition.getBody(), oldUnit));
 		String trailingComments = getCommentsAsString(getTrailingComments(oldDefinition.getBody(), oldUnit));
 		ASTLiteralNode bodyWithComments = new ASTLiteralNode(leadingComments + oldDefinition.getBody().getRawSignature() + trailingComments);
@@ -496,13 +492,48 @@ public class ToggleNodeHelper extends NodeHelper {
 	 * the beginning of another function definition.
 	 */
 	public static void restoreLeadingComments(ASTRewrite rewriter,
-			IASTSimpleDeclaration newDeclaration,
+			IASTFunctionDefinition newDefinition,
 			IASTFunctionDefinition oldDefinition, IASTTranslationUnit oldUnit,
-			TextEditGroup infoText) {
+			IASTFunctionDeclarator oldDeclaration, IASTTranslationUnit oldDeclarationUnit, TextEditGroup infoText) {
+		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDeclaration), oldDeclarationUnit));
+		comments += getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldUnit));
+		if (comments.isEmpty())
+			return;
+		IASTNode parent = getParentTemplateDeclaration(newDefinition);
+		if (parent instanceof ICPPASTTemplateDeclaration) {
+			newDeclSpec = parent.getRawSignature();
+			rewriter.replace(parent, new ASTLiteralNode(comments + newDeclSpec), infoText);
+		} else {
+			rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+		}
+	}
+
+	public static void restoreLeadingComments(ASTRewrite rewriter,
+			IASTSimpleDeclaration newDeclaration,
+			IASTFunctionDefinition oldDefinition,
+			IASTTranslationUnit oldDefUnit, TextEditGroup infoText) {
 		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
-		String comments = getCommentsAsString(getLeadingComments(oldDefinition, oldUnit));
+		String comments = getCommentsAsString(getLeadingComments(getParentTemplateDeclaration(oldDefinition), oldDefUnit));
 		if (!comments.isEmpty())
 			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(comments + newDeclSpec), infoText);
+	}
+	
+	public static IASTNode getParentTemplateDeclaration(
+			IASTNode def) {
+		if (def == null)
+			return null;
+		IASTNode lastSeen = def;
+		IASTNode node = def.getParent();
+		while (node != null) {
+			if (node instanceof ICPPASTTemplateDeclaration || node instanceof IASTSimpleDeclaration) {
+				lastSeen = node;
+				node = node.getParent();
+				continue;
+			}
+			return lastSeen;
+		}
+		return lastSeen;
 	}
 
 	private static ArrayList<IASTComment> getLeadingComments(IASTNode existingNode, IASTTranslationUnit oldUnit) {
@@ -520,5 +551,17 @@ public class ToggleNodeHelper extends NodeHelper {
 		for (IASTComment c : commentList)
 			comments += c.getRawSignature() + LINE_SEPARATOR;
 		return comments;
+	}
+
+	public static IASTSimpleDeclaration getSimpleDeclaration(
+			IASTFunctionDeclarator declarator) {
+		IASTNode node = declarator;
+		while (node.getParent() != null) {
+			node = node.getParent();
+			if (node instanceof IASTSimpleDeclaration) {
+				return (IASTSimpleDeclaration) node;
+			}
+		}
+		return null;
 	}
 }

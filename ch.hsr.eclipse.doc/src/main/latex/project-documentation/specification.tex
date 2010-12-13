@@ -16,6 +16,26 @@ header file. What the different places are, in which direction the code may be
 moved and in which situation the refactoring may be invoked is described in the 
 following chapters. 
 
+\subsection{Examples}
+
+\subsubsection{Toggle free function from .cpp to .h}
+There already is a declaration:
+No declaration is found: 
+/+`+!+£"!"++&"&"/*=?"?+?)("+*
+Whenever a free function definition is toggled the first time, the whole 
+definition shall be moved to a header file with the same name as the source 
+file. When this definition is toggled back to the source file, the declaration will remain in
+Whenever a free function is toggled, it shall swap definition and declaration. 
+When toggling to the header file and no declaration may be found there, the 
+definition will be created there.
+with the same name as the source file
+\lstinputlisting[caption={A.h},label={01freefuncPre}]{01freefuncPre.cpp}
+\begin{tabular}{p{5cm}p{.4cm}p{5cm}}
+\lstinputlisting[caption={A.h},label={01freefuncPostCpp}]{01freefuncPost.cpp}
+& & 
+\lstinputlisting[caption={A.cpp},label={01freefuncPostH}]{01freefuncPost.h}
+\end{tabular}
+
 \subsection{Activation}
 
 Most important is this basic rule: A function definition must exist.
@@ -118,8 +138,8 @@ that has no associated definition. A missing semicolon at the end of the
 function declaration should not stop the mechanism to work.
 
 After writing a function declaration in the class definition, not yet written
-the ``;'', code completion can be used to create the function body with a
-appropriated default empty return statement.\newline
+the ``;'', code completion can be used to create the function body with an
+appropriate default empty return statement.\newline
 
 An already completed function declaration can be transformed to a function
 definition by using the ``Implement Member Function'' hot-key which creates a

@@ -56,8 +56,7 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 				fcontext.getDefinition(), fcontext.getDefinitionUnit(),
 				infoText);
 		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration,
-				fcontext.getDefinition(), fcontext.getDefinitionUnit(),
-				infoText);
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(), infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {

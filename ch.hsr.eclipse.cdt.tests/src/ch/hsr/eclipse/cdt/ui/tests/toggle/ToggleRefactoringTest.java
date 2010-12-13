@@ -3,11 +3,8 @@ package ch.hsr.eclipse.cdt.ui.tests.toggle;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.cdt.ui.tests.refactoring.TestSourceFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -22,10 +19,6 @@ public class ToggleRefactoringTest extends RefactoringTest {
 		super(name, files);
 	}
 
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	@Override
 	protected void configureRefactoring(Properties refactoringProperties) {
 		fatalError = Boolean.valueOf(refactoringProperties.getProperty("fatalerror", "false")).booleanValue(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -35,7 +28,6 @@ public class ToggleRefactoringTest extends RefactoringTest {
 	protected void runTest() throws Throwable {
 		Refactoring refactoring = new ToggleRefactoring(project.getFile(fileName), selection, cproject);
 		RefactoringStatus checkInitialConditions = refactoring.checkInitialConditions(NULL_PROGRESS_MONITOR);
-		// Needed for the tu `unit' to be loaded.
 		if (fatalError) {
 			assertConditionsFatalError(checkInitialConditions);
 			return;

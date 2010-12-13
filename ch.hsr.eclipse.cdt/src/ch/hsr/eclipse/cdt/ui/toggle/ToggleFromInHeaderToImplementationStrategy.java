@@ -134,7 +134,13 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(
 				unit, insertion_parent.getTranslationUnit(), 
 				declarator);
-		impl_rewrite.insertBefore(insertion_parent, insertion_point, new_definition, infoText);
+		ASTRewrite newRewriter = impl_rewrite.insertBefore(insertion_parent, insertion_point, new_definition, infoText);
+		ToggleNodeHelper.restoreBody(newRewriter, new_definition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(
+				newRewriter, new_definition, 
+				context.getDefinition(), context.getDefinitionUnit(),
+				context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 
 	private CPPASTNamespaceDefinition createNamespace(
@@ -145,8 +151,7 @@ public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefacto
 	private void removeDefinitionFromHeader(ModificationCollector collector) {
 		ASTRewrite header_rewrite = collector.rewriterForTranslationUnit(
 				context.getDefinitionUnit());
-		header_rewrite.remove(ToggleNodeHelper.getParentRemovePoint(
-				context.getDefinition()), infoText);
+		header_rewrite.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
 	}
 
 	private IASTNode searchNamespaceInImpl(final IASTName name) {
