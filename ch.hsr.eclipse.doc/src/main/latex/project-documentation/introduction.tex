@@ -22,7 +22,7 @@ files. This is a pain point for every programmer. Forgetting to update the
 function signature in one of the files will result in compilation error which
 causes either lack of understanding for beginners or loss of time.
 
-After two minutes of compile error hunting because you forgot to rename a
+After two minutes of compile error hunting because you forgot to change a
 function signature in both, the header and the implementation file, you start
 asking yourself: Why nobody has yet implemented a solution to prevent such an
 error?
@@ -49,6 +49,9 @@ to \texttt{in-header} to \texttt{separate-file}  and back again to
 \texttt{in-class}. We concentrated on this order during this project. If the
 implementation is fast enough there is no need for a configuration dialog which
 defines the order of the toggle subfunctions.
+Then function definitions can be toggled circularly with good speed so nod time
+overhead is produced when moving. Toggling three times brings you back to the
+original position in no time. 
 
 \subsection{\textit{Implement Member Function}}
 The current CDT plug-in already includes a \textit{Implement Member Function}.
@@ -72,7 +75,7 @@ These are the basic aims for the project:
  \item Toggling between \texttt{in-class}, \texttt{in-header},
 \texttt{separate-file} and back again to \texttt{in-class} works for basic and
 some frequent special cases.
- \item Project organization: Fixed two-week iterations are used. Redmine is used
+ \item Project organization: Fixed one-week iterations are used. Redmine is used
 for planning and tracking time, issue tracking and as information radiator for
 the supervisor. A project documentation is written. Organization and results are
 reviewed weekly together with the supervisor.
@@ -115,10 +118,10 @@ thesis.
 \section{Expected outcome}
 
 Implement member function and the toggle key are written to work in synergy.
-First write the declaration for a member function in the class definition, then
-a hot-key is used to implement the function. At this point the toggle key can
-be hit at any time to move the function to the appropriate position and
-continue with the next new member function.
+First write the declaration for a (member) function in the header/class
+definition, then a hot-key is used to implement the function. At this point the
+toggle key can be hit at any time to move the function to the appropriate
+position and continue with the next new member function.
 
 \section{Project duration}
 The semester thesis starts on September 20th and has to be finished until

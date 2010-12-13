@@ -52,7 +52,9 @@ placed outside the class definition but still in the same (header) file. Such a
 function is called \textit{inlined}. For templates, this is the only position 
 where implementation may be placed outside the class definition due to problems 
 of the \textit{extern} keyword. Templated functions cannot be placed outside the 
-header file. The following listings show an example of what will be called 
+header file. Except for ... %TODO: find cases where template functions can be
+%placed outside of a header file
+The following listings show an example of what will be called 
 \textit{in-header situation} throughout this document.
 
 \lstinputlisting[caption={Implementation outside of the class in A.h},
