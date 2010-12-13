@@ -72,6 +72,11 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
 		ToggleNodeHelper.restoreBody(headerast, newdefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(
+				headerast, newdefinition, 
+				context.getDefinition(), context.getDefinitionUnit(),
+				context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 	
 	private void removeDefinitionFromImplementation(

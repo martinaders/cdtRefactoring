@@ -26,3 +26,32 @@ class A {
     return;
 }
 };
+//!ImplToHeaderTopComment
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
+//@.config
+filename=A.cpp
+//@A.cpp
+#include "A.h"
+
+// Definition comment
+void A::/*$*/member/*$$*/()
+{
+    return;
+}
+//=
+#include "A.h"
+
+// Definition comment
+
+//@A.h
+class A {
+    void member();
+};
+//=
+class A {
+    // Definition comment
+void member()
+    {
+    return;
+}
+};
