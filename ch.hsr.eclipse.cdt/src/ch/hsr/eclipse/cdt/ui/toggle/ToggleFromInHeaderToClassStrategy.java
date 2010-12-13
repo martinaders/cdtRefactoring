@@ -11,18 +11,11 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import org.eclipse.cdt.core.dom.ast.IASTComment;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCatchHandler;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionWithTryBlock;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclaration;
-import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -32,58 +25,40 @@ public class ToggleFromInHeaderToClassStrategy implements
 
 	private TextEditGroup infoText;
 	private ToggleRefactoringContext context;
-	private CPPASTSimpleDeclaration declaration;
 
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
 		this.context = context;
 		this.infoText =  new TextEditGroup("Toggle function body placement");
-		declaration = getParentSimpleDeclaration(context.getDeclaration());
-		if (declaration == null) {
-			throw new NotSupportedException("Parent needs to be a SimpleDeclaration.");
-		}
+		if (isFreeFunction(context))
+			throw new NotSupportedException("Cannot toggle templated free function");
 	}
 
-	private CPPASTSimpleDeclaration getParentSimpleDeclaration(IASTFunctionDeclarator node) {
-		if (node == null || node.getParent() == null || !(node.getParent() instanceof CPPASTSimpleDeclaration))
-			return null;
-		return (CPPASTSimpleDeclaration) node.getParent();
+	private boolean isFreeFunction(ToggleRefactoringContext context) {
+		return !ToggleNodeHelper.isInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
 	}
 
 	@Override
 	public void run(ModificationCollector modifications) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context
 				.getDefinitionUnit());
-		rewriter.remove(ToggleNodeHelper.getParentRemovePoint(context.getDefinition()), infoText);
+		IASTNode parentRemovePoint = ToggleNodeHelper.getParentRemovePoint(context.getDefinition());
+		rewriter.remove(parentRemovePoint, infoText);
 		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition( context.getDeclaration(), 
 				context.getDefinition(), context.getDefinitionUnit());
-		rewriter.replace(context.getDeclaration().getParent(), newDefinition, infoText);
-		rewriter.replace(newDefinition.getBody(), new ASTLiteralNode(format(context.getDefinition().getBody().getRawSignature())), infoText);
-		rewriteCatchHandlers(rewriter, newDefinition);
-
-		String declarationString = format(addLeadingComments(declaration));
-		rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(declarationString), infoText);
-	}
-
-	private String addLeadingComments(CPPASTSimpleDeclaration decl) {
-		String code = decl.getDeclSpecifier().toString();
-		ArrayList<IASTComment> leadingComments = ASTCommenter.getCommentedNodeMap(context.getDeclarationUnit()).getLeadingCommentsForNode(decl);
-		Collections.reverse(leadingComments);
-		for (IASTComment c : leadingComments)
-			code = c.getRawSignature() + "\n    " + code;
-		return code;
-	}
-
-	private void rewriteCatchHandlers(ASTRewrite rewriter, IASTFunctionDefinition newDefinition) {
-		if (newDefinition instanceof CPPASTFunctionWithTryBlock) {
-			ICPPASTCatchHandler[] newCatches = ((CPPASTFunctionWithTryBlock)newDefinition).getCatchHandlers();
-			ICPPASTCatchHandler[] oldCatches = ((CPPASTFunctionWithTryBlock)context.getDefinition()).getCatchHandlers();
-			for (int i = 0; i < oldCatches.length; i++)
-				rewriter.replace(newCatches[i], new ASTLiteralNode(" " + format(oldCatches[i].getRawSignature())), infoText);
+		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getSimpleDeclaration(context.getDeclaration());
+		ASTRewrite newRewriter = rewriter.replace(fullDeclaration,
+				newDefinition, infoText);
+		IASTNode parentTemplateDeclaration = ToggleNodeHelper.getParentTemplateDeclaration(context.getDeclaration());
+		if (parentTemplateDeclaration instanceof ICPPASTTemplateDeclaration) {
+			ToggleNodeHelper.restoreBody(newRewriter, newDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		} else {
+			ToggleNodeHelper.restoreBody(rewriter, newDefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+			
+			ToggleNodeHelper.restoreLeadingComments(
+					rewriter, newDefinition, 
+					context.getDefinition(), context.getDefinitionUnit(),
+					context.getDeclaration(), context.getDeclarationUnit(),
+					infoText);
 		}
-	}
-
-	private String format(String rawSignature) {
-		String result = rawSignature.replace("\n", "\n    ");
-		return result;
 	}
 }

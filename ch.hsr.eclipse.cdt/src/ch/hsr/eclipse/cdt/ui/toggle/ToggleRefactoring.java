@@ -12,6 +12,7 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.pdom.indexer.IndexerPreferences;
@@ -39,6 +40,7 @@ public class ToggleRefactoring extends CRefactoring {
 	private TextSelection selection;
 	private ToggleRefactoringStrategy strategy;
 	private ToggleRefactoringContext context;
+	private IIndex fIndex;
 	
 	public ToggleRefactoring(IFile file, TextSelection selection, ICProject proj) {
 		super(file, selection, null, proj);
@@ -56,14 +58,14 @@ public class ToggleRefactoring extends CRefactoring {
 			pm.subTask("waiting for indexer");
 			prepareIndexer(pm);
 			pm.subTask("analyzing user text selection");
-			context = new ToggleRefactoringContext(getIndex(), file, selection);
+			context = new ToggleRefactoringContext(fIndex, file, selection);
 			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {
 		} catch (NotSupportedException e) {
 			System.err.println("not implemented: " + e.getMessage());
 			initStatus.addFatalError("fatal");
 		} finally {
-			unlockIndex();
+			fIndex.releaseReadLock();
 		}
 
 		return initStatus;
@@ -78,8 +80,9 @@ public class ToggleRefactoring extends CRefactoring {
 		}
 		if (!im.isProjectIndexed(project))
 			throw new NotSupportedException("not able to work without the indexer");
-		lockIndex();
 		IndexerPreferences.set(project.getProject(), IndexerPreferences.KEY_INDEX_UNUSED_HEADERS_WITH_DEFAULT_LANG, Boolean.TRUE.toString());
+		fIndex = CCorePlugin.getIndexManager().getIndex(project);
+		fIndex.acquireReadLock();
 	}
 
 	@Override

@@ -20,8 +20,8 @@ class A {
 
 inline void A::member(int a, int b)
 {
-    return;
-}
+        return;
+    }
 
 //!TestDefaultParameterInitializerInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -101,7 +101,6 @@ class A {
 class A {
     void member(int a = 0, int b = 0)
     {
-        return;
-    }
-
+    return;
+}
 };

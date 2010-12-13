@@ -63,7 +63,13 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 		ASTRewrite header_rewrite = modifications.rewriterForTranslationUnit(other_tu);
 		IASTFunctionDefinition newfunction = context.getDefinition().copy();
 		newfunction.setParent(other_tu);
-		header_rewrite.insertBefore(other_tu.getTranslationUnit(), null, newfunction, infoText);
+		ASTRewrite newRewriter = header_rewrite.insertBefore(other_tu.getTranslationUnit(), null, newfunction, infoText);
+		ToggleNodeHelper.restoreBody(newRewriter, newfunction, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(
+				newRewriter, newfunction, 
+				context.getDefinition(), context.getDefinitionUnit(),
+				context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 
 	private void addDefinitionToClass(ModificationCollector modifications) {
@@ -71,6 +77,12 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
 				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
 		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
+		ToggleNodeHelper.restoreBody(headerast, newdefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
+		ToggleNodeHelper.restoreLeadingComments(
+				headerast, newdefinition, 
+				context.getDefinition(), context.getDefinitionUnit(),
+				context.getDeclaration(), context.getDeclarationUnit(),
+				infoText);
 	}
 	
 	private void removeDefinitionFromImplementation(

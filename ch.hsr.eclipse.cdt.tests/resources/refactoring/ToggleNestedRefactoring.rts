@@ -23,8 +23,8 @@ class A {
 
 inline void A::B::member(int a, int b)
 {
-    return;
-}
+            return;
+        }
 
 //!TestNestedClassInHeaderToImplementation
 //#ch.hsr.eclipse.cdt.ui.tests.toggle.ToggleRefactoringTest
@@ -113,8 +113,7 @@ class A {
     class B {
         void member(int a, int b)
         {
-            return;
-        }
-
+    return;
+}
     };
 };
