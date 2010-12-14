@@ -75,18 +75,17 @@ The sequence diagram in figure \ref{sd} illustrates the basic call flow when
 
 \subsection{The strategies}
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the user selection. The following strategies have been f
+considered, based on the user selection. The following strategies have been
 implemented to cover the specified cases:
 
 \begin{itemize}
-\item ToggleFromImplementationToClassStrategy
-\item ToggleFreeFunctionFromInHeaderToImpl
 \item ToggleFromClassToInHeaderStrategy
+\item ToggleFromImplementationHeaderOrClassStrategy
 \item ToggleFromInHeaderToClassStrategy
 \item ToggleFromInHeaderToImplementationStrategy
 \end{itemize}
 
-\subsection{implications of not using a refactoring wizard}
+\subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
 executed several times in succession. When using a wizard, the 
 \textit{RefactoringWizardOpenOperation} handles the execution of the refactoring 
@@ -222,6 +221,6 @@ infrastructure.
 \end{enumerate}
 
 Another technique to measure time more accurately was checked out. For this, the 
-org.eclipse.test.performance plugin was used. 
+\textit{org.eclipse.test.performance} plugin was used. 
 
 
