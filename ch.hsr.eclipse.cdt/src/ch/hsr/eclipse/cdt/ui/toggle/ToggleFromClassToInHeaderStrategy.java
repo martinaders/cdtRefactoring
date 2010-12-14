@@ -11,15 +11,16 @@
  ******************************************************************************/
 package ch.hsr.eclipse.cdt.ui.toggle;
 
-
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateDeclaration;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
@@ -30,54 +31,95 @@ import org.eclipse.text.edits.TextEditGroup;
 public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrategy {
 
 	protected TextEditGroup infoText = new TextEditGroup("Toggle function body placement");
-	private ToggleRefactoringContext fcontext;
+	private ToggleRefactoringContext context;
 
 	public ToggleFromClassToInHeaderStrategy(ToggleRefactoringContext context) {
-		if (ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTCompositeTypeSpecifier.class) != null
-			    && ToggleNodeHelper.getAncestorOfType(context.getDeclaration(), ICPPASTCompositeTypeSpecifier.class) != null)
-			throw new NotSupportedException("behavior when def + decl both inside a class is undefined");
-		this.fcontext = context;
+		if (isInClass(context.getDeclaration()) && isInClass(context.getDefinition()))
+			throw new NotSupportedException("Definition and Declaration both inside class. Behavoir is undefined.");
+		this.context = context;
+	}
+
+	private boolean isInClass(IASTNode node) {
+		return ToggleNodeHelper.getAncestorOfType(node, 
+				ICPPASTCompositeTypeSpecifier.class) != null;
 	}
 
 	public void run(ModificationCollector modifications) {
+		IASTNode parentNamespace = getParentNamespace();
+		IASTNode newDefinition = getNewDefinition(parentNamespace);
 		IASTSimpleDeclaration newDeclaration = getNewDeclaration();
-		
-		IASTNode parentNamespace = ToggleNodeHelper.getAncestorOfType(
-				fcontext.getDefinition(), ICPPASTNamespaceDefinition.class);
-		if (parentNamespace == null)
-			parentNamespace = fcontext.getDefinitionUnit();
-		
+		ASTRewrite rewriter = replaceDefinitionWithDeclaration(modifications, newDeclaration);
+		IASTNode insertion_point = getInsertionPoint(parentNamespace);
+		ASTRewrite newRewriter = rewriter.insertBefore(parentNamespace, 
+				insertion_point, newDefinition, infoText);
+		restoreBody(newDefinition, newRewriter);
+		restoreLeadingComments(newDeclaration, rewriter);
+	}
+
+	private IASTNode getNewDefinition(IASTNode parentNamespace) {
 		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(
-				fcontext.getDefinition(), fcontext.getDefinitionUnit(), parentNamespace);
+				context.getDefinition(), context.getDefinitionUnit(), parentNamespace);
+		
+		ICPPASTTemplateDeclaration templdecl = ToggleNodeHelper.getTemplateDeclaration(
+				context.getDefinition(), (IASTFunctionDefinition) newDefinition);
+		if (templdecl != null) {
+			newDefinition = templdecl;
+		}
+		newDefinition.setParent(context.getDefinitionUnit());
+		return newDefinition;
+	}
+
+	private IASTNode getParentNamespace() {
+		IASTNode parentNamespace = ToggleNodeHelper.getAncestorOfType(
+				context.getDefinition(), ICPPASTNamespaceDefinition.class);
+		if (parentNamespace == null)
+			parentNamespace = context.getDefinitionUnit();
+		return parentNamespace;
+	}
+
+	private IASTNode getInsertionPoint(IASTNode parentNamespace) {
 		IASTTranslationUnit unit = parentNamespace.getTranslationUnit();
 		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(
-				unit, unit, fcontext.getDefinition().getDeclarator());
+				unit, unit, context.getDefinition().getDeclarator());
+		return insertion_point;
+	}
 
+	private ASTRewrite replaceDefinitionWithDeclaration(
+			ModificationCollector modifications,
+			IASTSimpleDeclaration newDeclaration) {
 		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(
-				fcontext.getDefinitionUnit());
-		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
-		ASTRewrite newRewriter = rewriter.insertBefore(
-				parentNamespace, insertion_point, newDefinition, infoText);
+				context.getDefinitionUnit());
+		rewriter.replace(context.getDefinition(), newDeclaration, infoText);
+		return rewriter;
+	}
 
+	private void restoreBody(IASTNode newDefinition, ASTRewrite newRewriter) {
 		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper.getFunctionDefinition(newDefinition);
-		String bodyWithComments = ToggleNodeHelper.restoreBody(
-				fcontext.getDefinition(), fcontext.getDefinitionUnit());
-		newRewriter.replace(funcDefinition.getBody(), new ASTLiteralNode(bodyWithComments), infoText);
-		String leading = ToggleNodeHelper.restoreLeadingComments(fcontext.getDefinition(), fcontext.getDefinitionUnit());
-		System.out.println("leading: " + leading);
-		if (leading != null) {
-			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(leading), infoText);
-		}
+		String bodyWithComments = ToggleNodeHelper.getBody(
+				context.getDefinition(), context.getDefinitionUnit());
+		newRewriter.replace(funcDefinition.getBody(), 
+				new ASTLiteralNode(bodyWithComments), infoText);
+	}
+
+	private void restoreLeadingComments(IASTSimpleDeclaration newDeclaration,
+			ASTRewrite rewriter) {
+		String leadingDefComments = ToggleNodeHelper.getLeadingComments(
+				context.getDefinition(), context.getDefinitionUnit());
+		String leadingDecComments = ToggleNodeHelper.getLeadingComments(
+				context.getDeclaration(), context.getDeclarationUnit());
+		String newDeclSpec = newDeclaration.getDeclSpecifier().toString();
+		rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(
+				leadingDecComments + leadingDefComments + newDeclSpec), infoText);
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
 		CPPNodeFactory factory = new CPPNodeFactory();
-		IASTDeclSpecifier newDeclSpecifier = fcontext.getDefinition().getDeclSpecifier().copy();
+		IASTDeclSpecifier newDeclSpecifier = context.getDefinition().getDeclSpecifier().copy();
 		newDeclSpecifier.setInline(false);
 		IASTSimpleDeclaration newDeclaration = factory.newSimpleDeclaration(newDeclSpecifier);
-		IASTFunctionDeclarator newDeclarator = fcontext.getDefinition().getDeclarator().copy();
+		IASTFunctionDeclarator newDeclarator = context.getDefinition().getDeclarator().copy();
 		newDeclaration.addDeclarator(newDeclarator);
-		newDeclaration.setParent(fcontext.getDefinition().getParent());
+		newDeclaration.setParent(context.getDefinition().getParent());
 		return newDeclaration;
 	}
 }

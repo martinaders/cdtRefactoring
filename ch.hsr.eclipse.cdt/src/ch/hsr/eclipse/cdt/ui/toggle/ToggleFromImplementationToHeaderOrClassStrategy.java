@@ -26,7 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRefactoringStrategy {
 
 	private ToggleRefactoringContext context;
-	protected TextEditGroup infoText;
+	private TextEditGroup infoText;
 	private IASTTranslationUnit other_tu;
 	private ASTLiteralNode includenode;
 
@@ -35,8 +35,9 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 		this.context = context;
 		this.infoText = new TextEditGroup("Toggle function body placement");
 		if (context.getDeclarationUnit() == null) {
-			if (context.getDefinition().getDeclarator().getName() instanceof ICPPASTQualifiedName)
+			if (isFreeFunction(context.getDefinition())) {
 				throw new NotSupportedException("Not a free function. Cannot decide where to toggle");
+			}
 			other_tu = context.getTUForSiblingFile();
 			if (other_tu == null) {
 				ToggleFileCreator filecreator = new ToggleFileCreator(context, ".h");
@@ -50,69 +51,90 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 			}
 		}
 	}
+
+	private boolean isFreeFunction(IASTFunctionDefinition definition) {
+		return definition.getDeclarator().getName() instanceof ICPPASTQualifiedName;
+	}
 	
 	@Override
 	public void run(ModificationCollector modifications) {
-		removeDefinitionFromImplementation(modifications);
-		if (context.getDeclarationUnit() != null)
+		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		removeDefinitionFromImplementation(implast);
+		if (includenode != null) {
+			implast.insertBefore(context.getDefinitionUnit(), 
+					context.getDefinitionUnit().getChildren()[0], includenode, infoText);
+		}
+		if (context.getDeclarationUnit() != null) {
 			addDefinitionToClass(modifications);
-		else
+		} else {
 			addDefinitionToHeader(modifications);
+		}
 	}
 
 	private void addDefinitionToHeader(ModificationCollector modifications) {
 		ASTRewrite headerRewrite = modifications.rewriterForTranslationUnit(other_tu);
 		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createFunctionSignatureWithEmptyBody(
-				context.getDefinition().getDeclSpecifier().copy(), context.getDefinition().getDeclarator().copy(), context.getDefinition().copy());
+				context.getDefinition().getDeclSpecifier().copy(), 
+				context.getDefinition().getDeclarator().copy(), 
+				context.getDefinition().copy());
 		newDefinition.setParent(other_tu);
-		ASTRewrite newRewriter = headerRewrite.insertBefore(other_tu.getTranslationUnit(), null, newDefinition, infoText);
-		
+		ASTRewrite newRewriter = headerRewrite.insertBefore(
+				other_tu.getTranslationUnit(), null, newDefinition, infoText);
 		restoreBody(newRewriter, newDefinition);
 		restoreLeadingComments(newRewriter, newDefinition);
 	}
 
 	private void addDefinitionToClass(ModificationCollector modifications) {
-		ASTRewrite headerRewrite = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+		ASTRewrite headerRewrite = modifications.rewriterForTranslationUnit(
+				context.getDeclarationUnit());
 		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(
-				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-		IASTNode parent = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTCompositeTypeSpecifier.class);
-		if (parent != null)
-			newDefinition.setParent(parent);
-		else
-			newDefinition.setParent(context.getDeclarationUnit());
-		
+				context.getDeclaration(), context.getDefinition(), 
+				context.getDeclarationUnit());
+		newDefinition.setParent(getParent());
 		headerRewrite.replace(context.getDeclaration().getParent(), newDefinition, infoText);
-		
 		restoreBody(headerRewrite, newDefinition);
 		restoreLeadingComments(headerRewrite, newDefinition);
 	}
 
+	private IASTNode getParent() {
+		IASTNode parent = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), 
+				ICPPASTCompositeTypeSpecifier.class);
+		IASTNode parentnode = null;
+		if (parent != null) {
+			parentnode  = parent;
+		}
+		else {
+			parentnode =context.getDeclarationUnit();
+		}
+		return parentnode;
+	}
+
 	private void restoreLeadingComments(ASTRewrite headerRewrite,
 			IASTFunctionDefinition newDefinition) {
-		String leading = ToggleNodeHelper.restoreLeadingComments(newDefinition,
-				context.getDefinition(), context.getDefinitionUnit(),
+		String leadingDeclComments = ToggleNodeHelper.getLeadingComments(
 				context.getDeclaration(), context.getDeclarationUnit());
-		if (leading != null) {
-			headerRewrite.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(leading), infoText);
-		}
+		String leadingDefComments = ToggleNodeHelper.getLeadingComments(
+				context.getDefinition(), context.getDefinitionUnit());
+		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
+		headerRewrite.replace(newDefinition.getDeclSpecifier(),
+					new ASTLiteralNode(leadingDeclComments + leadingDefComments + newDeclSpec), infoText);
 	}
 
 	private void restoreBody(ASTRewrite headerRewrite,
 			IASTFunctionDefinition newDefinition) {
-		String body = ToggleNodeHelper.restoreBody(context.getDefinition(), context.getDefinitionUnit());
-		headerRewrite.replace(newDefinition.getBody(), new ASTLiteralNode(body), infoText);
+		String body = ToggleNodeHelper.getBody(context.getDefinition(), 
+				context.getDefinitionUnit());
+		headerRewrite.replace(newDefinition.getBody(), new ASTLiteralNode(body),
+				infoText);
 	}
 	
-	private void removeDefinitionFromImplementation(
-			ModificationCollector modifications) {
-		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		ICPPASTNamespaceDefinition ns = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTNamespaceDefinition.class);
-		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition()))
+	private void removeDefinitionFromImplementation(ASTRewrite implast) {
+		ICPPASTNamespaceDefinition ns = ToggleNodeHelper.getAncestorOfType(
+				context.getDefinition(), ICPPASTNamespaceDefinition.class);
+		if (ns != null && isSingleElementInNamespace(ns, context.getDefinition())) {
 			implast.remove(ns, infoText);
-		else
+		} else {
 			implast.remove(context.getDefinition(), infoText);
-		if (includenode != null) {
-			implast.insertBefore(context.getDefinitionUnit(), context.getDefinitionUnit().getChildren()[0], includenode, infoText);
 		}
 	}
 

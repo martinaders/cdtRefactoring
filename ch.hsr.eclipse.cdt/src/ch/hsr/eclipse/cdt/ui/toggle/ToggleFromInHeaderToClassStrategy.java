@@ -32,55 +32,83 @@ public class ToggleFromInHeaderToClassStrategy implements ToggleRefactoringStrat
 	private ToggleRefactoringContext context;
 
 	public ToggleFromInHeaderToClassStrategy(ToggleRefactoringContext context) {
-		this.context = context;
-		this.infoText =  new TextEditGroup("Toggle function body placement");
 		if (isFreeFunction(context))
 			throw new NotSupportedException("Cannot toggle templated free function");
+		this.context = context;
+		this.infoText =  new TextEditGroup("Toggle function body placement");
 	}
 
 	private boolean isFreeFunction(ToggleRefactoringContext context) {
-		return isNotInsideAClass(context.getDefinition().getDeclarator(), context.getDeclaration());
+		return isNotInsideAClass(context.getDefinition().getDeclarator(),
+				context.getDeclaration());
 	}
 	
 	boolean isNotInsideAClass(IASTFunctionDeclarator declarator, IASTFunctionDeclarator backup) {
 		if (declarator.getName() instanceof ICPPASTQualifiedName) {
 			declarator = backup;
 		}
-		return (ToggleNodeHelper.getAncestorOfType(declarator, IASTCompositeTypeSpecifier.class) == null);
+		return (ToggleNodeHelper.getAncestorOfType(declarator,
+				IASTCompositeTypeSpecifier.class) == null);
 	}
 
 	@Override
 	public void run(ModificationCollector modifications) {
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context
-				.getDefinitionUnit());
+		ASTRewrite rewriter = removeDefinition(modifications);
+		IASTFunctionDefinition newDefinition = getNewDefinition();
+		ASTRewrite newRewriter = replaceDeclarationWithDefinition(rewriter, newDefinition);
+		IASTNode parentTemplateDeclaration = 
+			ToggleNodeHelper.getParentTemplateDeclaration(context.getDeclaration());
+		if (parentTemplateDeclaration instanceof ICPPASTTemplateDeclaration) {
+			restoreBody(newRewriter, newDefinition);
+		} else {
+			restoreBody(rewriter, newDefinition);
+			restoreLeadingComments(rewriter, newDefinition);
+		}
+	}
+
+	private ASTRewrite removeDefinition(ModificationCollector modifications) {
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
 		IASTNode parentRemovePoint = ToggleNodeHelper.getParentRemovePoint(context.getDefinition());
 		rewriter.remove(parentRemovePoint, infoText);
-		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(context.getDeclaration(), 
-				context.getDefinition(), context.getDefinitionUnit());
-		IASTNode parent = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTCompositeTypeSpecifier.class);
-		if (parent != null)
+		return rewriter;
+	}
+
+	private IASTFunctionDefinition getNewDefinition() {
+		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(
+				context.getDeclaration(), context.getDefinition(), context.getDefinitionUnit());
+		IASTNode parent = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), 
+				ICPPASTCompositeTypeSpecifier.class);
+		if (parent != null) {
 			newDefinition.setParent(parent);
-		else
-			newDefinition.setParent(context.getDefinitionUnit());
-		
-		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getAncestorOfType(context.getDeclaration(), CPPASTSimpleDeclaration.class);
-		
-		ASTRewrite newRewriter = rewriter.replace(fullDeclaration,
-				newDefinition, infoText);
-		IASTNode parentTemplateDeclaration = ToggleNodeHelper.getParentTemplateDeclaration(context.getDeclaration());
-		if (parentTemplateDeclaration instanceof ICPPASTTemplateDeclaration) {
-			String body = ToggleNodeHelper.restoreBody(context.getDefinition(), context.getDefinitionUnit());
-			newRewriter.replace(newDefinition.getBody(), new ASTLiteralNode(body), infoText);
-		} else {
-			String body = ToggleNodeHelper.restoreBody(context.getDefinition(), context.getDefinitionUnit());
-			rewriter.replace(newDefinition.getBody(), new ASTLiteralNode(body), infoText);
-			
-			String leading = ToggleNodeHelper.restoreLeadingComments(newDefinition,
-					context.getDefinition(), context.getDefinitionUnit(),
-					context.getDeclaration(), context.getDeclarationUnit());
-			
-			if (leading != null)
-				rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(leading), infoText);
 		}
+		else {
+			newDefinition.setParent(context.getDefinitionUnit());
+		}
+		return newDefinition;
+	}
+
+	private ASTRewrite replaceDeclarationWithDefinition(ASTRewrite rewriter,
+			IASTFunctionDefinition newDefinition) {
+		IASTSimpleDeclaration fullDeclaration = ToggleNodeHelper.getAncestorOfType(
+				context.getDeclaration(), CPPASTSimpleDeclaration.class);
+		ASTRewrite newRewriter = rewriter.replace(fullDeclaration, newDefinition, infoText);
+		return newRewriter;
+	}
+
+	private void restoreBody(ASTRewrite rewriter,
+			IASTFunctionDefinition newDefinition) {
+		String body = ToggleNodeHelper.getBody(context.getDefinition(), context.getDefinitionUnit());
+		rewriter.replace(newDefinition.getBody(), new ASTLiteralNode(body), infoText);
+	}
+
+	private void restoreLeadingComments(ASTRewrite rewriter,
+			IASTFunctionDefinition newDefinition) {
+		String newDeclSpec = newDefinition.getDeclSpecifier().toString();
+		String declarationLeading = ToggleNodeHelper.getLeadingComments(
+				context.getDeclaration(), context.getDeclarationUnit());
+		String definitionLeading = ToggleNodeHelper.getLeadingComments(
+				context.getDefinition(), context.getDefinitionUnit());
+		rewriter.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(
+				declarationLeading + definitionLeading + newDeclSpec), infoText);
 	}
 }
