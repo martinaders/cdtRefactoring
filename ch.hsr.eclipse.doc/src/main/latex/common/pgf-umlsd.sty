@@ -53,7 +53,7 @@ Sequence Diagrams.]
   \stepcounter{instnum}
   \path (inst\thepreinst.east)+(#1,0) node[inststyle] (inst\theinstnum)
   {\ifpgfumlsdunderline
-    \underline{#3}
+    \underline{\tiny #3}
   \else
   #3
   \fi};
@@ -92,7 +92,7 @@ Sequence Diagrams.]
   (#4.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (ct\thecallevel) {};
   
   \draw[->,>=triangle 60] ({cf\thecallevel}) -- (ct\thecallevel)
-  node[midway, above] {\small #3};
+  node[midway, above] {\tiny #3};
   \def\l\thecallevel{#1}
   \def\f\thecallevel{#2}
   \def\t\thecallevel{#4}
@@ -105,7 +105,37 @@ Sequence Diagrams.]
   (\f\thecallevel)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rf\thecallevel) {}
   (\t\thecallevel.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rt\thecallevel) {};
   \draw[dashed,->,>=angle 60] ({rt\thecallevel}) -- (rf\thecallevel)
-  node[midway, above]{\small \returnvalue};
+  node[midway, above]{\tiny \returnvalue};
+  \drawthread{ct\thecallevel}{rt\thecallevel}
+  \addtocounter{callevel}{-1} % pop
+}
+
+% a function call without return value
+% Example:
+% \begin{callnoret}[height]{caller}{function}{callee}
+% \end{callnoret}
+\newenvironment{callnoret}[4][1]{
+  \stepcounter{seqlevel}
+  \stepcounter{callevel} % push
+  \path
+  (#2)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (cf\thecallevel) {}
+  (#4.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (ct\thecallevel) {};
+  
+  \draw[->,>=triangle 60] ({cf\thecallevel}) -- (ct\thecallevel)
+  node[midway, above] {\tiny #3};
+  \def\l\thecallevel{#1}
+  \def\f\thecallevel{#2}
+  \def\t\thecallevel{#4}
+%  \def\returnvalue{#5}
+  \tikzstyle{threadstyle}+=[instcolor#2]
+}
+{
+  \addtocounter{seqlevel}{\l\thecallevel}
+  \path
+  (\f\thecallevel)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rf\thecallevel) {}
+  (\t\thecallevel.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rt\thecallevel) {};
+%  \draw[dashed,->,>=angle 60] ({rt\thecallevel}) -- (rf\thecallevel);
+%  node[midway, above]{\tiny \returnvalue};
   \drawthread{ct\thecallevel}{rt\thecallevel}
   \addtocounter{callevel}{-1} % pop
 }
@@ -122,20 +152,20 @@ Sequence Diagrams.]
   ({sc\thecallevel}.east)+(0,-0.33*\unitfactor) node (scb\thecallevel) {};
 
   \draw[->,>=triangle 60] ({sc\thecallevel}.east) -- ++(0.8,0)
-  node[near start, above right] {\small #3} -- ++(0,-0.33*\unitfactor)
+  node[near start, above right] {\tiny #3} -- ++(0,-0.33*\unitfactor)
   -- (scb\thecallevel); 
   \def\l\thecallevel{#1}
   \def\f\thecallevel{#2}
-  \def\returnvalue{#4}
+%  \def\returnvalue{#4}
   \tikzstyle{threadstyle}+=[instcolor#2] 
 }{
   \addtocounter{seqlevel}{\l\thecallevel}
   \path (\f\thecallevel)+(0,-\theseqlevel*\unitfactor-0.33*\unitfactor) node
   (sct\thecallevel) {};
 
-  \draw[dashed,->,>=angle 60] ({sct\thecallevel}.east) node
-  (sce\thecallevel) {} -- ++(0.8,0) -- node[midway, right]{\small \returnvalue} ++(0,-0.33*\unitfactor) -- ++(-0.8,0);
-  \drawthread{scb\thecallevel}{sce\thecallevel}
+%  \draw[dashed,->,>=angle 60] ({sct\thecallevel}.east) node
+%  (sce\thecallevel) {} -- ++(0.8,0) -- node[midway, right]{\tiny \returnvalue} ++(0,-0.33*\unitfactor) -- ++(-0.8,0);
+%  \drawthread{scb\thecallevel}{sce\thecallevel}
   \addtocounter{callevel}{-1} % pop
 }
 
@@ -147,7 +177,7 @@ Sequence Diagrams.]
   \path
   (#1)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (messbeg) {}
   (#3)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (messend) {};
-  \draw[->,>=angle 60] (messbeg) -- (messend) node[midway, above] {\small #2};
+  \draw[->,>=angle 60] (messbeg) -- (messend) node[midway, above] {\tiny #2};
 }
 
 % In the situation of multi-threads, some objects are called at the
