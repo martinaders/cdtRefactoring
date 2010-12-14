@@ -225,13 +225,13 @@ Sequence Diagrams.]
     \setlength{\unitlength}{1cm}
     \tikzstyle{sequence}=[coordinate]
     \tikzstyle{inststyle}=[rectangle, draw, anchor=west, minimum
-    height=0.8cm, minimum width=1.6cm, fill=white, 
+    height=0.6cm, minimum width=1cm, fill=white, 
     drop shadow={opacity=1,fill=black}]
     \ifpgfumlsdroundedcorners
     \tikzstyle{inststyle}+=[rounded corners=3mm]
     \fi
     \tikzstyle{loopstyle}=[anchor=north west]
-    \global\def\unitfactor{0.6}
+    \global\def\unitfactor{0.5} % squeezes the diagram vertically
     \global\def\threadbias{center}
     % reset counters
     \setcounter{preinst}{0}
