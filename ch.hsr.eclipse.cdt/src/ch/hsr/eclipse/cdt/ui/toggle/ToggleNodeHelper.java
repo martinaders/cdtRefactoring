@@ -351,6 +351,8 @@ public class ToggleNodeHelper extends NodeHelper {
 		}
 		
 		URI uri = getTranslationUnitOfSiblingFile(include, filename, headerflag);
+		if (uri == null)
+			return null;
 		return getTranslationUnitFromFile(cProject, projectindex, uri);
 	}
 	
