@@ -7,11 +7,18 @@ implemented and which problems had to be solved during development.
 
 \section{Implementation approach}
 
-At the beginning, as many cases as possible were collected on the project wiki to gain a view on what had to be realized, what we wanted to take in scope and what had nothing to do with toggling function definitions. Some cases were simple, some exotic. The simplest one, toggling from inside a class to the same file outside the class, was chosen to be implemented first. 
+At the beginning, as many cases as possible were collected on the project wiki 
+to gain a view on what had to be realized, what was planned to take into scope 
+and what had nothing to do with toggling function definitions. Some cases were 
+simple, some exotic. The simplest one, toggling from inside a class to the same 
+file outside the class, was chosen to be implemented first. 
 
-Before that a skeletton plugin was built with a NullRefactoring to try whether it was possible to develop a separate plugin instead of directly manipulating the CDT source code. By this approach it was assured that the developed plugin may be deployed easily even without being integrated into CDT.
+Before that, a skeleton plugin was built with a NullRefactoring to try whether 
+it was possible to develop a separate plugin instead of directly manipulating 
+the CDT source code. By this approach it was assured that the developed plugin 
+may be deployed easily even without being integrated into CDT.
 
-After the first refactoring worked, more cases were added by priority.
+After the first refactoring was implemented, more cases were added by priority. 
 
 \section{Architecture}
 
@@ -19,24 +26,66 @@ In Eclipse, most of the architecture is already given. Some specialities of the
 toggle refactoring are presented in this section.
 
 \subsection{Basic call flow}
-Here's the place for some nice diagram to visualize the work.
+The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
+\textit{Toggle Function} is invoked.
 
-Activator -- ActionDelegate -- (Job) -- ToggleRefactoring -- Strategy
+\begin{figure}
+  \begin{sequencediagram}
+    \newthread{del}{:ActionDeleg}
+    \newinst{run}{:Runner}
+    \newthread{job}{:Job}
+    \newinst{ref}{:Refactoring}
+    \newinst{ctx}{:Context}
+    \newinst{fac}{:StrategyFactory}
+    \newinst{strat}{:Strategy}
+    
+    \begin{call}{del}{create}{run}{}
+      \begin{call}{run}{create}{ref}{}
+      \end{call}
+    \end{call}
+    \begin{call}{del}{run}{run}{}
+      \begin{call}{run}{create}{job}{}
+      \end{call}
+      \begin{call}{run}{schedule}{job}{}
+      \end{call}
+    \end{call}
+    \begin{call}{job}{checkAllConditions}{ref}{status}
+      \begin{call}{ref}{create}{ctx}{}
+      \end{call}
+      \begin{call}{ref}{create(context)}{fac}{}
+      \end{call}
+      \begin{call}{ref}{getAppropriateStategy}{fac}{strategy}
+        \begin{call}{fac}{create}{strat}{}
+        \end{call}
+      \end{call}
+    \end{call}
+    \begin{call}{job}{createChange}{ref}{change}
+      \begin{callself}[0.5]{ref}{collectModifications}{ref}
+      \end{callself}
+      \begin{call}{ref}{run}{strat}{}
+      \end{call}
+    \end{call}
+    \begin{callself}{job}{change.perform}{}
+    \end{callself}
+  \end{sequencediagram}
+
+  \caption{Basic call flow when toggling a function definition}
+  \label{sd}
+\end{figure}
 
 \subsection{The strategies}
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the user selection. The following strategies have been f
+considered, based on the user selection. The following strategies have been
 implemented to cover the specified cases:
 
 \begin{itemize}
-\item ToggleFromImplementationToClassStrategy
-\item ToggleFreeFunctionFromInHeaderToImpl
 \item ToggleFromClassToInHeaderStrategy
+\item ToggleFromImplementationHeaderOrClassStrategy
 \item ToggleFromInHeaderToClassStrategy
 \item ToggleFromInHeaderToImplementationStrategy
 \end{itemize}
 
-\subsection{implications of not using a refactoring wizard}
+\subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
 executed several times in succession. When using a wizard, the 
 \textit{RefactoringWizardOpenOperation} handles the execution of the refactoring 
@@ -49,14 +98,14 @@ needed by the UndoManager. The UndoManager is available through
 \textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
 for more details on the implementation.
 
-\section{Testing and Performance environment}
+\section{Testing and performance environment}
 
-This section introduces special tricks that were used to simplify testing and
-control performance.
+This section introduces strategies to simplify testing and monitoring of 
+performance.
 
-\subsection{A real-world test environment}
-The COAST source code uses modern C++ coding style and was hence used as test 
-environment for real-world tests.
+\subsection{A real world test environment}
+The COAST~\cite{COAST} source code was used as test environment for real-world 
+tests as it uses a lot of C++ code that can be toggled.
 
 \subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
 recognition for the test environment}
@@ -81,21 +130,72 @@ The whitespace issue was already discussed. Another issue is that the Doxygen
 syntax //! may not be used in the test files since this syntax is used to 
 specify the test name.
 
-Testing error conditions is not comfortable. % TODO: solutions?
+\subsubsection{Resource '/RegressionTestProject/A.h' does not exist.}
 
-All in all, the special refactoring test environment was a big help for 
-refactoring relaxedly.
+The following issue was not resolved to its cause and is still active when the 
+tests are being run. However, tests still pass without failure. During the test 
+run, the following exception is shown on the Eclipse console:
 
-\section{Test coverage}
-The test coverage tool Eclemma was a good help to find dead code and to think 
-about justification of code blocks. 
+\begin{lstlisting}[language=java]
+!ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
+!MESSAGE Error: Resource '/RegressionTestProject/\
+A.h' does not exist.
+!STACK 1
+org.eclipse.core.internal.resources.\
+ResourceException: Resource '/RegressionTest\
+Project/A.h' does not exist.
+  at...ces.Resource.checkExists(Resource.java:326)
+  at...Resource.checkAccessible(Resource.java:200)
+  at...l.resources.File.getContents(File.java:291)
+  at...aceFileContent(InternalParserUtil.java:145)
+  at...ser.FileContent.create(FileContent.java:83)
+  at...ser.FileContent.create(FileContent.java:67)
+  at...Reader(ProjectIndexerInputAdapter.java:288)
+  at...ask.parseFile(AbstractIndexerTask.java:755)
+  at....parseLinkage(AbstractIndexerTask.java:688)
+  at...rTask.runTask(AbstractIndexerTask.java:343)
+  at...OMIndexerTask.run(PDOMIndexerTask.java:127)
+  at...PDOMIndexerJob.run(PDOMIndexerJob.java:137)
+  at...re.internal.jobs.Worker.run(Worker.java:54)
+!SUBENTRY 1 org.eclipse.core.resources 4 368 ...
+!MESSAGE Resource '/RegressionTestProject/A.h' \
+does not exist.
+\end{lstlisting}
 
-Creating new files was not tested due to the dialog box popping up during 
-execution. If a refactoring has to be done with more user interaction, it
-should 
-be investigated how this may be tested.
+\subsubsection{Testing for exceptions}
 
-%todo: move this to project setup and link from here to there?
+Error testing is not actually an issue but the mechanism to test for exceptions 
+is not obvious, so an example will be shown at this point. 
+
+The .rts test file may include the following syntax:
+
+\begin{lstlisting}[language=java]
+//@.config
+fatalerror=true
+\end{lstlisting}
+
+The \textit{fatalerror} variable may be retrieved using a member function of \textit{RefactoringTest}:
+\begin{lstlisting}[language=java]
+@Override
+protected void configureRefactoring(
+    Properties refactoringProperties) {
+  fatalError = Boolean.valueOf(
+      refactoringProperties.getProperty(
+      "fatalerror", "false")).booleanValue();
+}
+\end{lstlisting}
+
+The \textit{runTest} method may then assert that an error has occurred by using:
+\begin{lstlisting}[language=java]
+RefactoringStatus initialConditions = 
+    refactoring.checkInitialConditions(
+    NULL_PROGRESS_MONITOR);
+if (fatalError)
+  assertConditionsFatalError(initialConditions);
+\end{lstlisting}
+
+All in all, the special refactoring test environment developed by \cite{GB06} 
+was a big help for refactoring relaxedly.
 
 \subsection{Performance tests}
 
@@ -109,19 +209,18 @@ average time of three consecutive runs of all tests. Five scenarios have been
 chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
-\item First time toggling: includes loading of the infrastructure and will take 
+\item First time toggling: Includes loading of the infrastructure and will take 
 some more time.
-\item Toggle from in class to header: only one translation unit is affected by 
-this refactoring.
-\item Toggle from implementation header: two translation units are affected here.
-\item Average runtime: time to run all the tests (will vary due to new tests but 
-helpful for comparing effects of small changes between versions)
-\item Emtpy reference test: a dummy refactoring that won't load and analyze any 
+\item Toggle from in class to header: Only one file is affected by this 
+refactoring. This represents the least complex refactoring and should be the 
+quickest one beside the reference test.
+\item Toggle from implementation header: Two files are affected here.
+\item Emtpy reference test: A dummy refactoring that won't load and analyze any 
 code. Shows what amount of time is consumed by the given refactoring 
 infrastructure.
 \end{enumerate}
 
 Another technique to measure time more accurately was checked out. For this, the 
-org.eclipse.test.performance plugin was used. 
+\textit{org.eclipse.test.performance} plugin was used. 
 
 

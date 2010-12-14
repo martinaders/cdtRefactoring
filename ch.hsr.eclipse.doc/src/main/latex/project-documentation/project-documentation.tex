@@ -4,13 +4,18 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{hyperref}
-\lstset{language=C++, numbers=left,
-numberstyle=\tiny\color{black},frame=shadowbox, basicstyle=\small,
-rulesepcolor=\color{gray}, backgroundcolor=\color{lightgray}, title=\lstname,
-captionpos=b}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shadows}
+\usepackage{lscape}
+\usepackage[underline=true,rounded corners=false]{pgf-umlsd}
+\lstset{language=C++, numbers=left, numberstyle=\tiny\color{black}, 
+frame=shadowbox, basicstyle=\small\ttfamily, rulesepcolor=\color{gray}, 
+backgroundcolor=\color{lightgray}, keywordstyle=\color{keyword_color}, 
+commentstyle=\color{comment_color}, title=\lstname, captionpos=b}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \definecolor{lightgray}{rgb}{0.95,0.95,0.95}
-
+\definecolor{comment_color}{rgb}{0, 0.6, 0.2}
+\definecolor{keyword_color}{rgb}{0, 0.2, 0.6}
 \textheight 20cm
 \textwidth 12.0cm
 \headsep 2.5cm
@@ -56,15 +61,7 @@ captionpos=b}
 \appendix
 \include{usermanual}
 \include{configurationmgnt}
-
 \include{timemanagement}
-
-\chapter{Copyright agreement}
-\thispagestyle{fancy}
-%\thispagestyle{fancy}
-% TODO: Add a copy of the signed document here.
-% \includepdf{agreement}
-
 \include{glossary}
 
 % Use citations like this: AV08~\cite{AV08}.

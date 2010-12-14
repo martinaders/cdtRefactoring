@@ -53,4 +53,12 @@ X Server was needed. Xvfb was used in our case for the job. Maven has to be
 explicitly told which test class to execute and in which folder the test class
 is located. If this is not done properly the tests will fail.
 
+\subsection{Test coverage}
 
+The test coverage tool Eclemma\footnote{www.eclemma.org} was a good help to find dead code and to think 
+about justification of code blocks. 
+
+Creating new files was not tested due to the dialog box popping up during 
+execution. If a refactoring has to be done with more user interaction, it
+should be investigated how this may be tested. 
+%TODO: Sommerlad had an idea but I wasn't able to dechypher the note...

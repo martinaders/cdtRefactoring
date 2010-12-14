@@ -6,11 +6,17 @@ capable of and what may still need some improvement.
 
 \section{Features and limitations}
 
+Toggling functions is available inside any class or namespace hierarchy and may 
+be invoked when the selection is anywhere inside a function declaration or body. 
+Basic templated functions are supported as well. However, there might be 
+template special cases that were not thought of.
 
+The code generator removes preprocessor statements that stay inside a node that 
+has to be rewritten.
 
 \section{Performance results}
 
-It is difficult to compare the speed to other refactorings of CDT since wizards 
+It is difficult to compare the speed with other refactorings of CDT since wizards 
 are used for the other known refactorings. However, the goal was reached that 
 the refactoring is executing almost instantly.
 
@@ -22,7 +28,6 @@ project:
  \hline
  first time toggling 	&  ---ms & --ms & --\% \\
  toggle free function	&  ---ms & --ms & --\% \\
- average runtime	&  ---ms & --ms & --\% \\
  emtpy reference test	&  ---ms & --ms & --\% \\
 \end{tabular}
 

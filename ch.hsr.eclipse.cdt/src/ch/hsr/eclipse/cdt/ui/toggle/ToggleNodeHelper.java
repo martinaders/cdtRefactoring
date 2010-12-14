@@ -306,8 +306,10 @@ public class ToggleNodeHelper extends NodeHelper {
 		} else {
 			include = projectIndex.findIncludes(thisFile);
 		}
-		
 		URI uri = getTranslationUnitOfSiblingFile(include, fileName, headerFlag);
+		if (uri == null) {
+			return null;
+		}
 		return getTranslationUnitFromFile(cProject, projectIndex, uri);
 	}
 	

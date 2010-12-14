@@ -19,9 +19,16 @@ following chapters.
 \subsection{Examples}
 
 \subsubsection{Toggle free function from .cpp to .h}
-There already is a declaration:
+If a separate declaration of the function exists, the definition shall replace 
+the declaration. If the definition relied inside a header file, its declaration 
+shall remain there. This means that if the following code 
+
+\lstinputlisting[caption={A.h},label={01freefuncPre}]{01freefuncPre.cpp}
+
+is toggled twice, it will result in a declaration inside the header file.
+%TODO hier weitermachen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 No declaration is found: 
-/+`+!+£"!"++&"&"/*=?"?+?)("+*
+
 Whenever a free function definition is toggled the first time, the whole 
 definition shall be moved to a header file with the same name as the source 
 file. When this definition is toggled back to the source file, the declaration will remain in
@@ -29,7 +36,6 @@ Whenever a free function is toggled, it shall swap definition and declaration.
 When toggling to the header file and no declaration may be found there, the 
 definition will be created there.
 with the same name as the source file
-\lstinputlisting[caption={A.h},label={01freefuncPre}]{01freefuncPre.cpp}
 \begin{tabular}{p{5cm}p{.4cm}p{5cm}}
 \lstinputlisting[caption={A.h},label={01freefuncPostCpp}]{01freefuncPost.cpp}
 & & 
