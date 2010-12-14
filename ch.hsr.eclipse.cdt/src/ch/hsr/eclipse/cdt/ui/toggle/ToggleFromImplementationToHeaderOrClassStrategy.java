@@ -12,7 +12,9 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
@@ -59,29 +61,46 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRe
 	}
 
 	private void addDefinitionToHeader(ModificationCollector modifications) {
-		ASTRewrite header_rewrite = modifications.rewriterForTranslationUnit(other_tu);
-		IASTFunctionDefinition newfunction = context.getDefinition().copy();
-		newfunction.setParent(other_tu);
-		ASTRewrite newRewriter = header_rewrite.insertBefore(other_tu.getTranslationUnit(), null, newfunction, infoText);
-		ToggleNodeHelper.restoreBody(newRewriter, newfunction, context.getDefinition(), context.getDefinitionUnit(), infoText);
-		ToggleNodeHelper.restoreLeadingComments(
-				newRewriter, newfunction, 
-				context.getDefinition(), context.getDefinitionUnit(),
-				context.getDeclaration(), context.getDeclarationUnit(),
-				infoText);
+		ASTRewrite headerRewrite = modifications.rewriterForTranslationUnit(other_tu);
+		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createFunctionSignatureWithEmptyBody(
+				context.getDefinition().getDeclSpecifier().copy(), context.getDefinition().getDeclarator().copy(), context.getDefinition().copy());
+		newDefinition.setParent(other_tu);
+		ASTRewrite newRewriter = headerRewrite.insertBefore(other_tu.getTranslationUnit(), null, newDefinition, infoText);
+		
+		restoreBody(newRewriter, newDefinition);
+		restoreLeadingComments(newRewriter, newDefinition);
 	}
 
 	private void addDefinitionToClass(ModificationCollector modifications) {
-		ASTRewrite headerast = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
-		IASTFunctionDefinition newdefinition = ToggleNodeHelper.createInClassDefinition(
+		ASTRewrite headerRewrite = modifications.rewriterForTranslationUnit(context.getDeclarationUnit());
+		IASTFunctionDefinition newDefinition = ToggleNodeHelper.createInClassDefinition(
 				context.getDeclaration(), context.getDefinition(), context.getDeclarationUnit());
-		headerast.replace(context.getDeclaration().getParent(), newdefinition, infoText);
-		ToggleNodeHelper.restoreBody(headerast, newdefinition, context.getDefinition(), context.getDefinitionUnit(), infoText);
-		ToggleNodeHelper.restoreLeadingComments(
-				headerast, newdefinition, 
+		IASTNode parent = ToggleNodeHelper.getAncestorOfType(context.getDefinition(), ICPPASTCompositeTypeSpecifier.class);
+		if (parent != null)
+			newDefinition.setParent(parent);
+		else
+			newDefinition.setParent(context.getDeclarationUnit());
+		
+		headerRewrite.replace(context.getDeclaration().getParent(), newDefinition, infoText);
+		
+		restoreBody(headerRewrite, newDefinition);
+		restoreLeadingComments(headerRewrite, newDefinition);
+	}
+
+	private void restoreLeadingComments(ASTRewrite headerRewrite,
+			IASTFunctionDefinition newDefinition) {
+		String leading = ToggleNodeHelper.restoreLeadingComments(newDefinition,
 				context.getDefinition(), context.getDefinitionUnit(),
-				context.getDeclaration(), context.getDeclarationUnit(),
-				infoText);
+				context.getDeclaration(), context.getDeclarationUnit());
+		if (leading != null) {
+			headerRewrite.replace(newDefinition.getDeclSpecifier(), new ASTLiteralNode(leading), infoText);
+		}
+	}
+
+	private void restoreBody(ASTRewrite headerRewrite,
+			IASTFunctionDefinition newDefinition) {
+		String body = ToggleNodeHelper.restoreBody(context.getDefinition(), context.getDefinitionUnit());
+		headerRewrite.replace(newDefinition.getBody(), new ASTLiteralNode(body), infoText);
 	}
 	
 	private void removeDefinitionFromImplementation(

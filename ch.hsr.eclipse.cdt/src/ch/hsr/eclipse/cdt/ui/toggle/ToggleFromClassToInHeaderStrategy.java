@@ -22,6 +22,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPNodeFactory;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -41,30 +42,38 @@ public class ToggleFromClassToInHeaderStrategy implements ToggleRefactoringStrat
 	public void run(ModificationCollector modifications) {
 		IASTSimpleDeclaration newDeclaration = getNewDeclaration();
 		
-		IASTNode parentNamespace = ToggleNodeHelper.getAncestorOfType(fcontext.getDefinition(), ICPPASTNamespaceDefinition.class);
+		IASTNode parentNamespace = ToggleNodeHelper.getAncestorOfType(
+				fcontext.getDefinition(), ICPPASTNamespaceDefinition.class);
 		if (parentNamespace == null)
 			parentNamespace = fcontext.getDefinitionUnit();
 		
-		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(fcontext.getDefinition(), fcontext.getDefinitionUnit(), parentNamespace);
+		IASTNode newDefinition = ToggleNodeHelper.getQualifiedNameDefinition(
+				fcontext.getDefinition(), fcontext.getDefinitionUnit(), parentNamespace);
 		IASTTranslationUnit unit = parentNamespace.getTranslationUnit();
-		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(unit, unit, fcontext.getDefinition().getDeclarator());
+		IASTNode insertion_point = InsertionPointFinder.findInsertionPoint(
+				unit, unit, fcontext.getDefinition().getDeclarator());
 
-		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(fcontext.getDefinitionUnit());
+		ASTRewrite rewriter = modifications.rewriterForTranslationUnit(
+				fcontext.getDefinitionUnit());
 		rewriter.replace(fcontext.getDefinition(), newDeclaration, infoText);
-		ASTRewrite newRewriter = rewriter.insertBefore(parentNamespace, insertion_point, newDefinition, infoText);
+		ASTRewrite newRewriter = rewriter.insertBefore(
+				parentNamespace, insertion_point, newDefinition, infoText);
 
-		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper
-				.getFunctionDefinition(newDefinition);
-		ToggleNodeHelper.restoreBody(newRewriter, funcDefinition,
-				fcontext.getDefinition(), fcontext.getDefinitionUnit(),
-				infoText);
-		ToggleNodeHelper.restoreLeadingComments(rewriter, newDeclaration,
-				fcontext.getDefinition(), fcontext.getDefinitionUnit(), infoText);
+		ICPPASTFunctionDefinition funcDefinition = ToggleNodeHelper.getFunctionDefinition(newDefinition);
+		String bodyWithComments = ToggleNodeHelper.restoreBody(
+				fcontext.getDefinition(), fcontext.getDefinitionUnit());
+		newRewriter.replace(funcDefinition.getBody(), new ASTLiteralNode(bodyWithComments), infoText);
+		String leading = ToggleNodeHelper.restoreLeadingComments(fcontext.getDefinition(), fcontext.getDefinitionUnit());
+		System.out.println("leading: " + leading);
+		if (leading != null) {
+			rewriter.replace(newDeclaration.getDeclSpecifier(), new ASTLiteralNode(leading), infoText);
+		}
 	}
 
 	private IASTSimpleDeclaration getNewDeclaration() {
 		CPPNodeFactory factory = new CPPNodeFactory();
 		IASTDeclSpecifier newDeclSpecifier = fcontext.getDefinition().getDeclSpecifier().copy();
+		newDeclSpecifier.setInline(false);
 		IASTSimpleDeclaration newDeclaration = factory.newSimpleDeclaration(newDeclSpecifier);
 		IASTFunctionDeclarator newDeclarator = fcontext.getDefinition().getDeclarator().copy();
 		newDeclaration.addDeclarator(newDeclarator);
