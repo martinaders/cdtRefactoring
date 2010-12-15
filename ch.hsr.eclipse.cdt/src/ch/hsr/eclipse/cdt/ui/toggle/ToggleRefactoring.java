@@ -38,7 +38,7 @@ import org.eclipse.ui.ide.IDE;
 public class ToggleRefactoring extends CRefactoring {
 
 	private TextSelection selection;
-	private ToggleRefactoringStrategy strategy;
+	private IToggleRefactoringStrategy strategy;
 	private ToggleRefactoringContext context;
 	private IIndex fIndex;
 	

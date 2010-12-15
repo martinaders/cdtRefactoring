@@ -26,7 +26,7 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromInHeaderToClassStrategy implements ToggleRefactoringStrategy {
+public class ToggleFromInHeaderToClassStrategy implements IToggleRefactoringStrategy {
 
 	private TextEditGroup infoText;
 	private ToggleRefactoringContext context;

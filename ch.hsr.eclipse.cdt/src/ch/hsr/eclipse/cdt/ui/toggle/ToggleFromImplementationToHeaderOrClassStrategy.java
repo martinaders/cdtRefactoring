@@ -23,7 +23,7 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromImplementationToHeaderOrClassStrategy implements ToggleRefactoringStrategy {
+public class ToggleFromImplementationToHeaderOrClassStrategy implements IToggleRefactoringStrategy {
 
 	private ToggleRefactoringContext context;
 	private TextEditGroup infoText;

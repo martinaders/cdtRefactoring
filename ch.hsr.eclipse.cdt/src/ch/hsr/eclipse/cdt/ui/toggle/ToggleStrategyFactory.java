@@ -22,7 +22,7 @@ public class ToggleStrategyFactory {
 		this.context = context;
 	}
 
-	public ToggleRefactoringStrategy getAppropriateStategy() {
+	public IToggleRefactoringStrategy getAppropriateStategy() {
 		if (context.getDefinition() == null)
 			throw new NotSupportedException("cannot work without function defintion");
 		if (!context.getDefinitionUnit().isHeaderUnit())

@@ -30,7 +30,7 @@ import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
-public class ToggleFromInHeaderToImplementationStrategy implements ToggleRefactoringStrategy {
+public class ToggleFromInHeaderToImplementationStrategy implements IToggleRefactoringStrategy {
 
 	private IASTTranslationUnit impl_unit;
 	private ToggleRefactoringContext context;
