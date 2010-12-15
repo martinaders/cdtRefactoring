@@ -98,7 +98,7 @@ function definition is shown by listings \ref{twofilesolution_header} and
 label={twofilesolution_header}]{implementation_file.h}
 & & 
 \lstinputlisting[caption={A.cpp},
-label={twofilesolution_impl}]{implementation_file.c}
+label={twofilesolution_impl}]{implementation_file.cpp}
 \end{tabular}
 
 \subsection{Basic scenarios}
@@ -125,7 +125,7 @@ positions:
 
 \subsubsection{Templated member functions}
 An exception are templated member functions that may only be toggled inside the 
-same translation unit.
+same headerfile.
 \begin{enumerate}
 \item Toggle from in-class to in-header
 \item Toggle from in-header to in-class
@@ -133,8 +133,11 @@ same translation unit.
 
 \subsection{Special case - namespaces}
 
-Empty namespaces shall be deleted when toggling removed the last function 
-contained.
+If the moved function definition is contained in a namespace definition, the
+namespace definition will be created. Then the function is inserted in the newly
+created namespace definition.
+On the other hand, empty namespace definitions shall be deleted when toggling
+removed the last function contained within.
 
 \section{\textit{Implement Member Function}}
 
