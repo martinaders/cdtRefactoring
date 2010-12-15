@@ -26,49 +26,11 @@ In Eclipse, most of the architecture is already given. Some specialities of the
 toggle refactoring are presented in this section.
 
 \subsection{Basic call flow}
-The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
+The sequence diagram in figure %\ref{sd} illustrates the basic call flow when 
 \textit{Toggle Function} is invoked.
-
-\begin{figure}
-  \begin{sequencediagram}
-    \newthread{del}{:ActionDeleg}
-    \newinst{run}{:Runner}
-    \newthread{job}{:Job}
-    \newinst{ref}{:Refactoring}
-    \newinst{ctx}{:Context}
-    \newinst{fac}{:StrategyFactory}
-    \newinst{strat}{:Strategy}
-    
-    \begin{call}{del}{create}{run}{}
-      \begin{call}{run}{create}{ref}{}
-      \end{call}
-    \end{call}
-    \begin{call}{del}{run}{run}{}
-      \begin{call}{run}{create}{job}{}
-      \end{call}
-      \begin{call}{run}{schedule}{job}{}
-      \end{call}
-    \end{call}
-    \begin{call}{job}{checkAllConditions}{ref}{status}
-      \begin{call}{ref}{create}{ctx}{}
-      \end{call}
-      \begin{call}{ref}{create(context)}{fac}{}
-      \end{call}
-      \begin{call}{ref}{getAppropriateStategy}{fac}{strategy}
-        \begin{call}{fac}{create}{strat}{}
-        \end{call}
-      \end{call}
-    \end{call}
-    \begin{call}{job}{createChange}{ref}{change}
-      \begin{callself}[0.5]{ref}{collectModifications}{ref}
-      \end{callself}
-      \begin{call}{ref}{run}{strat}{}
-      \end{call}
-    \end{call}
-    \begin{callself}{job}{change.perform}{}
-    \end{callself}
-  \end{sequencediagram}
-
+\begin{figure}[h]
+  \centering
+  \includegraphics[trim = 35mm 120mm 40mm 28mm,clip,scale=0.8]{seqdiagram/seqdiagram.pdf} %,clip,
   \caption{Basic call flow when toggling a function definition}
   \label{sd}
 \end{figure}
