@@ -1,5 +1,5 @@
 //!2ndEmptyTest
-//#ch.hsr.eclipse.cdt.ui.tests.toggle.EmptyTest
+//#ch.hsr.eclipse.cdt.ui.tests.empty.EmptyTest
 //@.config
 filename=A.h
 //@A.h
