@@ -1,0 +1,36 @@
+//!1stEmptyTest
+//#ch.hsr.eclipse.cdt.ui.tests.toggle.EmptyTest
+//@.config
+filename=A.h
+//@A.h
+#include <string>
+
+class A {
+    int /*$*/foo/*$$*/() 
+    {
+        return 0;
+    }
+};
+//=
+#include <string>
+
+class A {
+    int foo() 
+    {
+        return 0;
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
