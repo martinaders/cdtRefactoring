@@ -2,17 +2,21 @@ package ch.hsr.eclipse.cdt.ui.implement;
 
 import java.util.HashMap;
 
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeConstructorExpression;
 import org.eclipse.cdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTCompoundStatement;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTConstructorInitializer;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTReturnStatement;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleDeclSpecifier;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTSimpleTypeConstructorExpression;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
@@ -27,6 +31,8 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.text.edits.TextEditGroup;
+
+import ch.hsr.eclipse.cdt.ui.toggle.ToggleNodeHelper;
 
 @SuppressWarnings("restriction")
 public class NewImplementRefactoring extends CRefactoring {
@@ -76,14 +82,22 @@ public class NewImplementRefactoring extends CRefactoring {
 		func.setDeclSpecifier(new CPPASTSimpleDeclSpecifier());
 		IASTName name = memberDeclaration.getDeclarators()[0].getName().copy();
 		func.setDeclarator(new CPPASTFunctionDeclarator(name));
-		func.setBody(new CPPASTCompoundStatement());
 
 		// return type
-		IASTNode returnvalue = ASTHelper
-				.getDeclarationForNode(memberDeclaration);
-		IASTDeclSpecifier value = ASTHelper
-				.getDeclarationSpecifier(returnvalue).copy();
-		func.setDeclSpecifier(value);
+		IASTNode returnvalue = ASTHelper.getDeclarationForNode(memberDeclaration);
+		ICPPASTDeclSpecifier declSpec = (ICPPASTDeclSpecifier) ASTHelper.getDeclarationSpecifier(returnvalue).copy();
+		func.setDeclSpecifier(declSpec);
+		ICPPASTDeclSpecifier returndeclspec = declSpec.copy();
+		returndeclspec.setStorageClass(ICPPASTDeclSpecifier.sc_unspecified);
+		
+		CPPASTReturnStatement returnstmt = new CPPASTReturnStatement();
+		ICPPASTSimpleTypeConstructorExpression returntype = new CPPASTSimpleTypeConstructorExpression(returndeclspec, new CPPASTConstructorInitializer());
+		returnstmt.setReturnValue(returntype);
+		returnstmt.setParent(func);
+		
+		CPPASTCompoundStatement body = new CPPASTCompoundStatement();
+		body.addStatement(returnstmt);
+		func.setBody(body);
 
 		ASTRewrite rewrite = collector.rewriterForTranslationUnit(parent
 				.getTranslationUnit());
