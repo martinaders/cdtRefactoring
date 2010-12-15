@@ -56,41 +56,44 @@ public class DeclaratorFinder {
 		IASTNode firstNodeInsideSelection = unit.getNodeSelector(null)
 				.findFirstContainedNode(selection.getOffset(),
 						selection.getLength());
-		IASTFunctionDeclarator result = findDeclaratorInAncestors(firstNodeInsideSelection);
+		IASTFunctionDeclarator declarator = findDeclaratorInAncestors(firstNodeInsideSelection);
 
-		if (result == null) {
-			firstNodeInsideSelection = unit.getNodeSelector(null)
-					.findEnclosingNode(selection.getOffset(),
-							selection.getLength());
-			result = findDeclaratorInAncestors(firstNodeInsideSelection);
+		if (declarator == null) {
+			firstNodeInsideSelection = unit.getNodeSelector(null).findEnclosingNode(
+					selection.getOffset(), selection.getLength());
+			declarator = findDeclaratorInAncestors(firstNodeInsideSelection);
 		}
-		return result;
+		return declarator;
 	}
 
 	private IASTFunctionDeclarator findDeclaratorInAncestors(IASTNode node) {
 		while (node != null) {
-			IASTFunctionDeclarator result = extractDeclarator(node);
-			if (node instanceof ICPPASTTemplateDeclaration)
-				result = extractDeclarator(((ICPPASTTemplateDeclaration) node).getDeclaration());
-			if (result != null)
-				return result;
+			IASTFunctionDeclarator declarator = extractDeclarator(node);
+			if (node instanceof ICPPASTTemplateDeclaration) {
+				declarator = extractDeclarator(((ICPPASTTemplateDeclaration) node).getDeclaration());
+			}
+			if (declarator != null) {
+				return declarator;
+			}
 			node = node.getParent();
 		}
 		return null;
 	}
 
 	private IASTFunctionDeclarator extractDeclarator(IASTNode node) {
-		if (node instanceof ICPPASTTemplateDeclaration)
+		if (node instanceof ICPPASTTemplateDeclaration) {
 			node = ((ICPPASTTemplateDeclaration) node).getDeclaration();
-		if (node instanceof IASTFunctionDeclarator)
+		}
+		if (node instanceof IASTFunctionDeclarator) {
 			return (IASTFunctionDeclarator) node;
-		if (node instanceof IASTFunctionDefinition)
+		}
+		if (node instanceof IASTFunctionDefinition) {
 			return ((IASTFunctionDefinition) node).getDeclarator();
+		}
 		if (node instanceof IASTSimpleDeclaration) {
-			IASTDeclarator[] declarators = ((IASTSimpleDeclaration) node)
-					.getDeclarators();
-			if (declarators.length == 1
-					&& declarators[0] instanceof IASTFunctionDeclarator)
+			IASTDeclarator[] declarators = ((IASTSimpleDeclaration) node).getDeclarators();
+			if (declarators.length == 1 && 
+					declarators[0] instanceof IASTFunctionDeclarator)
 				return (IASTFunctionDeclarator) declarators[0];
 		}
 		return null;
