@@ -17,26 +17,25 @@ quickly. Project setup hints are listed in the appendix.
 
 \chapter*{Management Summary}
 Changing function signatures in C++ is an unthankful task to do. Usually the
-signature has to be changed in two files, the header file and the
-implementation file. Often programmers forget about to change in one place
-which results in error and unnecessary time consuming error correction.
+signature has to be changed inside two files, the header file and the
+implementation file. Often programmers forget to change the signature in one place
+which results in compile errors and unnecessary time consuming error correction.
 
 Refactorings do solve such problems by automating changes to source code so
-less error are introduced by hand.
+less errors are introduced by hand.
 
 The ``One touch toggle refactoring'' moves function definition from one place
-to an other and preserves correctness.
+to another and preserves correctness.
 
 This is done by searching for a function definition or declaration next to the
-cursor position or the selection of source code. Then according to the found
+cursor position or the selection of source code. Then, according to the found
 element, it's sibling is searched. Then the signature of the definition is
 copied and adapted to the new position. The new definition gets inserted and
 the old definition is removed.
 If the definition and the declaration is the same in the beginning, the old
 definition is replaced with a newly created declaration.
 
-All this is done without any wizard and kept speedy to not unterbrechen the
-work flow.
+All this is done without any wizard and kept speedy to not break the work flow.
 \thispagestyle{empty}
 \pagebreak
 
