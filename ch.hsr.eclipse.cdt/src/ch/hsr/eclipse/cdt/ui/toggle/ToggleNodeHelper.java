@@ -298,47 +298,23 @@ public class ToggleNodeHelper extends NodeHelper {
 				IndexLocationFactory.getWorkspaceIFL(file));
 		String fileName = ToggleNodeHelper.getFilenameWithoutExtension(
 				file.getFullPath().toString());
-		IIndexInclude[] include;
-		boolean headerFlag = false;
-		if (asttu.isHeaderUnit()) {
-			include = projectIndex.findIncludedBy(thisFile);
-			headerFlag = true;
-		} else {
-			include = projectIndex.findIncludes(thisFile);
-		}
-		URI uri = getTranslationUnitOfSiblingFile(include, fileName, headerFlag);
-		if (uri == null) {
-			return null;
-		}
-		return getTranslationUnitFromFile(cProject, projectIndex, uri);
-	}
-	
-	
-	private static URI getTranslationUnitOfSiblingFile(IIndexInclude[] includes, 
-			String fileName, boolean isHeader) {
-		URI uri = null;
-		for(IIndexInclude include: includes) {
-			try {
-				if (isHeader) {
-					uri = include.getIncludedBy().getLocation().getURI();
-				} else {
-					uri = include.getIncludesLocation().getURI();
+		if (file.getFileExtension().equals("h")) {
+           for (IIndexInclude include : projectIndex.findIncludedBy(thisFile)) {
+                   if (ToggleNodeHelper.getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(fileName)) {
+                           ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(include.getIncludedBy().getLocation().getURI(), cProject);
+                           return tu.getAST(projectIndex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+                   }
+           }
+		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("c")) {
+			for (IIndexInclude include : projectIndex.findIncludes(thisFile)) {
+				if (ToggleNodeHelper.getFilenameWithoutExtension(include.getFullName()).equals(fileName)) {
+					URI uri = include.getIncludesLocation().getURI();
+					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
+					return tu.getAST(projectIndex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
 				}
-				if (ToggleNodeHelper.getFilenameWithoutExtension(uri.getRawPath()).equals(fileName)) {
-					break;
-				}
-			} catch (CoreException e) {
-				throw new NotSupportedException("Could not get sibling translation unit");
 			}
 		}
-		return uri;
-	}
-
-	private static IASTTranslationUnit getTranslationUnitFromFile(
-			ICProject cProject, IIndex projectindex, URI uri)
-			throws CModelException, CoreException {
-		ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
-		return tu.getAST(projectindex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
+		return null;
 	}
 
 	static String getFilenameWithoutExtension(String filename) {
