@@ -1,7 +1,7 @@
 \chapter{Interpretation}
 \thispagestyle{fancy}
 
-After implementation, a look back is made on what the resulting refactoring is 
+After implementation, a look back was made on what the resulting refactoring is 
 capable of and what may still need some improvement.
 
 \section{Features and limitations}
@@ -11,8 +11,9 @@ be invoked when the selection is anywhere inside a function declaration or body.
 Basic templated functions are supported as well. However, there might be 
 template special cases that were not thought of.
 
-The code generator removes preprocessor statements that stay inside a node that 
-has to be rewritten.
+On the other side, the code generator removes preprocessor statements that stay 
+inside a node that has to be rewritten. Removing comments of removed nodes was 
+not achieved without changing the rewriter.
 
 \section{Performance results}
 
@@ -20,21 +21,20 @@ It is difficult to compare the speed with other refactorings of CDT since wizard
 are used for the other known refactorings. However, the goal was reached that 
 the refactoring is executing almost instantly.
 
-The following table shows speed improvements during the development of the 
-project:
-
-\begin{tabular}[t]{l|rrr}
- Scenario   & first draft & final result & improvement in \% \\
- \hline
- first time toggling 	&  ---ms & --ms & --\% \\
- toggle free function	&  ---ms & --ms & --\% \\
- emtpy reference test	&  ---ms & --ms & --\% \\
-\end{tabular}
+It was planned to measure the speed of the jUnit tests. However, the displayed 
+time does not represent the actual speed of the refactoring. This may be due to 
+the fact that tests are not being invoked exactly the same way as the actual 
+refactoring. 
 
 The results from the \textit{org.eclipse.test.performance} speed tests were not 
-used in the end. Since in reality the refactorings are much slower than the 
+used too. Since in reality the refactorings are much slower than the 
 (repeated) measurements, resulting values may only be compared relative to each 
 other.
+
+In the end, the only way to judge whether the refactorings became quicker is to 
+check out an older version like \textit{597440f4552eaa} and to try it out 
+manually. Including dependencies like iostream slowed down the refactoring 
+noticeably before speed was improved.
 
 \section{Personal review}
 
