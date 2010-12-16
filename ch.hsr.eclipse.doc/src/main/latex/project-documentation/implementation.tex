@@ -161,7 +161,7 @@ was a big help for refactoring relaxedly.
 
 \subsection{Performance tests}
 
-The simplest way to assess the speed of the refactoring is to look at the junit 
+The simplest way to assess the speed of the refactoring is to look at the jUnit 
 time measurements. The first test that is run takes more time and represents the 
 time needed for first time toggling when the refactoring infrastructure has to 
 be loaded. 
@@ -176,7 +176,7 @@ some more time.
 \item Toggle from in class to header: Only one file is affected by this 
 refactoring. This represents the least complex refactoring and should be the 
 quickest one beside the reference test.
-\item Toggle from implementation header: Two files are affected here.
+\item Toggle from implementation to header: Two files are affected here.
 \item Emtpy reference test: A dummy refactoring that won't load and analyze any 
 code. Shows what amount of time is consumed by the given refactoring 
 infrastructure.

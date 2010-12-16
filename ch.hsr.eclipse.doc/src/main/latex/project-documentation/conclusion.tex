@@ -39,7 +39,90 @@ No deeper investigation on how this refactoring could benefit from the developed
 work has been done until now.
 % TODO: complete this chapter
 
-\section{Issues}
+\section{Known issues}
+
+\subsection{Handling newly created files}
+\textbf{Problem}: It is difficult do manipulate newly created files.
+\textbf{Cause}: --
+\textbf{Solution}: --
+
+\subsection{Constructor / destructor bug}
+\textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
+Then toggle the constructor out of the class definition. The Destructor will be 
+overridden partially. This problem only occurs in exactly this situation (no 
+paramenters, no initialization lists).
+\textbf{Cause}: Unknown. It seems to be some offset bug.
+\textbf{Solution}: None yet solved.
+
+\subsection{Unneccessary newlines}
+\textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
+by the rewriter. 
+\textbf{Cause}: Newlines are inserted by the rewriter before and after an new
+node but are not removed when removing the same node. To be able to judge how 
+many newlines have to be inserted or removed, the whitespace situation around an 
+affected node has to be analyzed thoroughly. Given figure \ref{commentA} it 
+could be tried to always remove one newline before and one newline after the 
+removed function.
+
+\begin{figure}[h]
+\begin{lstlisting}[language=C++]
+void before() {
+}
+// 1st newline added
+void newFunction() {
+} // 2nd newline added
+
+void after() {
+}
+\end{lstlisting}
+\setlength{\abovecaptionskip}{-20pt}
+\caption{Whitespaces may not be removed blindly}
+\label{commentA}
+\end{figure}
+
+Yet, it is not determined whether the programmer changed the code to look like 
+in figure \ref{commentB}. There, it would be fatal to remove a character before 
+and after the function because brackets would be removed instead.
+
+\begin{figure}[h]
+\begin{lstlisting}[language=C++]
+void before(){}void newFunction(){}void after(){}
+\end{lstlisting}
+\setlength{\abovecaptionskip}{-20pt}
+\caption{the same code without the usual newlines}
+\label{commentB}
+\end{figure}
+
+\textbf{Workaround}: First, the formatter could be used to remove multiple 
+newlines. This breaks the programmers formatting which could be disruptive. 
+Another solution is to manually change the generated text edits to avoid 
+inserting or to delete more newlines. However, the changes are highly coupled to 
+the different refactoring strategies. When this solution was tried to be 
+implemented, it was a problem too that the generated text edits were changing 
+their array positions, which made changes even more difficult. The resulting 
+code was unstable and this solution is not recommended. 
+
+\subsection{Comment handling}
+\textbf{Problem}: A lot of freestanding comments are generated when toggling 
+multiple times.
+\textbf{Cause}: When a node is removed by the rewriter, associated comments are 
+not removed. This may be seen as a defensive strategy to avoid deleting comments 
+accidentally. 
+
+\subsection{Menu integration (partially solved)}
+\textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
+developing a separate plugin.
+\textbf{Cause}: Menu items are hardcoded inside 
+\textit{CRefactoringActionGroup}. No way was found to replace or change this 
+class within a separate plugin. In addition, the use of the 
+\textit{org.eclipse.ui.actionSets} extension point does not make inserting new 
+items easier.
+\textbf{Workaround}: The menu was added using \textit{plugin.xml} and may be added 
+by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
+Anyhow, the refactoring may always be invoked using the key binding. 
+
+
+\section{Solved issues}
 
 This section describes special cases that have been omitted intentionally or due 
 to lack of time. In addition, found limitations of the CDT are described here.
@@ -64,51 +147,6 @@ set to false. However, this option is needed for standalone header files to be
 indexed.
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
 true.
-
-\subsection{Handling newly created files}
-\textbf{Problem}: It is difficult do manipulate newly created files.
-\textbf{Cause}: --
-\textbf{Solution}: --
-
-\subsection{Constructor / destructor bug}
-\textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
-Then toggle the constructor out of the class definition. The Destructor will be 
-overridden partially. This problem only occurs in exactly this situation (no 
-paramenters, no initialization lists).
-\textbf{Cause}: Unknown. It seems to be some offset bug.
-\textbf{Solution}: None yet solved.
-
-\subsection{Unneccessary newlines}
-\textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
-by the rewriter.
-\textbf{Cause}: The rewriter inserts newlines before and after inserted nodes 
-but does not remove them when the same node is removed.
-\textbf{Solution}: No satisfying solution was found. The formatter may be used 
-to remove multiple newlines. It was tried to manually change the generated text 
-changes to avoid inserting or delete more newlines. However, this solution is 
-highly dependent on the actual changes that are made. In addition, the generated 
-arrays of changes are not guaranteed to have the same changes at the same index 
-all the time (and yes, they do change). The resulting code was unstalbe and this 
-solution is not recommended. Another point is, that the situation has to be 
-evaluated carefully since it is not always appropriate not to insert or remove 
-all generated and existing newlines.
-
-\subsection{Menu integration}
-\textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
-developing a separate plugin.
-\textbf{Cause}: Menu items are hardcoded inside 
-\textit{CRefactoringActionGroup}. No way was found to replace or change this 
-class within a separate plugin. In addition, the use of the 
-\textit{org.eclipse.ui.actionSets} extension point does not make inserting new 
-items easier.
-\textbf{Solution}: The menu was added using \textit{plugin.xml} and may be added 
-by the user manually. Right-click the toolbar, choose "Customize Perspective...", 
-"Command Groups Availability" and check every group that is named "C++ Coding". 
-This reveals the new menu item inside the refactor menu. Anyhow, the refactoring 
-may always be invoked using the key binding.
-
-The toggle key binding was realized using the \textit{org.eclipse.ui.bindings} 
-extension point.
 
 \subsection{The selection}
 \textbf{Problem}: After toggling multiple times, the wrong functions were 
@@ -168,25 +206,22 @@ Pro: lets the developer decide where to put the comment.
 Contra: Feature is commented-out in the 7.0.1 release of CDT, comments need to 
 be moved by hand.
 \item Other solutions may be possible. An idea could be to register the comments 
-during copy functions. This would require to change every copy function of every 
-IASTNode. 
+whenever a node is being copied. Since \textit{copy} is abstract in 
+\textit{IASTNode} and implemented separately inside every node, this would 
+require a change inside every node class.
 \end{itemize}
 
 \subsection{Toggling function-local functions}
-\textbf{Problem}: When function-local functions are allowed to be toggled, the 
-fuzzy selection detection may not be as intuitive to the user as intended. If 
-the cursor is inside a function body, the parent function definition should be 
-toggled.
+\textbf{Problem}: When using function-local functions, the refactoring may 
+produce code that won't compile.
 
-\textbf{Cause}: At least GCC allows to define functions inside a function, even 
-templated or namespaced ones or ones that are inside a class definition. In the 
-beginning, selection detection just found the nearest definition around the 
-selection.
+\textbf{Cause}: Despite in the C++ standard\cite{IsoCpp} function-local 
+functions are not allowed, the Gnu C Compiler allows to define such nested 
+functions\cite{GCC}. In this case the selection detection finds the nested 
+function if selected and it is tried to toggle it. However, it is not guaranteed 
+that valid code will be generated.
 
-\textbf{Solution}: Function-local functions are skipped in favour of the next 
-parent that is a declaration that may be toggled. If no parent is found, the 
-refactoring aborts.
-
+\textbf{Solution}: Toggling is disabled for such nested function definitions.
 
 \section{Further work}
 

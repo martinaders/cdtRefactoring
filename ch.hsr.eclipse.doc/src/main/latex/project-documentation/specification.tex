@@ -62,6 +62,7 @@ should be toggled.
 
 \subsection{Three positions for function definitions}
 
+\label{positions}
 In C++ there are three possible positions where a \marginline{\textit{in-class}}
 function definition may occur. Listing \ref{classheaderimpl} shows an example
 where the definition of a class member function is placed inside its class
@@ -123,21 +124,29 @@ positions:
 \item Toggle from in-file to in-class
 \end{enumerate}
 
+\subsection{Special cases}
+
+Not every function may be toggled between the three positions and some cases 
+require additional work before they may be toggled. Those special case are 
+listed in this section.
+
+\subsubsection{Namespaces}
+
+If the moved function definition is contained inside a namespace definition, a 
+new namespace definition shall be created. The function is then inserted into 
+the newly created namespace definition.
+
+Contrariwise, namespace definitions that would become empty after removing the 
+last function shall be deleted.
+
 \subsubsection{Templated member functions}
+
 An exception are templated member functions that may only be toggled inside the 
-same headerfile.
+same header file.
 \begin{enumerate}
 \item Toggle from in-class to in-header
 \item Toggle from in-header to in-class
 \end{enumerate}
-
-\subsection{Special case - namespaces}
-
-If the moved function definition is contained in a namespace definition, the
-namespace definition will be created. Then the function is inserted in the newly
-created namespace definition.
-On the other hand, empty namespace definitions shall be deleted when toggling
-removed the last function contained within.
 
 \section{\textit{Implement Member Function}}
 

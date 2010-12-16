@@ -27,10 +27,6 @@ function signature in both, the header and the implementation file, you start
 asking yourself: Why nobody has yet implemented a solution to prevent such an
 error?
 
-One answer seems to be that this is not an easy task to achieve. But
-nevertheless we do not want to be part of the people who always complain about
-open source software. We change it, because we can.
- 
 The IFS Institute for Software at HSR with its group around Professor Peter
 Sommerlad and
 Emanuel Graf has been working on Eclipse refactorings for a long time. Since
@@ -42,26 +38,75 @@ During this semester thesis it was planned to introduce and improve one or more
 refactorings to the Eclipse CDT project. They will now be introduced by 
 priority.
 
-\subsection{\textit{Toggle (Member-) Function Implementation}}
-There is a need for three toggling subfunctions to enable toggling circularly
-from \texttt{in-class}
-to \texttt{in-header} to \texttt{separate-file}  and back again to
-\texttt{in-class}. We concentrated on this order during this project. If the
-implementation is fast enough there is no need for a configuration dialog which
-defines the order of the toggle subfunctions.
-Then function definitions can be toggled circularly with good speed so nod time
-overhead is produced when moving. Toggling three times brings you back to the
-original position in no time. 
+\subsection{\textit{Toggle Function Definition}}
+The goal of this refactoring is to automate the process of moving the definition 
+of a function from one place to another as shown in figures \ref{exA} and \ref{exB}:
+
+\begin{figure}[h]
+\begin{lstlisting}[language=C++]
+#ifndef EXAMPLE_H
+#define EXAMPLE_H
+
+class ClearClass {
+  void bigfunction() {
+    /* implementation */
+  }
+};
+
+#endif
+\end{lstlisting}
+\setlength{\abovecaptionskip}{-20pt}
+\caption{Initial situation: member function defined inside a class}
+\label{exA}
+\end{figure}
+
+\begin{figure}[h]
+\begin{lstlisting}[language=C++]
+#ifndef EXAMPLE_H
+#define EXAMPLE_H
+
+class ClearClass {
+  void bigfunction();
+};
+
+void ClearClass::bigfunction {
+  /* implementation */
+}
+
+#endif
+\end{lstlisting}
+\setlength{\abovecaptionskip}{-20pt}
+\caption{Situation after toggling: member function defined separately, outside 
+the class}
+\label{exB}
+\end{figure}
+
+The example shows that moving the function body does not only involve copying 
+code but also adds a scope operator \textit{::} to the new definition. Also, the 
+former definition had to be replaced by a plain declaration. There are several 
+such changes required depending on the scope and properties (static, virtual, 
+etc.) of the function. Toggling multiple times should bring the code back to the 
+original position in almost no time. 
+
+Throughout this documentation, this functionality is referred to as being a 
+refactoring as it uses the refactoring facility of the Eclipse LTK
+\footnote{http://www.eclipse.org/articles/Article-LTK/ltk.html}. However, 
+\textit{Toggle Function Definition} actually is a code generator. The idea for 
+this ''refactoring'' was introduced by project advisor Prof. Peter Sommerlad.
+
+Goal of this thesis is to realize this idea in form of an Eclipse plugin and to 
+make it fast enough to become a good alternative to editing the files manually. 
 
 \subsection{\textit{Implement Member Function}}
 The current CDT plug-in already includes a \textit{Implement Member Function}.
-However, it is slow and does not fit together with the \textit{Move
-Implementation}. It breaks the coding flow for adding functionality to classes
-twice, which could be a reason not to use the toggle key. Therefore, toggle key
-will be supported by a new \textit{Implement Member Function} which achieves
-synergy with the toggle key.
+However, it is slow and does not fit together with the newly created 
+\textit{Toggle Function Definition}. It breaks the coding flow for adding 
+functionality to classes with unneccessary wizards, which could be a reason not 
+to use the new toggle functionality subsequently. This code generator shall 
+support \textit{Toggle Function Definition} by providing a quick way to create a 
+new function given an existing declaration.
 
-Depending on the success of the implementation with the first refactoring it is 
+Depending on the success of the implementation with the first refactoring, it is 
 planned to re-implement the \textit{Implement Function} refactoring.
 
 \subsection{\textit{Override virtual member function}}
@@ -96,7 +141,7 @@ functionality and our project vision.
 \subsection{Advanced objectives}
 All basic goals have been archived. Additionally:\newline
 \begin{itemize}
- \item Toggling function is fast. less than 1s
+ \item Toggling function is fast. less than a second.
 \end{itemize}
 
 Re-Implement the ``Implement Function'' feature.
@@ -118,7 +163,7 @@ thesis.
 \section{Expected outcome}
 
 Implement member function and the toggle key are written to work in synergy.
-First write the declaration for a (member) function in the header/class
+First write the declaration for a (member) function in the header or class
 definition, then a hot-key is used to implement the function. At this point the
 toggle key can be hit at any time to move the function to the appropriate
 position and continue with the next new member function.
