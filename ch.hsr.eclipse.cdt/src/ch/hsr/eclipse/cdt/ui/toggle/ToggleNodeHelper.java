@@ -42,7 +42,6 @@ import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexInclude;
 import org.eclipse.cdt.core.index.IndexLocationFactory;
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.CoreModelUtil;
 import org.eclipse.cdt.core.model.ICProject;
@@ -424,8 +423,9 @@ public class ToggleNodeHelper extends NodeHelper {
 	
 	private static String getCommentsAsString(ArrayList<IASTComment> commentList) {
 		String comments = "";
-		for (IASTComment c : commentList)
+		for (IASTComment c : commentList) {
 			comments += c.getRawSignature() + System.getProperty("line.separator");
+		}
 		return comments;
 	}
 
