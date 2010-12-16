@@ -1,0 +1,40 @@
+\begin{thebibliography}{SZCF08}
+
+\bibitem[30910]{IsoCpp}
+ISO/IEC JTC1 SC22 WG21~N 3092.
+\newblock {\em IS 14882: Programming Languages -- C++}.
+\newblock March 2010.
+
+\bibitem[AV08]{AV08}
+A.~Simeon A.~Verhein.
+\newblock {Werkzeugkasten Technische Berichte 1}, 2008.
+
+\bibitem[BG06]{GB06}
+Leo Büttiker and Emanuel Graf.
+\newblock C++ refactoring support für eclipse-cdt.
+\newblock Website, 2006.
+\newblock Available online at
+  \url{http://ifsoftware.ch/uploads/tx_icscrm/i_da_2006_refactoring_support_fu%
+er_eclipse_cdt_leo_buettiker_emanuel_graf.pdf}; visited on December 13th 2010.
+
+\bibitem[Fre10]{GCC}
+Free Software Foundation.
+\newblock {\em Nested Functions - Using the GNU Compiler Collection (GCC)}, Dec
+  2010.
+\newblock \url{http://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html}.
+
+\bibitem[Hub10]{COAST}
+Marcel Huber.
+\newblock Coast – c++ open application server toolkit.
+\newblock personal communication, 2010.
+\newblock also known as WebDisplay2
+  \url{http://wiki.hsr.ch/APF/files/WebDisplay2_Architecture.pdf}.
+
+\bibitem[SZCF08]{Sommerlad:2008:RCR:1449814.1449817}
+Peter Sommerlad, Guido Zgraggen, Thomas Corbat, and Lukas Felber.
+\newblock Retaining comments when refactoring code.
+\newblock In {\em Companion to the 23rd ACM SIGPLAN conference on
+  Object-oriented programming systems languages and applications}, OOPSLA
+  Companion '08, pages 653--662, New York, NY, USA, 2008. ACM.
+
+\end{thebibliography}

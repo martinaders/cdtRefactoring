@@ -168,8 +168,9 @@ Pro: lets the developer decide where to put the comment.
 Contra: Feature is commented-out in the 7.0.1 release of CDT, comments need to 
 be moved by hand.
 \item Other solutions may be possible. An idea could be to register the comments 
-during copy functions. This would require to change every copy function of every 
-IASTNode. 
+whenever a node is being copied. Since \textit{copy} is abstract in 
+\textit{IASTNode} and implemented separately inside every node, this would 
+require a change inside every node class.
 \end{itemize}
 
 \subsection{Toggling function-local functions}
