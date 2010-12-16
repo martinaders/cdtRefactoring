@@ -28,11 +28,9 @@ fact that there may still be some improvements needed to satisfy a large
 audience.
 
 \subsection{Implement Function}
-The two other refactorings have not been implemented. However it became clearer 
-that \textit{Implement Function} shares a lot of similarities and could benefit 
-of functionality developed for \textit{Toggle Function Definition}. It could be 
-an option to share the same key binding so functions may firs be implemented and 
-then toggled instantly with the same key.
+\textit{Implement Function} shares a lot of similarities and benefits of
+functionality developed for the \textit{Toggle Function Definition}.
+
 
 \subsection{Override Virtual Function}
 No deeper investigation on how this refactoring could benefit from the developed 
@@ -42,6 +40,7 @@ work has been done until now.
 \section{Known issues}
 
 \subsection{Handling newly created files}
+%TODO: think about droping this subsection
 \textbf{Problem}: It is difficult do manipulate newly created files.
 \textbf{Cause}: --
 \textbf{Solution}: --
@@ -50,7 +49,7 @@ work has been done until now.
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
 overridden partially. This problem only occurs in exactly this situation (no 
-paramenters, no initialization lists).
+parameters, no initialization lists).
 \textbf{Cause}: Unknown. It seems to be some offset bug.
 \textbf{Solution}: None yet solved.
 
@@ -103,11 +102,13 @@ their array positions, which made changes even more difficult. The resulting
 code was unstable and this solution is not recommended. 
 
 \subsection{Comment handling}
-\textbf{Problem}: A lot of freestanding comments are generated when toggling 
-multiple times.
+\textbf{Problem}: A lot of freestanding comments are generated when
+toggling multiple times. These comments become leading if a function gets
+toggled below these freestanding comments.
 \textbf{Cause}: When a node is removed by the rewriter, associated comments are 
 not removed. This may be seen as a defensive strategy to avoid deleting comments 
-accidentally. 
+accidentally. The ASTRewrite adopts all comments above a node as an leading
+comment not caring how many spaces or lines they have in between.
 
 \subsection{Menu integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
@@ -121,6 +122,17 @@ items easier.
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
 Anyhow, the refactoring may always be invoked using the key binding. 
 
+\subsection{Preprocessor Statements}
+\textbf{Problem}: If a preprocessor statement (\textit{#ifdef}) is contained in
+the parent of a rewritten, removed or inserted node, the preprocessor statement
+is deleted.
+\textbf{Cause:}: The rewriter does not support preprocessor statements.
+\textbf{Solution}: None yet. This has to be solved by a fix for the rewriter
+which supports preprocessor statements.
+
+There was a small work around for this problem by warning about the presence of
+a preprocessor statement in the affected files. At the end this was dropped
+because this breaks the initial idea of the code flow.
 
 \section{Solved issues}
 
@@ -154,7 +166,7 @@ toggled or no selected function was found at all.
 \textbf{Cause}: The region provided by \textit{CRefactoring} pointed to a wrong 
 code offset. 
 \textbf{Solution}: The current selection is now based directly on the current 
-active editor part's selection.
+active editor part's selection and fetched every time when toggling is started.
 
 \subsection{Comments and macros}
 \textbf{Problem}: Nodes inside a translation unit have to be copied to be 
@@ -165,7 +177,8 @@ definition.
 
 Another issue were macros. Macros are working perfectly when copied and 
 rewritten inside the same translation unit. As soon as a macro is moved outside 
-to another translation unit, the macro will be expanded during rewrite. 
+to another translation unit, the macro will be expanded during rewrite or even
+deleted when no information about the macro is found.
 
 \textbf{Cause}: The rewriter is using a method in \texttt{ASTCommenter} to get a 
 \texttt{NodeCommentMap} of the rewritten translation unit. If a node is copied, 
@@ -223,14 +236,11 @@ that valid code will be generated.
 
 \textbf{Solution}: Toggling is disabled for such nested function definitions.
 
+
 \section{Further work}
 
 The toggle refactoring was developed as a separate plugin so integration into 
 the CDT project should be possible if desired.
-
-As \textit{Implement Function} surely is a candidate refactoring that shares a 
-lot of logic with the toggle refactoring. Actually, some code had to be deleted 
-to avoid beginning to add such functionality.
 
 It should be a small task to provide a solution for multi-toggling. If the user 
 selects more than one definition, all of them could be toggled. An example 
