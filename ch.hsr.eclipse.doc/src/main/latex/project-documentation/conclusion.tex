@@ -173,20 +173,16 @@ IASTNode.
 \end{itemize}
 
 \subsection{Toggling function-local functions}
-\textbf{Problem}: When function-local functions are allowed to be toggled, the 
-fuzzy selection detection may not be as intuitive to the user as intended. If 
-the cursor is inside a function body, the parent function definition should be 
-toggled.
+\textbf{Problem}: When using function-local functions, the refactoring may 
+produce code that won't compile.
 
-\textbf{Cause}: At least GCC allows to define functions inside a function, even 
-templated or namespaced ones or ones that are inside a class definition. In the 
-beginning, selection detection just found the nearest definition around the 
-selection.
+\textbf{Cause}: Despite in the C++ standard\cite{IsoCpp} function-local 
+functions are not allowed, the Gnu C Compiler allows to define such nested 
+functions\cite{GCC}. In this case the selection detection finds the nested 
+function if selected and it is tried to toggle it. However, it is not guaranteed 
+that valid code will be generated.
 
-\textbf{Solution}: Function-local functions are skipped in favour of the next 
-parent that is a declaration that may be toggled. If no parent is found, the 
-refactoring aborts.
-
+\textbf{Solution}: Toggling is disabled for such nested function definitions.
 
 \section{Further work}
 
