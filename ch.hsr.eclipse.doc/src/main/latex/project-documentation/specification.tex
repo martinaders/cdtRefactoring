@@ -115,13 +115,30 @@ function definition is shown by listings \ref{twofilesolution_header} and
 \ref{twofilesolution_impl}. The position will be called 
 \textit{in-implementation} or \textit{in-file}.
 
-\begin{tabular}{p{5cm}p{.4cm}p{5cm}}
-\lstinputlisting[caption={A.h},
-label={twofilesolution_header}]{implementation_file.h}
-& & 
-\lstinputlisting[caption={A.cpp},
-label={twofilesolution_impl}]{implementation_file.cpp}
-\end{tabular}
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
+\begin{lstlisting}[caption={A.h},label={twofilesolution_header},language=C++]
+#ifndef A_H_
+#define A_H_
+
+class A {
+	int x();
+};
+
+#endif /* _A_H */
+\end{lstlisting}
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp},label={twofilesolution_impl},language=C++]
+#include "A.h"
+
+int A::x() { 
+    /* impl. */ 
+}
+\end{lstlisting}
+\end{minipage}
 
 \subsection{Basic scenarios}
 
