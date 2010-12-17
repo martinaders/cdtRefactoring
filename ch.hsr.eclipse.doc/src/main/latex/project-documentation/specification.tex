@@ -4,7 +4,7 @@
 This section describes how the different code automation mechanisms have been
 understood and designed.
 
-\section{\textit{Toggle Function Definition}}
+\section{Toggle Function Definition}
 
 The idea: good code should separate interface and implementation. However, it is 
 annoying to copy function signatures from the header file to the implementation 
@@ -99,6 +99,119 @@ has to be replaced by the definition which is moved from the implementation
 file, resulting in a header file already shown in listing
 \nolinebreak\ref{02freefuncInsert}.
 
+\subsubsection{Toggle Member Functions}
+
+The starting point for toggling member functions can be for instance a class
+with a function definition inside like in listing
+\nolinebreak\ref{01toggleMemberFunction}.
+
+\begin{lstlisting}[caption={A.h, function definition inside class declaration},
+label={01toggleMemberFunction}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  void foo() {
+    return;
+  }
+};
+}
+#endif /* A_H_ */
+\end{lstlisting}
+
+Function \texttt{foo()} needs to be toggled. The next position of the
+definition is ouside of the class but it is keept it in namespace level. At the
+position the definition was, a declaration is inserted as in listing
+\ref{02toggleMemberFunction}
+
+If there is no namespace, the function definition will be placed below the
+class in the header file. Listing \ref{02_1toggleMemberFunction}
+
+If there are any special keywords like \texttt{virtual} or \texttt{static},
+these are adapted to the new definition. Definitions in the header file need
+the keyword \texttt{inline} prepended. The keyword \texttt{virtual}
+is only allowed in inside a class definition. Furthermore for the
+\textit{in-header} position the \texttt{inline} keyword needs to be prepended to
+the function definition.
+
+\begin{lstlisting}[caption={A.h,
+function definition outside class
+definition in header}, label={02toggleMemberFunction}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  void foo();
+};
+
+inline void foo() {
+  return;
+}
+}
+#endif /* A_H_ */
+\end{lstlisting}
+
+\begin{lstlisting}[caption={A.h,
+function definition outside class definition without namespace},
+label={02_1toggleMemberFunction}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+class A {
+  void foo();
+};
+
+inline void foo() {
+  return;
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+If \texttt{foo()} gets toggled again, the definition is moved to the
+implementation file and if necessary a namespace definition is created where
+the function gets inserted. Nothing stays outside of the class definition in the
+header file and the declaration in the class does not change.
+
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
+\begin{lstlisting}[caption={A.h, after moved definition},
+label={03toggleMemberFunction}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  void foo();
+};
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp with definition},
+label={03_1toggleMemberFunction}, language=C++ ]
+#include "A.h"
+
+namespace N {
+void A::foo() {
+  return
+}
+}
+\end{lstlisting}
+\end{minipage}
+
+If \texttt{foo()} is toggled once again, we reached the original starting
+position we have seen in listing \ref{01toggleMemberFunction}. An empty
+namespace in a implementation file will be removed.
+
+\subsubsection{Toggle Templated Member Functions}
+
 \subsection{Three positions for function definitions}
 
 \label{positions}
@@ -109,22 +222,48 @@ definition. Placing implementation code right next to the declaration is the
 most intuitive behaviour for Java developers. New code blocks created by
 \textit{Implement Member Function} are placed inside the class definition too.
 
-\lstinputlisting[caption={In Class implementation in A.h},
-label={classheaderimpl}]{classheader_implementation.h}
+\begin{lstlisting}[caption={In-class implementation in A.h},
+label={classheaderimpl}, language=C++ ]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  int x() {
+    return 0;
+  }
+};
+}
+\end{lstlisting}
 
 %TODO: add a footnote for the 'extern' problem. (MS, 2.12.2010)
 To keep the interface clear, \marginline{\textit{in-header}} functions may be 
 placed outside the class definition but still in the same (header) file. Such a 
-function is called \textit{inlined}. For templates, this is the only position 
-where implementation may be placed outside the class definition due to problems 
-of the \textit{extern} keyword. Templated functions cannot be placed outside the 
-header file. Except for ... %TODO: find cases where template functions can be
+function is called \textit{inlined}. See Listing \ref{inheaderimpl}. For
+templates, this is the only position where implementation may be placed outside
+the class definition due to problems of the \texttt{extern} keyword. Templated
+functions cannot be placed outside the header file. Except for ... 
+%TODO: find cases where template functions can be
 %placed outside of a header file
 The following listings show an example of what will be called 
 \textit{in-header situation} throughout this document.
 
-\lstinputlisting[caption={Implementation outside of the class in A.h},
-label={outsideclass}]{outside_class_implementation.h}
+\begin{lstlisting}[caption={In-header implementation in A.h},
+label={inheaderimpl}, language=C++ ]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  int x();
+};
+
+inline int A::x() {
+  return 0;
+}
+
+}
+\end{lstlisting}
 
 To \marginline{\textit{in-file}} separate implementation from the interface more 
 clearly, a separate source file may be used for the definitions while the 
@@ -140,9 +279,11 @@ function definition is shown by listings \ref{twofilesolution_header} and
 #ifndef A_H_
 #define A_H_
 
+namespace N {
 class A {
-	int x();
+  int x();
 };
+}
 
 #endif /* _A_H */
 \end{lstlisting}
@@ -152,8 +293,10 @@ class A {
 \begin{lstlisting}[caption={A.cpp},label={twofilesolution_impl},language=C++]
 #include "A.h"
 
+namespace N {
 int A::x() { 
-    /* impl. */ 
+  return 0;
+}
 }
 \end{lstlisting}
 \end{minipage}
@@ -204,7 +347,7 @@ same header file.
 \item Toggle from in-header to in-class
 \end{enumerate}
 
-\section{\textit{Implement Member Function}}
+\section{Implement Member Function}
 
 \subsection{Activation}
 This refactoring shall be active as soon as a function declaration is selected 
