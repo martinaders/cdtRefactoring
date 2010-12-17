@@ -42,6 +42,7 @@ work has been done until now.
 \subsection{Handling newly created files}
 %TODO: think about droping this subsection
 \textbf{Problem}: It is difficult do manipulate newly created files.
+
 \textbf{Cause}: --
 \textbf{Solution}: --
 
@@ -50,12 +51,15 @@ work has been done until now.
 Then toggle the constructor out of the class definition. The Destructor will be 
 overridden partially. This problem only occurs in exactly this situation (no 
 parameters, no initialization lists).
+
 \textbf{Cause}: Unknown. It seems to be some offset bug.
+
 \textbf{Solution}: None yet solved.
 
 \subsection{Unneccessary newlines}
 \textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
 by the rewriter. 
+
 \textbf{Cause}: Newlines are inserted by the rewriter before and after an new
 node but are not removed when removing the same node. To be able to judge how 
 many newlines have to be inserted or removed, the whitespace situation around an 
@@ -105,6 +109,7 @@ code was unstable and this solution is not recommended.
 \textbf{Problem}: A lot of freestanding comments are generated when
 toggling multiple times. These comments become leading if a function gets
 toggled below these freestanding comments.
+
 \textbf{Cause}: When a node is removed by the rewriter, associated comments are 
 not removed. This may be seen as a defensive strategy to avoid deleting comments 
 accidentally. The ASTRewrite adopts all comments above a node as an leading
@@ -113,11 +118,13 @@ comment not caring how many spaces or lines they have in between.
 \subsection{Menu integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
 developing a separate plugin.
-\textbf{Cause}: Menu items are hardcoded inside 
+
+\textbf{Cause}: Menu items are hardcoded inside
 \textit{CRefactoringActionGroup}. No way was found to replace or change this 
 class within a separate plugin. In addition, the use of the 
 \textit{org.eclipse.ui.actionSets} extension point does not make inserting new 
 items easier.
+
 \textbf{Workaround}: The menu was added using \textit{plugin.xml} and may be added 
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
 Anyhow, the refactoring may always be invoked using the key binding. 
@@ -126,7 +133,9 @@ Anyhow, the refactoring may always be invoked using the key binding.
 \textbf{Problem}: If a preprocessor statement (\textit{\#ifdef}) is contained in
 the parent of a rewritten, removed or inserted node, the preprocessor statement
 is deleted.
+
 \textbf{Cause:}: The rewriter does not support preprocessor statements.
+
 \textbf{Solution}: None yet. This has to be solved by a fix for the rewriter
 which supports preprocessor statements.
 
@@ -142,40 +151,46 @@ to lack of time. In addition, found limitations of the CDT are described here.
 \subsection{Speed}
 \textbf{Problem}: Refactoring, especially the first run, was very slow in the 
 beginning. Including a big library slowed down the process even more.
+
 \textbf{Cause}: The first thought was that header file indexing was the cause. 
 However, the indexer option that skips already indexed headers is enabled in 
 \textit{CRefactoring}. In the end, it was found out that most of the time was 
 consumed by the \textit{checkInitialConditions} method of \textit{CRefactoring} 
 that checked for problems inside the translation unit.
+
 \textbf{Solution}: The super call to \textit{checkInitialConditions} was omitted.
 
 \subsection{Accessing standalone header files}
 \textbf{Problem}: Header files that are not included in any source file by 
 default were not found by the indexer. Thus, it was not possible to analyze the 
 source code of the affected header file.
+
 \textbf{Cause}: By default, the indexer preference option 
 \textit{IndexerPreferences.KEY\_INDEX\_UNUSED\_HEADERS\_WITH\_DEFAULT\_LANG} is 
 set to false. However, this option is needed for standalone header files to be 
 indexed.
+
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
 true.
 
 \subsection{Selection}
 \textbf{Problem}: After toggling multiple times, the wrong functions were 
 toggled or no selected function was found at all. 
+
 \textbf{Cause}: The region provided by \textit{CRefactoring} pointed to a wrong 
 code offset. This happens due to the fact that 
 \textit{IWorkbenchWindowActionDelegate}'s \textit{selectionChanged} method is 
 updated with outdated offset information.
+
 \textbf{Solution}: The current selection is now based directly on the current 
 active editor part's selection and fetched every time when toggling is started.
 
 \subsection{Comments and macros}
 \textbf{Problem}: Nodes inside a translation unit have to be copied to be 
 changed since they are frozen. When nodes are copied, their surrounding comments 
-get lost during rewrite\cite{Sommerlad:2008:RCR:1449814.1449817}. This was annoying, since copying the function body 
-provided a straightforward solution for replacing a declaration with a 
-definition.
+get lost during rewrite\cite{Sommerlad:2008:RCR:1449814.1449817}. This was
+annoying, since copying the function body provided a straightforward solution
+for replacing a declaration with a definition.
 
 Another issue were macros. Macros are working perfectly when copied and 
 rewritten inside the same translation unit. As soon as a macro is moved outside 
