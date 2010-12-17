@@ -40,10 +40,11 @@ priority.
 
 \subsection{\textit{Toggle Function Definition}}
 The goal of this refactoring is to automate the process of moving the definition 
-of a function from one place to another as shown in figures \ref{exA} and \ref{exB}:
+of a function from one place to another as shown in Listings
+\ref{funcdefPre} and \ref{funcdefPost}:\newline
 
-\begin{figure}[h]
-\begin{lstlisting}[language=C++]
+\begin{lstlisting}[caption={Initial situation: member function defined inside a
+class},label={funcdefPre},language=C++]
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
@@ -55,13 +56,9 @@ class ClearClass {
 
 #endif
 \end{lstlisting}
-\setlength{\abovecaptionskip}{-20pt}
-\caption{Initial situation: member function defined inside a class}
-\label{exA}
-\end{figure}
 
-\begin{figure}[h]
-\begin{lstlisting}[language=C++]
+\begin{lstlisting}[caption={Situation after toggling: member function defined
+separately, outside the class},label={funcdefPost},language=C++]
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
@@ -75,11 +72,6 @@ void ClearClass::bigfunction {
 
 #endif
 \end{lstlisting}
-\setlength{\abovecaptionskip}{-20pt}
-\caption{Situation after toggling: member function defined separately, outside 
-the class}
-\label{exB}
-\end{figure}
 
 The example shows that moving the function body does not only involve copying 
 code but also adds a scope operator \textit{::} to the new definition. Also, the 
@@ -139,7 +131,7 @@ functionality and our project vision.
 \end{itemize}
 
 \subsection{Advanced objectives}
-All basic goals have been archived. Additionally:\newline
+All basic goals have been archived. Additionally:
 \begin{itemize}
  \item Toggling function is fast. less than a second.
 \end{itemize}
