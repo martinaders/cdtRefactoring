@@ -1,3 +1,0 @@
-void freefunction {
-  return;
-}

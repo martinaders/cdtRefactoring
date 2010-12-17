@@ -19,16 +19,27 @@ following chapters.
 \subsection{Examples}
 
 \subsubsection{Toggle free function from .cpp to .h}
-If a separate declaration of the function exists, the definition shall replace 
-the declaration. If the definition relied inside a header file, its declaration 
-shall remain there. This means that if the following code 
+If \marginline{declaration exists} a separate declaration of the function exists,
+the declaration shall be substituted by the definition. If the definition is 
+placed inside a header file, its declaration shall remain there. This implies 
+that when the following code 
 
-\lstinputlisting[caption={A.h},label={01freefuncPre}]{01freefuncPre.cpp}
+\begin{lstlisting}[caption={A.h},label={01freefuncPre},language=C++]
+#ifndef EXAMPLE_H
+#define EXAMPLE_H
+
+class ClearClass {
+  void bigfunction() {
+    /* implementation */
+  }
+};
+
+#endif
+\end{lstlisting}
 
 is toggled twice, it will result in a declaration inside the header file.
-%TODO hier weitermachen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-No declaration is found: 
 
+What happens if no declaration is found? \marginline{no declaration}
 Whenever a free function definition is toggled the first time, the whole 
 definition shall be moved to a header file with the same name as the source 
 file. When this definition is toggled back to the source file, the declaration will remain in
@@ -37,9 +48,22 @@ When toggling to the header file and no declaration may be found there, the
 definition will be created there.
 with the same name as the source file
 \begin{tabular}{p{5cm}p{.4cm}p{5cm}}
-\lstinputlisting[caption={A.h},label={01freefuncPostCpp}]{01freefuncPost.cpp}
+\begin{lstlisting}[caption={A.h},label={01freefuncPostCpp},language=C++]
+void freefunction {
+  return;
+}
+\end{lstlisting}
 & & 
-\lstinputlisting[caption={A.cpp},label={01freefuncPostH}]{01freefuncPost.h}
+\begin{lstlisting}[caption={A.cpp},label={01freefuncPostH},language=C++]
+#ifndef FREEFUNC_H_
+#define FREEFUNC_H_
+
+void freefunc() {
+  return;
+}
+
+#endif
+\end{lstlisting}
 \end{tabular}
 
 \subsection{Activation}
@@ -53,12 +77,9 @@ associated file. If no definition exists, the refactoring aborts. There may be
 more than one declaration. If more than one declaration is selected, it is not 
 specified which one will be toggled.
 
-The refactoring should allow selections anywhere inside the function, be it 
+The refactoring shall allow selections anywhere inside the function, be it 
 inside the signature, function (try) body, catch handlers or template 
-declarations. If functions are defined inside a function body which is 
-non-standard but allowed for some compilers, the outermost function parent 
-should be toggled.
-% TODO: This is not the case yet
+declarations. 
 
 \subsection{Three positions for function definitions}
 
