@@ -38,7 +38,7 @@ During this semester thesis it was planned to introduce and improve one or more
 refactorings to the Eclipse CDT project. They will now be introduced by 
 priority.
 
-\subsection{\textit{Toggle Function Definition}}
+\subsection{Toggle Function Definition}
 The goal of this refactoring is to automate the process of moving the definition 
 of a function from one place to another as shown in Listings
 \ref{funcdefPre} and \ref{funcdefPost}:\newline
@@ -74,7 +74,7 @@ void ClearClass::bigfunction {
 \end{lstlisting}
 
 The example shows that moving the function body does not only involve copying 
-code but also adds a scope operator \textit{::} to the new definition. Also, the 
+code but also adds a scope operator \texttt{::} to the new definition. Also, the 
 former definition had to be replaced by a plain declaration. There are several 
 such changes required depending on the scope and properties (static, virtual, 
 etc.) of the function. Toggling multiple times should bring the code back to the 
@@ -89,7 +89,7 @@ this ''refactoring'' was introduced by project advisor Prof. Peter Sommerlad.
 Goal of this thesis is to realize this idea in form of an Eclipse plugin and to 
 make it fast enough to become a good alternative to editing the files manually. 
 
-\subsection{\textit{Implement Member Function}}
+\subsection{Implement Member Function}
 The current CDT plug-in already includes a \textit{Implement Member Function}.
 However, it is slow and does not fit together with the newly created 
 \textit{Toggle Function Definition}. It breaks the coding flow for adding 
@@ -101,7 +101,7 @@ new function given an existing declaration.
 Depending on the success of the implementation with the first refactoring, it is 
 planned to re-implement the \textit{Implement Function} refactoring.
 
-\subsection{\textit{Override virtual member function}}
+\subsection{Override virtual member function}
 This code genrator may share some functionality with the above ones. Its goal is 
 to help the user override multiple member functions of an inherited class.
 
