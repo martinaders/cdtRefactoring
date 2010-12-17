@@ -39,12 +39,6 @@ work has been done until now.
 
 \section{Known issues}
 
-\subsection{Handling newly created files}
-%TODO: think about droping this subsection
-\textbf{Problem}: It is difficult do manipulate newly created files.
-\textbf{Cause}: --
-\textbf{Solution}: --
-
 \subsection{Constructor / destructor bug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
@@ -107,8 +101,8 @@ toggling multiple times. These comments become leading if a function gets
 toggled below these freestanding comments.
 \textbf{Cause}: When a node is removed by the rewriter, associated comments are 
 not removed. This may be seen as a defensive strategy to avoid deleting comments 
-accidentally. The ASTRewrite adopts all comments above a node as an leading
-comment not caring how many spaces or lines they have in between.
+accidentally. The ASTRewrite adopts all comments above a node as a leading
+comment not caring how many spaces or lines there are between node and comment.
 
 \subsection{Menu integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
@@ -122,11 +116,28 @@ items easier.
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
 Anyhow, the refactoring may always be invoked using the key binding. 
 
-\subsection{Preprocessor Statements}
-\textbf{Problem}: If a preprocessor statement (\textit{\#ifdef}) is contained in
+\subsection{Preprocessor statements}
+\textbf{Problem}: If a preprocessor statement (e.g. \textit{\#ifdef}) is contained inside
 the parent of a rewritten, removed or inserted node, the preprocessor statement
-is deleted.
-\textbf{Cause:}: The rewriter does not support preprocessor statements.
+is deleted. Listing \ref{prepro} shows an example where a class is rewritten and 
+a contained preprocessor statement is removed as a side effect.
+
+\begin{lstlisting}[caption={Jeopardized preprocessor statement inside a class that is going to be rewritten},label={prepro},language=C++]
+#ifdef EXAMPLE_H_           // not affected
+#define EXAMPLE_H_          // not affected
+
+class WillBeRewrittenImplicitly {
+  #ifdef _X86__             // will be removed
+    void specificCode() {}  // will be removed
+  #endif                    // will be removed
+
+  void toBeManipulatedFunction(); // rewrite this
+};
+
+#endif                      // not affected
+\end{lstlisting}
+
+\textbf{Cause}: The rewriter does not support preprocessor statements.
 \textbf{Solution}: None yet. This has to be solved by a fix for the rewriter
 which supports preprocessor statements.
 
@@ -179,7 +190,7 @@ definition.
 
 Another issue were macros. Macros are working perfectly when copied and 
 rewritten inside the same translation unit. As soon as a macro is moved outside 
-to another translation unit, the macro will be expanded during rewrite or even
+a translation unit, the macro will be expanded during rewrite or even
 deleted when no information about the macro is found.
 
 \textbf{Cause}: The rewriter is using a method in \texttt{ASTCommenter} to get a 
