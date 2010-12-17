@@ -34,12 +34,12 @@ public class DeclaratorFinder {
 	public DeclaratorFinder(TextSelection selection, IASTTranslationUnit unit) {
 		foundDeclarator = findDeclaratorInSelection(selection, unit);
 
-		if (foundDeclarator == null)
+		if (foundDeclarator == null) {
 			throw new NotSupportedException("cannot work without declarator");
-
-		if (isPartOfAStatement(foundDeclarator))
-			throw new NotSupportedException(
-					"Nested function declarations not supported");
+		}
+		if (isPartOfAStatement(foundDeclarator)) {
+			throw new NotSupportedException("Nested function declarations not supported");
+		}
 	}
 
 	public IASTName getName() {
