@@ -19,67 +19,74 @@ following chapters.
 \subsection{Examples}
 
 \subsubsection{Toggle free function from .cpp to .h}
-If \marginline{declaration exists} a separate declaration of the function exists,
-the declaration shall be substituted by the definition. If the definition is 
-placed inside a header file, its declaration shall remain there. This implies 
-that when the following code 
+Let assume a free function in a header file with no declaration specified
+anywhere is toggled. Listing \nolinebreak\ref{01freefuncPre} shows the
+situation before toggling. 
 
-\begin{lstlisting}[caption={A.h},label={01freefuncPre},language=C++]
-#ifndef EXAMPLE_H
-#define EXAMPLE_H
-
-class ClearClass {
-  void bigfunction() {
-    /* implementation */
-  }
-};
-
-#endif
-\end{lstlisting}
-
-is toggled twice, it will result in a declaration inside the header file.
-
-What happens if no declaration is found? \marginline{no declaration}
-Whenever a free function definition is toggled the first time, the whole 
-definition shall be moved to a header file with the same name as the source 
-file. When this definition is toggled back to the source file, the declaration will remain in
-Whenever a free function is toggled, it shall swap definition and declaration. 
-When toggling to the header file and no declaration may be found there, the 
-definition will be created there.
-with the same name as the source file
-\begin{tabular}{p{5cm}p{.4cm}p{5cm}}
-\begin{lstlisting}[caption={A.h},label={01freefuncPostCpp},language=C++]
-void freefunction {
-  return;
-}
-\end{lstlisting}
-& & 
-\begin{lstlisting}[caption={A.cpp},label={01freefuncPostH},language=C++]
-#ifndef FREEFUNC_H_
-#define FREEFUNC_H_
-
-void freefunc() {
-  return;
+\begin{lstlisting}[caption={A.cpp},label={01freefuncPre},language=C++]
+int freefunction() {
+  return 42;
 }
 
-#endif
+int main() {
+  return 0;
+}
 \end{lstlisting}
-\end{tabular}
 
-\subsection{Activation}
+First it is checked if a file named with the same name as the original
+implementation file exists. If not, one is created with the appropriated
+include guards. See Listing \nolinebreak\ref{02freefuncNewFile}.
 
-Most important is this basic rule: A function definition must exist.
+\begin{lstlisting}[caption={Newly createdA.h}, label={02freefuncNewFile},
+language=C++]
+#ifndef A_H_
+#define A_H_
 
-The refactoring may be activated as soon as the user is editing a C++ 
-translation unit and the cursor resides inside a function declaration or 
-definition. For the selected function, a function definition must exist in an 
-associated file. If no definition exists, the refactoring aborts. There may be 
-more than one declaration. If more than one declaration is selected, it is not 
-specified which one will be toggled.
+#endif /* A_H_ */
+\end{lstlisting}
 
-The refactoring shall allow selections anywhere inside the function, be it 
-inside the signature, function (try) body, catch handlers or template 
-declarations. 
+The function \texttt{freefunction()} definition is now moved inside the header
+file as shown in listing \nolinebreak\ref{02freefuncInsert}
+
+\begin{lstlisting}[caption={Inserted freefunction in A.h},
+label={02freefuncInsert}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+int freefunction() {
+  return 42;
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+If toggled again, the declaration of \texttt{freefunction()} remains inside the
+header file while the definition is written to implementation file and an
+include statement is inserted at the top of the implemtation file. Listing
+\nolinebreak\ref{03freefuncEnd} and \ref{04freefuncEnd} shows the end
+situation.
+
+\begin{lstlisting}[caption={Inserted freefunction in A.h},
+label={03freefuncEnd}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+int freefunction();
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+\begin{lstlisting}[caption={A.cpp},label={04freefuncEnd},language=C++]
+#include "A.h"
+
+int freefunction() {
+  return 42;
+}
+
+int main() {
+  return 0;
+}
+\end{lstlisting}
 
 \subsection{Three positions for function definitions}
 
