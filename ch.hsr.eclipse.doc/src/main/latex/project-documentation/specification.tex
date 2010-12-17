@@ -19,9 +19,9 @@ following chapters.
 \subsection{Examples}
 
 \subsubsection{Toggle free function from .cpp to .h}
-Let assume a free function in a header file with no declaration specified
-anywhere is toggled. Listing \nolinebreak\ref{01freefuncPre} shows the
-situation before toggling. 
+Let assume a free function in a header file with no declaration specified is
+toggled. Listing \nolinebreak\ref{01freefuncPre} shows the situation before
+toggling. 
 
 \begin{lstlisting}[caption={A.cpp},label={01freefuncPre},language=C++]
 int freefunction() {
@@ -34,10 +34,10 @@ int main() {
 \end{lstlisting}
 
 First it is checked if a file named with the same name as the original
-implementation file exists. If not, one is created with the appropriated
-include guards. See Listing \nolinebreak\ref{02freefuncNewFile}.
+implementation file exists. If not, a new file is created with the
+appropriate include guards. See listing \nolinebreak\ref{02freefuncNewFile}.
 
-\begin{lstlisting}[caption={Newly createdA.h}, label={02freefuncNewFile},
+\begin{lstlisting}[caption={Newly created A.h}, label={02freefuncNewFile},
 language=C++]
 #ifndef A_H_
 #define A_H_
@@ -45,10 +45,10 @@ language=C++]
 #endif /* A_H_ */
 \end{lstlisting}
 
-The function \texttt{freefunction()} definition is now moved inside the header
+The \texttt{freefunction()} definition is now moved into the header
 file as shown in listing \nolinebreak\ref{02freefuncInsert}
 
-\begin{lstlisting}[caption={Inserted freefunction in A.h},
+\begin{lstlisting}[caption={Inserted \texttt{freefunction()} in A.h},
 label={02freefuncInsert}, language=C++]
 #ifndef A_H_
 #define A_H_
@@ -61,11 +61,14 @@ int freefunction() {
 \end{lstlisting}
 
 If toggled again, the declaration of \texttt{freefunction()} remains inside the
-header file while the definition is written to implementation file and an
-include statement is inserted at the top of the implemtation file. Listing
+header file while the definition is inserted into the implementation file and an
+include statement is prepended to the top of the implemtation file. Listing
 \nolinebreak\ref{03freefuncEnd} and \ref{04freefuncEnd} shows the end
 situation.
 
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
 \begin{lstlisting}[caption={Inserted freefunction in A.h},
 label={03freefuncEnd}, language=C++]
 #ifndef A_H_
@@ -75,7 +78,9 @@ int freefunction();
 
 #endif /* A_H_ */
 \end{lstlisting}
-
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
 \begin{lstlisting}[caption={A.cpp},label={04freefuncEnd},language=C++]
 #include "A.h"
 
@@ -87,6 +92,12 @@ int main() {
   return 0;
 }
 \end{lstlisting}
+\end{minipage}
+
+If \texttt{freefunction()} is toggled again, the declaration in the header file
+has to be replaced by the definition which is moved from the implementation
+file, resulting in a header file already shown in listing
+\nolinebreak\ref{02freefuncInsert}.
 
 \subsection{Three positions for function definitions}
 
