@@ -148,11 +148,13 @@ indexed.
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
 true.
 
-\subsection{The selection}
+\subsection{Selection}
 \textbf{Problem}: After toggling multiple times, the wrong functions were 
 toggled or no selected function was found at all. 
 \textbf{Cause}: The region provided by \textit{CRefactoring} pointed to a wrong 
-code offset. 
+code offset. This happens due to the fact that 
+\textit{IWorkbenchWindowActionDelegate}'s \textit{selectionChanged} method is 
+updated with outdated offset information.
 \textbf{Solution}: The current selection is now based directly on the current 
 active editor part's selection.
 
