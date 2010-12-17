@@ -110,13 +110,14 @@ The special cases that were listed on the project wiki were useful to
 communicate but it may have saved time if they were directly integrated into 
 the documentation.
 
-\subsubsection{multiple git trees}
-While using one master git branch for every developer we introduced a second
-git branch called development. During half a week it was worked on the
-development branch and then both trees were merged. The idea behind it was to
-have always a stable master. In fact this gave the oppertunity to mess around
-in the development branch and not care about it. The result was, nobody tried
-to pull from the other because in the master everything was already merged and
-the development branch was in a ``always unstable'' condition.
+\subsubsection{Multiple git branches}
+While using one master git branch for every developer, a second git branch 
+called development was introduced. During half a week new work was committed to the
+development branch and then both trees were merged. The idea behind this was to
+always have a stable master branch. This allowed to carelessly mess around
+inside the development branch which resulted in nobody daring
+to pull from the others branch. Inside the master branch everything was already merged and
+the development branch was in an ``always unstable'' condition.
 If something unstable is introduced to the repository one should use explicitly
 a separate branch and include this in the master as soon as possible.
+
