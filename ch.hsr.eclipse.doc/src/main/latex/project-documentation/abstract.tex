@@ -16,12 +16,13 @@ quickly. Project setup hints are listed in the appendix.
 \end{abstract}
 
 \chapter*{Management Summary}
+
 In C++ there is the possibility to tell the compiler there exists a function
 with a so called \textit{declaration}. Since
 this does not specify what the function does, a \textit{definition} is needed
 with the functionality.
 
-\begin{lstlisting}[caption={class with declaration and definition},
+\begin{lstlisting}[caption={class with declaration and separated definition},
 label={declanddef}, language=C++]
 class A {
   int function(int param1); //declaration
@@ -81,6 +82,8 @@ and the implementation file. More than once programmers forget to change the
 signature in one place which results in compile errors and unnecessary time
 consuming error correction.\newline
 
+\section*{Toggle Function definition}
+
 Refactorings do solve such problems by automating changes to source code so,
 less errors are introduced by hand.
 
@@ -97,6 +100,89 @@ definition is replaced with a newly created declaration.
 
 All this is done without any wizard and kept speedy to not break the work flow.
 The refactoring is bound to a key.
+
+\begin{lstlisting}[caption={Startposition of toggling},
+label={togglefirst}, language=C++]
+class A {
+  int function(int param1) {
+    return 42; | //<- cursor position
+  }
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={New position is found},
+label={togglethird}, language=C++]
+class A {
+  int function(int param1) {
+    return 42; |
+  }
+};
+
+X //<-new position is here
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Class with declaration and inlined definition},
+label={togglefourth}, language=C++]
+class A {
+  int function(int param1);
+};
+
+inline int function(int param1) {
+  return 42;
+}
+\end{lstlisting}
+
+Toggling again moves the definition from out of the header file to the
+implementation file which should contain the actual functionality. If
+\texttt{function(int param1)} from listing \ref{togglefourth} gets toggled
+the definition will end up in the implementation file as shown in listing
+\ref{toggleimpl}
+
+\begin{lstlisting}[caption={defintion in a implementation file},
+label={toggleimpl}, language=C++]
+#include "A.h"
+
+int A::function(int param1) {
+  return 42;
+}
+\end{lstlisting}
+
+All this moving functionality can be started with one keystroke.
+
+\section*{Quick Implement Function}
+
+To optain some coding flow and due to the fact that the \textit{Implement
+Method} (Wrongly named with the Java terminology method, and not function) does
+not really fit into this fast-toggle working style, this semester theses
+re-implemented the implement function as a \textit{Quick Implement Function}
+
+The Idea behind this is the following: The developer starts writing its class.
+He comes to the point where he would write it's first declaration. He uses a
+keystroke and the declaration is replaced with a definition containing a
+appropriated return statement.
+
+\begin{lstlisting}[caption={Situation before quick implement},
+label={beforeimpl}, language=C++]
+
+class A {
+  int function();|//<-cursor position
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Situation after quick implement},
+label={beforeimpl}, language=C++]
+
+class A {
+  int function()
+  {
+    return int(); //new generated definition
+  }
+};
+\end{lstlisting}
+
+The developer can continue to write the functionality of \texttt{function()}
+and toggles the definition with the other keystroke to the header file.
+
 \thispagestyle{empty}
 \pagebreak
 
