@@ -6,9 +6,9 @@ understood and designed.
 
 \section{Toggle Function Definition}
 
-The idea: good code should separate interface and implementation. However, it is 
+Good code should separate interface and implementation. However, it is 
 annoying to copy function signatures from the header file to the implementation 
-file or vice versa. 
+file or vice versa. This process shall be automated.
 
 \textit{Toggle Function Definition} moves the code of a member function between 
 different possible places, preserving the declaration statement inside the 
@@ -20,7 +20,7 @@ following chapters.
 \subsection{Three positions for function definitions}
 
 \label{positions}
-In C++ there are three possible positions where a \marginline{\textit{in-class}}
+In C++ there are three possible positions where a
 function definition may occur. Listing \ref{classheaderimpl} shows an example
 where the definition of a class member function is placed inside its class
 definition. Placing implementation code right next to the declaration is the
@@ -42,7 +42,7 @@ class A {
 \end{lstlisting}
 
 %TODO: add a footnote for the 'extern' problem. (MS, 2.12.2010)
-To keep the interface clear, \marginline{\textit{in-header}} functions may be 
+To keep the interface clear, functions may be 
 placed outside the class definition but still in the same (header) file. Such a 
 function is called \textit{inlined}. See Listing \ref{inheaderimpl}. For
 templates, this is the only position where implementation may be placed outside
@@ -70,12 +70,12 @@ inline int A::x() {
 }
 \end{lstlisting}
 
-To \marginline{\textit{in-file}} separate implementation from the interface more 
+To separate implementation from the interface more 
 clearly, a separate source file may be used for the definitions while the 
 declarations remain in the header file. An example for this position of a 
-function definition is shown by listings \ref{twofilesolution_header} and
-\ref{twofilesolution_impl}. The position will be called 
-\textit{in-implementation} or \textit{in-file}.
+function definition is shown in listings \ref{twofilesolution_header} and
+\ref{twofilesolution_impl}. This position will be called \textit{in-file} 
+throughout this document.
 
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
@@ -113,7 +113,7 @@ move the function definition. All supported toggling situations and their
 special cases are listed in this chapter.
 
 \subsubsection{Free functions}
-For plain free functions, toggling shall happen between two positions:
+For plain free functions, toggling shall be possible at two positions:
 \begin{enumerate}
 \item Toggle from in-header to in-file
 \item Toggle from in-file to in-header
@@ -143,6 +143,8 @@ the newly created namespace definition.
 Contrariwise, namespace definitions that would become empty after removing the 
 last function shall be deleted.
 
+%TODO: Add an example
+
 \subsubsection{Templated member functions}
 
 An exception are templated member functions that may only be toggled inside the 
@@ -152,7 +154,11 @@ same header file.
 \item Toggle from in-header to in-class
 \end{enumerate}
 
+%TODO: Add an example
+
 \section{Implement Member Function}
+
+%TODO: Add some introduction text for this chapter
 
 \subsection{Activation}
 This refactoring shall be active as soon as a function declaration is selected 
@@ -160,7 +166,7 @@ that has no associated definition. A missing semicolon at the end of the
 function declaration should not stop the mechanism to work.
 
 After writing a function declaration in the class definition, not yet written
-the ``;'', code completion can be used to create the function body with an
+the ``;'', code completion shall be available to create the function body with an
 appropriate default empty return statement.\newline
 
 An already completed function declaration can be transformed to a function
@@ -181,6 +187,8 @@ implemented during the project.
 
 \section{Examples}
 
+%TODO: add a section introduction here
+
 \subsubsection{Toggle free function from .cpp to .h}
 Let assume a free function in a header file with no declaration specified is
 toggled. Listing \nolinebreak\ref{01freefuncPre} shows the situation before
@@ -197,7 +205,7 @@ int main() {
 \end{lstlisting}
 
 First it is checked if a file named with the same name as the original
-implementation file exists. If not, a new file is created with the
+implementation file exists (A.h in this example). If not, a new file is created with the
 appropriate include guards. See listing \nolinebreak\ref{02freefuncNewFile}.
 
 \begin{lstlisting}[caption={Newly created A.h}, label={02freefuncNewFile},
@@ -208,7 +216,7 @@ language=C++]
 #endif /* A_H_ */
 \end{lstlisting}
 
-The \texttt{freefunction()} definition is now moved into the header
+Subsequently, the \texttt{freefunction()} definition is moved into the header
 file as shown in listing \nolinebreak\ref{02freefuncInsert}
 
 \begin{lstlisting}[caption={Inserted \texttt{freefunction()} in A.h},
@@ -224,8 +232,8 @@ int freefunction() {
 \end{lstlisting}
 
 If toggled again, the declaration of \texttt{freefunction()} remains inside the
-header file while the definition is inserted into the implementation file and an
-include statement is prepended to the top of the implemtation file. Listing
+header file, while the definition is inserted into the implementation file and an
+include statement is prepended to the implementation file. Listing
 \nolinebreak\ref{03freefuncEnd} and \ref{04freefuncEnd} shows the end
 situation.
 

@@ -6,13 +6,14 @@
 The Eclipse Java Development Toolkit (JDT) has a large set of both quick and
 useful refactorings. Its sibling the C++ Development Toolkit (CDT) offers just a
 small range of such code helpers today. In addition, some of them don't work
-satisfyingly: Currenty, extracting the body of a hello world function takes more
-than three seconds on our machines. Reliability? Try to \texttt{extract
+satisfyingly: Currently, extracting the body of a hello world function takes more
+than three seconds on our machines. Reliability? Try to \textit{extract
 constant} the hello world string of the same program. At the time of this 
-writing, this still fails.
+writing, this still failed.
 
-Many bachelor students at HSR visit a C++ programming class and are using 
-Eclipse to solve the exercises. After a while it was clear that
+Bachelor students at HSR may visit a C++ programming class where
+Eclipse is used to solve exercises. For the authors of this document, it was 
+clear after a while that
 touching the refactoring buttons was a dangerous action because in some cases
 descibed above they broke your code. Compile errors all over the place and
 difficult exercise assignments didn't make our life easier.
@@ -22,15 +23,15 @@ files. This is a pain point for every programmer. Forgetting to update the
 function signature in one of the files will result in compilation error which
 causes either lack of understanding for beginners or loss of time.
 
-After two minutes of compile error hunting because you forgot to change a
-function signature in both, the header and the implementation file, you start
-asking yourself: Why nobody has yet implemented a solution to prevent such an
-error?
+After two minutes of compile error hunting because of a function signature that 
+was out of sync in the header and the implementation file, it may be asked: Why 
+nobody has yet implemented a solution to prevent such an error?
 
-The IFS Institute for Software at HSR with its group around Professor Peter
-Sommerlad and
-Emanuel Graf has been working on Eclipse refactorings for a long time. Since
-2006 nine Eclipse refactoring projects have been completed.
+Refactorings in CDT have a big field of interesting and unsolved problems. With 
+the support of the Institute of Software IFS at HSR Rapperswil, these problems 
+could be solved. The Institute for Software with its group around Professor 
+Peter Sommerlad and Emanuel Graf has been working on Eclipse refactorings for a 
+long time. Since 2006 nine Eclipse refactoring projects have been completed.
 
 \section{What has been planned}
 
@@ -57,8 +58,8 @@ class ClearClass {
 #endif
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Situation after toggling: member function defined
-separately, outside the class},label={funcdefPost},language=C++]
+\begin{lstlisting}[caption={Separated definition after toggling},
+label={funcdefPost},language=C++]
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
@@ -66,7 +67,7 @@ class ClearClass {
   void bigfunction();
 };
 
-void ClearClass::bigfunction {
+inline void ClearClass::bigfunction {
   /* implementation */
 }
 
@@ -74,23 +75,24 @@ void ClearClass::bigfunction {
 \end{lstlisting}
 
 The example shows that moving the function body does not only involve copying 
-code but also adds a scope operator \texttt{::} to the new definition. Also, the 
+code but also adds a scope operator \texttt{::} to the new definition. In addition, the 
 former definition had to be replaced by a plain declaration. There are several 
 such changes required depending on the scope and properties (static, virtual, 
 etc.) of the function. Toggling multiple times should bring the code back to the 
 original position in almost no time. 
 
 Throughout this documentation, this functionality is referred to as being a 
-refactoring as it uses the refactoring facility of the Eclipse LTK
+\textit{refactoring} as it uses the refactoring facility of the Eclipse LTK
 \footnote{\url{http://www.eclipse.org/articles/Article-LTK/ltk.html}}. However, 
 \textit{Toggle Function Definition} actually is a code generator. The idea for 
 this ''refactoring'' was introduced by project advisor Prof. Peter Sommerlad.
 
 Goal of this thesis is to realize this idea in form of an Eclipse plugin and to 
-make it fast enough to become a good alternative to editing the files manually. 
+make it fast enough to become a good alternative to editing the functions 
+manually. 
 
 \subsection{Implement Member Function}
-The current CDT plug-in already includes a \textit{Implement Member Function}.
+The current CDT plug-in already includes an \textit{Implement Member Function}.
 However, it is slow and does not fit together with the newly created 
 \textit{Toggle Function Definition}. It breaks the coding flow for adding 
 functionality to classes with unneccessary wizards, which could be a reason not 
@@ -127,13 +129,13 @@ with Emanuel Graf as he is a CDT commiter.
  \item At the end the project will be handed to the supervisor with two CD's and
 two paper versions of the documentation. An update site is created where the
 functionality can be added to Eclipse. A website describes in short the
-functionality and our project vision.
+functionality and the project vision.
 \end{itemize}
 
 \subsection{Advanced objectives}
-All basic goals have been archived. Additionally:
+All basic goals have been achieved. Additionally:
 \begin{itemize}
- \item Toggling function is fast. less than a second.
+ \item Toggling function is fast. Less than a second.
 \end{itemize}
 
 Re-Implement the ``Implement Function'' feature.
@@ -147,8 +149,8 @@ the block.
 
 \subsection{Further objectives and outlook}
 
-If there is enough time an \textit{Override Virtual Function} is implemented.
-Additionally, content assist can be implemented. This could be part of a
+If there is enough time, an \textit{Override Virtual Function} is implemented.
+Additionally, content assist may be implemented. This could be part of a
 bachelor thesis which continues and completes the work done in this semester
 thesis.
 
@@ -157,7 +159,7 @@ thesis.
 Implement member function and the toggle key are written to work in synergy.
 First write the declaration for a (member) function in the header or class
 definition, then a hot-key is used to implement the function. At this point the
-toggle key can be hit at any time to move the function to the appropriate
+toggle key may be hit at any time to move the function to the appropriate
 position and continue with the next new member function.
 
 \section{Project duration}

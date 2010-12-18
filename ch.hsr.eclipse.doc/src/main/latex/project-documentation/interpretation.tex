@@ -8,7 +8,7 @@ capable of and what may still need some improvement.
 
 Toggling functions is available inside any class or namespace hierarchy and may 
 be invoked when the selection is anywhere inside a function declaration or body. 
-Basic templated functions are supported as well. However, there might be 
+Basic templated functions are supported as well. However, there may be 
 template special cases that were not thought of.
 
 On the other side, the code generator removes preprocessor statements that stay 
@@ -24,16 +24,16 @@ the refactoring is executing almost instantly.
 It was planned to measure the speed of the jUnit tests. However, the displayed 
 time does not represent the actual speed of the refactoring. This may be due to 
 the fact that tests are not being invoked exactly the same way as the actual 
-refactoring.
+refactoring. The manually invoked refactoring is run with the help of \texttt{ToggleRefactoringRun- ner}.
 
 The results from the \textit{org.eclipse.test.performance} speed tests were not 
-used too. Since in reality the refactorings are much slower than the 
+used either. Since in reality the refactorings are much slower than the 
 (repeated) measurements, resulting values may only be compared relative to each 
 other.
 
 In the end, the only way to judge whether the refactorings became quicker is to 
 check out an older version like \textit{597440f4552eaa} and to try it out 
-manually. Including dependencies like iostream slowed down the refactoring 
+manually. Included libraries like iostream slowed down the refactoring 
 noticeably before speed was improved.
 
 \section{Personal review}
@@ -48,7 +48,8 @@ it without a wizard. However, the user needs full trust in the code generation
 that it won't break code and this is currently not given when preprocessor 
 statements are used. Nevertheless I'm glad the developed plugin is able to write 
 complex template definitions that I couldn't write myself without the C++ 
-specification by my side. This could save a lot of time.
+specification by my side. This could save a lot of time and hassle for 
+programmers.
 
 What next? If the plugin is integrated into CDT, I'd be interested in the 
 Eclipse Usage Data Collector
@@ -74,7 +75,7 @@ enough freedom to realize innovative ideas.
 
 The goal was to develop a plugin that is used by the world an not thrown away.
 Even if we could not solve all issues, specially with comments and macros, I
-think we archived in the main task and realized our supervisors and customers 
+think we achieved the main task and realized our supervisors and customers 
 idea of a toggle definition.
 
 \subsection{What we would do the same way}
@@ -118,6 +119,6 @@ always have a stable master branch. This allowed to carelessly mess around
 inside the development branch which resulted in nobody daring
 to pull from the others branch. Inside the master branch everything was already merged and
 the development branch was in an ``always unstable'' condition.
-If something unstable is introduced to the repository one should use explicitly
+If something unstable is introduced to the repository one should explicitly use
 a separate branch and include this in the master as soon as possible.
 
