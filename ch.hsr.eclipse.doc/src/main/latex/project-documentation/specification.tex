@@ -161,16 +161,17 @@ same header file.
 
 \subsection{Activation}
 This refactoring shall be active as soon as a function declaration is selected 
-that has no associated definition. A missing semicolon at the end of the 
-function declaration should not stop the mechanism to work.
-
-After writing a function declaration in the class definition, not yet written
-the ``;'', code completion shall be available to create the function body with an
-appropriate default empty return statement.\newline
+that has no associated definition. The original idea was to use this
+refactoring on declarations without a trailing semicolon. This is problematic
+because the state without a semicolon is saved before the refactoring starts.
+This however results in a problem statement corrupting the index and other
+mechanism to find and navigate in the AST.
 
 An already completed function declaration can be transformed to a function
 definition by using the ``Implement Member Function'' hot-key which creates a
 body with default empty return statement.
+If the return statement can not be created, e.g. the return type of the
+function is a reference, no return statement is created in the body.
 
 \subsection{Expected result}
 As described above, functions may only be toggled when they provide a function 
