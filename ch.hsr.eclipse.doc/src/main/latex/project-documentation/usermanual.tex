@@ -33,9 +33,21 @@ current perspective. Right-click on the toolbar and choose
 and check \textbf{all} "C++ coding" boxes. The menu "Toggle Function Definition" 
 should now be visible inside the source menu.
 
-\section{Use of the \textit{Toggle Function Definition} refactoring}
+\section{Using the refactoring}
 
-The refactoring may be applied as soon as the cursor is placed inside a function that is well defined. The definition may 
+The refactoring may be applied as soon as the cursor is placed inside a function 
+that is well defined. Any selection between the first and the last character of 
+the function definition (without comments) is considered valid for toggling. See 
+figure \ref{selection} for an example.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.4\textwidth]{images/selection.png}
+\caption{region for valid selection positions}
+\label{selection}
+\end{figure}
+
+Now toggling the selected function definition is as easy as pressing 
+\texttt{Ctrl+Alt+v}.
 
 \section{Example}
 
@@ -43,7 +55,7 @@ The following graphics show an example workflow with the \textit{toggle
 refactoring}. Figure \ref{exampleA} shows what happens to a regular member 
 function that was previously defined inside its class definition when the toggle 
 refactoring is invoked on it. The implementation of the member function 
-\textit{move} becomes separated from the class definition.
+\texttt{move} becomes separated from the class definition.
 
 \begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{images/step1.png}

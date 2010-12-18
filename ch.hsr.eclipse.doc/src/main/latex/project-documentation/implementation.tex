@@ -11,7 +11,8 @@ At the beginning, as many cases as possible were collected on the project wiki
 to gain a view on what had to be realized, what was planned to take into scope 
 and what had nothing to do with toggling function definitions. Some cases were 
 simple, some exotic. The simplest one, toggling from inside a class to the same 
-file outside the class, was chosen to be implemented first. 
+file outside the class, was chosen to be implemented first (See listings 
+\ref{funcdefPre} and \ref{funcdefPost}). 
 
 Before that, a skeleton plugin was built with a NullRefactoring to try whether 
 it was possible to develop a separate plugin instead of directly manipulating 
@@ -57,7 +58,8 @@ separate job had to be scheduled by the ActionDelegate.
 In addition, the undo functionality had to be implemented separately. When the 
 changes are performed, they (surprisingly) also return the undo changes that are 
 needed by the UndoManager. The UndoManager is available through 
-\textit{RefactoringCore.getUndoManager()}. See \textit{ToggleRefactoringRunner} 
+\texttt{RefactoringCore.getUndoMa-} \newline
+\texttt{nager()}. See \texttt{ToggleRefactoringRunner} 
 for more details on the implementation.
 
 \section{Testing and performance environment}
@@ -98,7 +100,7 @@ The following issue was not resolved to its cause and is still active when the
 tests are being run. However, tests still pass without failure. During the test 
 run, the following exception is shown on the Eclipse console:
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[caption={Randomly appearing error message},language=java]
 !ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
 !MESSAGE Error: Resource '/RegressionTestProject/\
 A.h' does not exist.
@@ -131,13 +133,15 @@ is not obvious, so an example will be shown at this point.
 
 The .rts test file may include the following syntax:
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[caption={Syntax to set variables inside a .rts file},
+language=java]
 //@.config
 fatalerror=true
 \end{lstlisting}
 
 The \textit{fatalerror} variable may be retrieved using a member function of \textit{RefactoringTest}:
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[caption={Accessing a property set in the .rts file},
+language=java]
 @Override
 protected void configureRefactoring(
     Properties refactoringProperties) {
@@ -148,7 +152,7 @@ protected void configureRefactoring(
 \end{lstlisting}
 
 The \textit{runTest} method may then assert that an error has occurred by using:
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[caption={Checking for errors inside the refactoring test class},language=java]
 RefactoringStatus initialConditions = 
     refactoring.checkInitialConditions(
     NULL_PROGRESS_MONITOR);

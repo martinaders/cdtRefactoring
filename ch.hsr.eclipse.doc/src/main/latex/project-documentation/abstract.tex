@@ -18,37 +18,42 @@ quickly. Project setup hints are listed in the appendix.
 \chapter*{Management Summary}
 Changing function signatures in C++ is an unthankful task to do. Usually the
 signature has to be changed inside two files, the header file and the
-implementation file. Often programmers forget to change the signature in one place
-which results in compile errors and unnecessary time consuming error correction.
+implementation file. If programmers forget to change the signature in one place,
+compile errors and unnecessary time consuming error corrections will be the 
+result.
 
-Refactorings do solve such problems by automating changes to source code so
-less errors are introduced by hand.
+Refactorings do solve such problems by automating changes to source code to 
+reduce errors introduced by hand.
 
-The ``One touch toggle refactoring'' moves function definition from one place
+\textit{Toggle Function Definition} moves function definitions from one place
 to another and preserves correctness.
 
 This is done by searching for a function definition or declaration next to the
 cursor position or the selection of source code. Then, according to the found
 element, it's sibling is searched. Then the signature of the definition is
-copied and adapted to the new position. The new definition gets inserted and
-the old definition is removed.
+copied and adapted to the new position. The new definition is inserted and
+the old definition removed.
 If the definition and the declaration is the same in the beginning, the old
 definition is replaced with a newly created declaration.
 
-All this is done without any wizard and kept speedy to not break the work flow.
+All this is done without any wizard and kept speedy to avoid breaking the work 
+flow.
 \thispagestyle{empty}
 \pagebreak
 
 \chapter*{Thanks}
 We would not have been able to achieve this project without the help of others.
-A big thanks goes to all of these people.\newline
+A big thanks goes to all of these people.
+
 Specially we would like to thank Prof. Peter Sommerlad for the original idea
-of the toggle refactoring, as our supervisor of the project and for various cool
-ideas in many problems we encountered. Lukas Felber who provided us with
-instant solutions where we struggled to continue. Emanuel Graf for his ideas and
-explanation in every subtopic of the CDT project. Thomas Corbat for help and
-ideas for various subtopics like comment handling. \newline
+of the toggle refactoring, for supervising the project and for various cool
+ideas in many problems we encountered. Lukas Felber provided us with
+instant solutions where we struggled to continue. Emanuel Graf had ideas and
+explanations for many CDT issues. Thomas Corbat helped with ideas for subjects
+like comment handling.
+
 Another big thank goes to our families and friends who were neglected during our
 semester thesis.
+
 \thispagestyle{empty}
 
