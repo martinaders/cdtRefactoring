@@ -1,7 +1,7 @@
 \chapter{Conclusions and future work}
 \thispagestyle{fancy}
 
-During the project, a lot of challenges have been discovered. They will be 
+During the project, a lot of challenges have been discovered which will be 
 documented in the following sections along with a look back on the whole project 
 and an outlook on what could be done in further theses. 
 
@@ -11,17 +11,16 @@ and an outlook on what could be done in further theses.
 The main goal of the project was to create a stable refactoring that would have 
 a chance to be integrated into CDT. In the view of the authors, the developed 
 plugin became quite handy but should be tested by a larger community before it 
-may be released to the public. One drawback is that whitespaces are not handled 
-satisfactorily.
+may be released to the public. One of the drawback is the issue with
+whitespaces which are not handled satisfactorily. See section \ref{newlines}
+about newlines.
 
 Anyhow, it should be taken into account that the C++ language specification (and 
-its implementations inside different compilers) may offer a lot more features 
-than two programmers could ever think of. The fact that it is allowed to toggle 
-even if there are syntax errors in the code makes it hard to test for every 
-possible case. It is not sure whether the covered special cases are enough 
-general to cover all language constructs, exotic or not, that may exist. Even 
-programming against the C++ language specification is no guarantee that the 
-refactoring will behave correctly out in the wild.
+its implementations by different compilers) may offer a lot more features 
+than two developers could ever think of. It is not sure whether the covered
+special cases are enough general to cover all language constructs that may
+exist. Even programming against the C++ language specification is no guarantee
+that the refactoring will behave correctly out in the wild.
 
 All in all, the developer team is proud of the solution although aware of the 
 fact that there may still be some improvements needed to satisfy a large 
@@ -29,36 +28,33 @@ audience.
 
 \subsection{Implement Function}
 \textit{Implement Function} shares a lot of similarities and benefits of
-functionality developed for the \textit{Toggle Function Definition}.
-
+functionality developed for the \textit{Toggle Function Definition}. This
+refactoring was developed in short time after the \textit{Toggle Function
+Definition}.
 
 \subsection{Override Virtual Function}
 No deeper investigation on how this refactoring could benefit from the developed 
-work has been done until now.
-% TODO: complete this chapter
+work has been done until now. This is still left to be implemented as another
+semester or bachelor thesis.
 
 \section{Known issues}
 
-<<<<<<< HEAD
-\subsection{Handling newly created files}
-%TODO: think about droping this subsection
-\textbf{Problem}: It is difficult do manipulate newly created files.
-
-\textbf{Cause}: --
-\textbf{Solution}: --
-
-=======
->>>>>>> d8140ec4d3207771032d77fb6de52dededeb1f17
 \subsection{Constructor / destructor bug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
-overridden partially. This problem only occurs in exactly this situation (no 
-parameters, no initialization lists).
+overridden partially. This bug can also be triggered when a function above a
+constructor or a destructor is toggled. It seems that it is triggered with
+function names which do not have a type information and the \texttt{replace()}
+method of the ASTRewrite.
+There are some ways to prevent this bug, although it is not really a workaround.
+First the destructor can be made virtual. In the function above, arguments will
+also prevent this bug.
 
-\textbf{Cause}: Unknown. It seems to be some offset bug.
+\textbf{Cause}: Unknown. It seems to be a offset bug and/or a rewriter bug.
 
 \textbf{Solution}: None yet solved.
 
+\label{newlines}
 \subsection{Unneccessary newlines}
 \textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
 by the rewriter. 
@@ -118,6 +114,8 @@ not removed. This may be seen as a defensive strategy to avoid deleting comments
 accidentally. The ASTRewrite adopts all comments above a node as a leading
 comment not caring how many spaces or lines there are between node and comment.
 
+\textbf{Solution}: No solution yet. This would be solve by a new rewriter.
+
 \subsection{Menu integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
 developing a separate plugin.
@@ -139,8 +137,8 @@ preprocessor statement is deleted. Listing \ref{prepro} shows an example where a
 class is rewritten and a contained preprocessor statement is removed as a side
 effect.
 
-\begin{lstlisting}[caption={Jeopardized preprocessor statement inside a class.
-}, label={prepro}, language=C++]
+\begin{lstlisting}[caption={Jeopardized preprocessor statement inside a class},
+label={prepro}, language=C++]
 #ifdef EXAMPLE_H_           // not affected
 #define EXAMPLE_H_          // not affected
 
@@ -171,7 +169,7 @@ to lack of time. In addition, found limitations of the CDT are described here.
 
 \subsection{Speed}
 \textbf{Problem}: Refactoring, especially the first run, was very slow in the 
-beginning. Including a big library slowed down the process even more.
+beginning. Including a big header file slowed down the process even more.
 
 \textbf{Cause}: The first thought was that header file indexing was the cause. 
 However, the indexer option that skips already indexed headers is enabled in 
@@ -179,7 +177,10 @@ However, the indexer option that skips already indexed headers is enabled in
 consumed by the \textit{checkInitialConditions} method of \textit{CRefactoring} 
 that checked for problems inside the translation unit.
 
-\textbf{Solution}: The super call to \textit{checkInitialConditions} was omitted.
+\textbf{Solution}: The super call to \textit{checkInitialConditions} was
+omitted. Additionally separated and isolated translation units were created and
+indexed with options to prevent reindexing of already indexed files.
+%TODO: add some code here how to do this
 
 \subsection{Accessing standalone header files}
 \textbf{Problem}: Header files that are not included in any source file by 
@@ -193,6 +194,16 @@ indexed.
 
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
 true.
+
+\subsection{Indexing all projects}
+
+\textbf{Problem}: Having multiple projects with the same file containing the
+same functions causes the plugin to crash. 
+\textbf{Cause}: In the index provided by the \texttt{CRefactoring} class
+returns an index containing all the indexes over all the open projects. This
+option makes only sense for refactorings like an ``organize include statements''
+\textbf{Solution}: Providing our own project local index and omit functionality
+from CRefactoring class.
 
 \subsection{Selection}
 \textbf{Problem}: After toggling multiple times, the wrong functions were 
@@ -274,7 +285,6 @@ that valid code will be generated.
 
 \textbf{Solution}: Toggling is disabled for such nested function definitions.
 
-
 \section{Further work}
 
 The toggle refactoring was developed as a separate plugin so integration into 
@@ -285,11 +295,19 @@ selects more than one definition, all of them could be toggled. An example
 workflow could be "Create new class (inherit from an abstract class)", "add 
 unimplemented methods", "toggle all methods to an implementation file".
 
-Support for preprocessor statements (fix the rewriter). Fix the rewriter to 
-remove comments too.
+A big problem in this refactoring was the rewriter. Since it is limited in its
+functionality by limited support for comments, no preprocessor statement
+support, inserting newlines over and over, and even producing wrong code with
+the constructor bug (see section \ref{Constructor / Destructor bug}), it is
+extremly time consuming to find workarounds for such problems.
+Therefore before any new refactoring is developed, the rewriter should be
+fixed or rewritten.
+As in the last meeting of this semester thesis with the supervisor, it was
+ensured such a work will be done by the Institut fuer Software.
 
 A mechanism could be implemented that fixes indentation after refactoring.
 Better user feedback in case of errors could be provided.
 
-% TODO: Add a soul-stirring, deeply moving text about \textit{Override Virtual Member Function} and some more outlooks
+At the end there was no time left to do the \textit{Override virtual member
+function} refactoring. This is still left as a semester thesis.
 
