@@ -45,7 +45,8 @@ To keep the interface clear, functions may be
 placed outside the class definition but still in the same (header) file. Such a 
 function is called \textit{inlined}. See Listing \ref{inheaderimpl}. For
 templates, this is the only position where implementation may be placed outside
-the class definition due to problems of the \texttt{extern} keyword \cite{ext03}. Templated
+the class definition due to problems of the \texttt{export} keyword
+\cite{ext03}. Templated
 functions cannot be placed outside the header file. Except for ... 
 %TODO: find cases where template functions can be
 %placed outside of a header file
@@ -65,7 +66,6 @@ class A {
 inline int A::x() {
   return 0;
 }
-
 }
 \end{lstlisting}
 
