@@ -16,10 +16,70 @@ quickly. Project setup hints are listed in the appendix.
 \end{abstract}
 
 \chapter*{Management Summary}
-Changing function signatures in C++ is an unthankful task to do. Usually the
-signature has to be changed inside two files, the header file and the
-implementation file. Often programmers forget to change the signature in one place
-which results in compile errors and unnecessary time consuming error correction.
+In C++ there is the possibility to tell the compiler there exists a function
+with a so called \textit{declaration}. Since
+this does not specify what the function does, a \textit{definition} is needed
+with the functionality.
+
+\begin{lstlisting}[caption={class with declaration and definition},
+label={declanddef}, language=C++]
+class A {
+  int function(int param1); //declaration
+};
+
+inline int function(int param1)
+{
+  return param1 + 23; //definition
+}
+\end{lstlisting}
+
+Every definition is a declaration too.
+
+\begin{lstlisting}[caption={class with declaration and definition},
+label={defonly}, language=C++]
+class A {
+  int function(int param1) { //decl. and def.
+    return param1 += 23;
+  }
+};
+\end{lstlisting}
+
+Since a declaration and definition can be separated differences can occur
+between the signature of the definition and the signature of the declaration.
+This is not allowed. 
+Imagine now that changing a function signature in C++ is an unthankful task.
+As an additional barrier, a declaration and a definition can occur in two
+different files.
+
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
+\begin{lstlisting}[caption={Header file containing declaration},
+label={twofile1}, language=C++]
+
+class A {
+  void foo();
+};
+
+#endif /* A_H_ */
+\end{lstlisting}
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
+\begin{lstlisting}[caption={Source file containing definition},
+label={twofile2}, language=C++ ]
+#include "A.h"
+
+void A::foo() {
+  return
+}
+\end{lstlisting}
+\end{minipage}
+
+If a signature changes, changes must be made in two files, the header file and
+the implementation file. More than once programmers forget to change the
+signature in one place which results in compile errors and unnecessary time
+consuming error correction.
 
 Refactorings do solve such problems by automating changes to source code so
 less errors are introduced by hand.
