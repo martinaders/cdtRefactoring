@@ -76,12 +76,12 @@ void A::foo() {
 \end{lstlisting}
 \end{minipage}
 
-If a signature changes, changes must be made in two files, the header file and
-the implementation file. More than once programmers forget to change the
+If a signature changes, these changes must be made in two files, the header file
+and the implementation file. More than once programmers forget to change the
 signature in one place which results in compile errors and unnecessary time
-consuming error correction.
+consuming error correction.\newline
 
-Refactorings do solve such problems by automating changes to source code so
+Refactorings do solve such problems by automating changes to source code so,
 less errors are introduced by hand.
 
 The ``One touch toggle refactoring'' moves function definition from one place
@@ -96,6 +96,7 @@ If the definition and the declaration is the same in the beginning, the old
 definition is replaced with a newly created declaration.
 
 All this is done without any wizard and kept speedy to not break the work flow.
+The refactoring is bound to a key.
 \thispagestyle{empty}
 \pagebreak
 
