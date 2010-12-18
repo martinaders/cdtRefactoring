@@ -30,6 +30,13 @@ Marcel Huber.
 \newblock also known as WebDisplay2
   \url{http://wiki.hsr.ch/APF/files/WebDisplay2_Architecture.pdf}.
 
+\bibitem[SP03]{ext03}
+Herb Sutter and Tom Plum.
+\newblock Why we can't afford export.
+\newblock
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1426.pdf},
+  March 2003.
+
 \bibitem[SZCF08]{Sommerlad:2008:RCR:1449814.1449817}
 Peter Sommerlad, Guido Zgraggen, Thomas Corbat, and Lukas Felber.
 \newblock Retaining comments when refactoring code.
