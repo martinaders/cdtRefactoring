@@ -48,20 +48,20 @@ templated member function there are three strategies needed.
 \item ToggleFromImplementationHeaderOrClassStrategy
 \end{itemize}
 
-This having these tree strategies member functions can be
-toggled around in circle.\newline
+With the help of these three strategies, member functions may be toggled 
+circularly.
 
-Having a templated class requires another strategy which toggles from
+To support templated classes, another strategy is required which toggles from
 \textit{in-header} back to \textit{in-class} as explained in section
-\ref{templatedmember}
+\ref{templatedmember}.
 
 \begin{itemize}
 \item ToggleFromInHeaderToClassStrategy
 \end{itemize}
 
 All these strategies implement an interface with a \texttt{run()} method taking
-a \texttt{ModificationCollector} to collecting the changes made to the source
-code.
+a \texttt{ModificationCollector} to collect the changes to be applied to the 
+source code.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
 label={01templatedMember}, language=Java]
@@ -70,9 +70,9 @@ public interface IToggleRefactoringStrategy {
 }
 \end{lstlisting}
 
-An interface was chose because an abstract class containing all the methods
+An interface was chosen because an abstract class containing all the methods
 needed by the various strategies was too big and unclear. This resulted in the
-Interface and an static helper class, named \texttt{ToggleNodeHelper}.
+interface and a static helper class, named \texttt{ToggleNodeHelper}.
 
 \subsubsection{ToggleNodeHelper}
 
@@ -83,7 +83,7 @@ method as smoothly as possible.
 \subsubsection{Context}
 
 The \texttt{ToggleRefactoringContext} is used first to collect information
-about definition, declaration and their translation units. Further it saves
+about definition, declaration and their translation units. Further it stores
 this information.
 
 The context is then passed to other instances e.g. the strategy factory which
@@ -91,10 +91,10 @@ passes it to the strategy by itself since the strategy is the main user of the
 context and retrieves all its information from the context.
 
 The context was introduced to prevent the code smell of a long parameter list. A
-common refactoring for this problem is to introduce context class which unites
-all single arguments.
+common refactoring for this problem is to introduce a parameter object which 
+consolidates all arguments.
 
-The justification that the strategy searches the information by it's own is due
+The justification that the strategy searches the information by its own is due
 to the fact that context would just be a very small data class and yet another
 class would be needed to search and collect the information which builds and
 returns the context.
@@ -102,7 +102,7 @@ returns the context.
 \subsubsection{Strategy Factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the context passed to. The strategy makes varous checks
+considered, based on the context given. The strategy makes varous checks
 and decides which strategy will be returned.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
