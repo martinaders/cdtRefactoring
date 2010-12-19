@@ -27,25 +27,15 @@ and order.
 In Eclipse, most of the architecture is already given. Some specialties of the 
 toggle refactoring are presented in this section.
 
-\subsection{Basic call flow}
-The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
-\textit{Toggle Function} is invoked.
-\begin{figure}[h]
-  \centering
-  \includegraphics[trim = 35mm 120mm 40mm 28mm,clip,scale=0.8]{seqdiagram/seqdiagram.pdf} %,clip,
-  \caption{Basic call flow when toggling a function definition}
-  \label{sd}
-\end{figure}
-
-\subsection{Architectural decisions}
+\subsection{Decisions}
 
 During the development process some architectural decisions were made to
-structure the code and to separate the logik.
+structure the code and to separate the logic.
 
 \subsubsection{Strategies}
 
 The way to toggle from one place to another differs a lot depending on
-the current position. Having all logik in the same unit would need a complex
+the current position. Having all logic in the same unit would need a complex
 conditional structure which is on one side confusing and on the other side
 slow.
 
@@ -90,13 +80,62 @@ Interface and an static helper class, named \texttt{ToggleNodeHelper}.
 other projects. in inherits from NodeHelper to make the integration of these
 method as smoothly as possible.
 
+\subsubsection{Context}
+
+The \texttt{ToggleRefactoringContext} is used first to collect information
+about definition, declaration and their translation units. Further it saves
+this information.
+
+The context is then passed to other instances e.g. the strategy factory which
+passes it to the strategy by itself since the strategy is the main user of the
+context and retrieves all its information from the context.
+
+The context was introduced to prevent the code smell of a long parameter list. A
+common refactoring for this problem is to introduce context class which unites
+all single arguments.
+
+The justification that the strategy searches the information by it's own is due
+to the fact that context would just be a very small data class and yet another
+class would be needed to search and collect the information which builds and
+returns the context.
+
 \subsubsection{Strategy Factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the user selection. The following strategies have been
-implemented to cover the specified cases:
+considered, based on the context passed to. The strategy makes varous checks
+and decides which strategy will be returned.
 
-\subsubsection{Context}
+\begin{lstlisting}[caption={IToggleRefactoringStrategy},
+label={strategy}, language=Java]
+
+public IToggleRefactoringStrategy getStategy() {
+  if (context.getDefinition() == null) {
+    throw new NotSupportedException(...
+  }
+  ...
+  if (isInClassSituation()) {
+    return new ClassToInHeaderStrategy(context);
+  }
+  if (isTemplateSituation()) {
+    return new HeaderToClassStrategy(context);
+  }
+  ...
+}
+\end{lstlisting}
+
+%TODO: Martin, can you add some words about the things you did, runner,
+% delegate, and so on...
+
+\subsection{Basic call flow}
+The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
+\textit{Toggle Function} is invoked.
+\begin{figure}[h]
+  \centering
+  \includegraphics[trim = 35mm 120mm 40mm
+28mm,clip,scale=0.8]{seqdiagram/seqdiagram.pdf} %,clip,
+  \caption{Basic call flow when toggling a function definition}
+  \label{sd}
+\end{figure}
 
 \subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
