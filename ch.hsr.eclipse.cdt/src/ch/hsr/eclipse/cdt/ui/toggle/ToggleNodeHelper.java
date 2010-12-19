@@ -297,16 +297,19 @@ public class ToggleNodeHelper extends NodeHelper {
 				IndexLocationFactory.getWorkspaceIFL(file));
 		String fileName = ToggleNodeHelper.getFilenameWithoutExtension(
 				file.getFullPath().toString());
-		if (file.getFileExtension().equals("h")) {
+		if (asttu.isHeaderUnit()) {
            for (IIndexInclude include : projectIndex.findIncludedBy(thisFile)) {
                    if (ToggleNodeHelper.getFilenameWithoutExtension(include.getIncludedBy().getLocation().getFullPath()).equals(fileName)) {
                            ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(include.getIncludedBy().getLocation().getURI(), cProject);
                            return tu.getAST(projectIndex, ITranslationUnit.AST_SKIP_ALL_HEADERS);
                    }
            }
-		} else if (file.getFileExtension().equals("cpp") || file.getFileExtension().equals("c")) {
+		} else {
 			for (IIndexInclude include : projectIndex.findIncludes(thisFile)) {
 				if (ToggleNodeHelper.getFilenameWithoutExtension(include.getFullName()).equals(fileName)) {
+					if (include.getIncludesLocation() == null){
+						throw new NotSupportedException("The include file does not exist");
+					}
 					URI uri = include.getIncludesLocation().getURI();
 					ITranslationUnit tu = CoreModelUtil.findTranslationUnitForLocation(uri, cProject);
 					return tu.getAST(projectIndex, ITranslationUnit.AST_SKIP_ALL_HEADERS);

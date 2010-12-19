@@ -38,24 +38,13 @@ public class ToggleFromInHeaderToImplementationStrategy implements IToggleRefact
 	private ASTLiteralNode includenode;
 
 	public ToggleFromInHeaderToImplementationStrategy(final ToggleRefactoringContext context) {
-		impl_unit = context.getTUForSiblingFile();
-		if (this.impl_unit == null) {
-			ToggleFileCreator filecreator = new ToggleFileCreator(context, ".cpp");
-			if (filecreator.askUserForFileCreation(context)) {
-				filecreator.createNewFile();
-				impl_unit = filecreator.loadTranslationUnit();
-				includenode = new ASTLiteralNode(filecreator.getIncludeStatement());
-			}
-			else {
-				throw new NotSupportedException("Cannot create new Implementation File");
-			}
-		}
 		this.infoText = new TextEditGroup("Toggle function body placement");
 		this.context = context;
 	}
 
 	@Override
 	public void run(ModificationCollector collector) {
+		newFileCheck();
 		ICPPASTFunctionDefinition newDefinition = getNewDefinition();
 		if (context.getDeclaration() != null) {
 			removeDefinitionFromHeader(collector);
@@ -94,6 +83,21 @@ public class ToggleFromInHeaderToImplementationStrategy implements IToggleRefact
 		
 		restoreBody(newDefinition, newRewriter);
 		restoreLeadingComments(newDefinition, newRewriter);
+	}
+
+	private void newFileCheck() {
+		impl_unit = context.getTUForSiblingFile();
+		if (this.impl_unit == null) {
+			ToggleFileCreator filecreator = new ToggleFileCreator(context, ".cpp");
+			if (filecreator.askUserForFileCreation(context)) {
+				filecreator.createNewFile();
+				impl_unit = filecreator.loadTranslationUnit();
+				includenode = new ASTLiteralNode(filecreator.getIncludeStatement());
+			}
+			else {
+				throw new NotSupportedException("Cannot create new Implementation File");
+			}
+		}
 	}
 
 	private ICPPASTNamespaceDefinition getParentNamespace() {

@@ -39,7 +39,7 @@ public class ToggleRefactoring extends CRefactoring {
 
 	private TextSelection selection;
 	private IToggleRefactoringStrategy strategy;
-	private ToggleRefactoringContext context;
+	protected ToggleRefactoringContext context;
 	private IIndex fIndex;
 	
 	public ToggleRefactoring(IFile file, TextSelection selection, ICProject proj) {
