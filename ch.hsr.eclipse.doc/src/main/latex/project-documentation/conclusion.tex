@@ -66,8 +66,8 @@ affected node has to be analyzed thoroughly. Given figure \ref{commentA} it
 could be tried to always remove one newline before and one newline after the 
 removed function.
 
-\begin{figure}[h]
-\begin{lstlisting}[language=C++]
+\begin{lstlisting}[caption={Whitespaces will not be removed blindly},
+label={commentA}, language=C++]
 void before() {
 }
 // 1st newline added
@@ -77,23 +77,15 @@ void newFunction() {
 void after() {
 }
 \end{lstlisting}
-\setlength{\abovecaptionskip}{-20pt}
-\caption{Whitespaces may not be removed blindly}
-\label{commentA}
-\end{figure}
 
 Yet, it is not determined whether the programmer changed the code to look like 
 in figure \ref{commentB}. There, it would be fatal to remove a character before 
 and after the function because brackets would be removed instead.
 
-\begin{figure}[h]
-\begin{lstlisting}[language=C++]
+\begin{lstlisting}[caption={Code without the usual newlines},
+label={commentB}, language=C++]
 void before(){}void newFunction(){}void after(){}
 \end{lstlisting}
-\setlength{\abovecaptionskip}{-20pt}
-\caption{the same code without the usual newlines}
-\label{commentB}
-\end{figure}
 
 \textbf{Workaround}: First, the formatter could be used to remove multiple 
 newlines. This breaks the programmers formatting which could be disruptive. 
@@ -299,7 +291,7 @@ A big problem in this refactoring was the rewriter. Since it is limited in its
 functionality by limited support for comments, no preprocessor statement
 support, inserting newlines over and over, and even producing wrong code with
 the constructor bug (see section \ref{Constructor / Destructor bug}), it is
-extremly time consuming to find workarounds for such problems.
+extremely time consuming to find workarounds for such problems.
 Therefore before any new refactoring is developed, the rewriter should be
 fixed or rewritten.
 As in the last meeting of this semester thesis with the supervisor, it was
