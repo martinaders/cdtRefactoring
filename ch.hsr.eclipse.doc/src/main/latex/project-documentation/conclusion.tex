@@ -50,9 +50,9 @@ There are some ways to prevent this bug, although it is not really a workaround.
 First the destructor can be made virtual. In the function above, arguments will
 also prevent this bug.
 
-\textbf{Cause}: Unknown. It seems to be a offset bug and/or a rewriter bug.
+\textbf{Cause}: Unknown. It seems to be an offset bug and/or a rewriter bug.
 
-\textbf{Solution}: None yet solved.
+\textbf{Solution}: Not yet solved.
 
 \label{newlines}
 \subsection{Unneccessary newlines}
@@ -114,7 +114,7 @@ not removed. This may be seen as a defensive strategy to avoid deleting comments
 accidentally. The ASTRewrite adopts all comments above a node as a leading
 comment not caring how many spaces or lines there are between node and comment.
 
-\textbf{Solution}: No solution yet. This would be solve by a new rewriter.
+\textbf{Solution}: No solution yet. This could be solved by a new rewriter.
 
 \subsection{Menu integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
@@ -159,7 +159,7 @@ class WillBeRewrittenImplicitly {
 which supports preprocessor statements.
 
 There was a small work around for this problem by warning about the presence of
-a preprocessor statement in the affected files. At the end this was dropped
+a preprocessor statement in the affected files. In the end this was dropped
 because this breaks the initial idea of the code flow.
 
 \section{Solved issues}

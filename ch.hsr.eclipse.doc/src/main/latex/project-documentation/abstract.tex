@@ -45,18 +45,20 @@ class A {
 };
 \end{lstlisting}
 
-Since a declaration and definition can be separated differences can occur
+Since a declaration and definition can be separated, differences may occur
 between the signature of the definition and the signature of the declaration.
 This is not allowed. 
 Imagine now that changing a function signature in C++ is an unthankful task.
-As an additional barrier, a declaration and a definition can occur in two
+As an additional barrier, a declaration and a definition may occur in two
 different files.
 
 \vspace{0.5cm}
-\begin{minipage}{.48\textwidth}
-\lstset{xrightmargin=0.5cm}
-\begin{lstlisting}[caption={Header file containing declaration},
+\begin{minipage}{.468\textwidth}
+\lstset{xrightmargin=0.55cm}
+\begin{lstlisting}[caption={Header file with a\newline declaration},
 label={twofile1}, language=C++]
+#ifndef A_H_
+#define A_H_
 
 class A {
   void foo();
@@ -65,8 +67,8 @@ class A {
 #endif /* A_H_ */
 \end{lstlisting}
 \end{minipage}%
-\begin{minipage}{.48\textwidth}
-\lstset{xleftmargin=0.5cm}
+\begin{minipage}{.492\textwidth}
+\lstset{xleftmargin=0.55cm}
 \begin{lstlisting}[caption={Source file containing definition},
 label={twofile2}, language=C++ ]
 #include "A.h"
@@ -74,29 +76,32 @@ label={twofile2}, language=C++ ]
 void A::foo() {
   return
 }
+
+
+	              |
 \end{lstlisting}
 \end{minipage}
 
-If a signature changes, these changes must be made in two files, the header file
+If a signature changes, these changes must be made in two files: the header file
 and the implementation file. More than once programmers forget to change the
 signature in one place which results in compile errors and unnecessary time
-consuming error correction.\newline
+consuming error correction.
 
 \section*{Toggle Function definition}
 
-Refactorings do solve such problems by automating changes to source code so,
+Refactorings do solve such problems by automating changes to source code, so
 less errors are introduced by hand.
 
-The ``One touch toggle refactoring'' moves function definition in
+The ``One touch toggle refactoring'' moves function definitions in
 \textit{Eclipse} from one position to another and preserves correctness.
 
 This is done by searching for a function definition or declaration next to the
-cursor position or the selection of source code. Then, according to the found
-element, it's sibling is searched. Then the signature of the definition is
+user's code selection. Then, according to the found
+element, it's sibling is searched. After that, the signature of the definition is
 copied and adapted to the new position. The new definition gets inserted and
 the old definition is removed.
-If the definition and the declaration is the same in the beginning, the old
-definition is replaced with a newly created declaration.
+If no separate declaration existed before, the old definition is replaced by a 
+newly created declaration.
 
 All this is done without any wizard and kept speedy to not break the work flow.
 The refactoring is bound to a key.
@@ -134,9 +139,9 @@ inline int function(int param1) {
 
 Toggling again moves the definition from out of the header file to the
 implementation file which should contain the actual functionality. If
-\texttt{function(int param1)} from listing \ref{togglefourth} gets toggled
+\texttt{function(int param1)} from listing \ref{togglefourth} is toggled,
 the definition will end up in the implementation file as shown in listing
-\ref{toggleimpl}
+\ref{toggleimpl}.
 
 \begin{lstlisting}[caption={defintion in a implementation file},
 label={toggleimpl}, language=C++]
@@ -152,18 +157,17 @@ All this moving functionality can be started with one keystroke.
 \section*{Quick Implement Function}
 
 To optain some coding flow and due to the fact that the \textit{Implement
-Method} (Wrongly named with the Java terminology method, and not function) does
+Method} (wrongly named with the Java terminology \textit{method}, and not \textit{function}) does
 not really fit into this fast-toggle working style, this semester theses
 re-implemented the implement function as a \textit{Quick Implement Function}
 
 The Idea behind this is the following: The developer starts writing its class.
-He comes to the point where he would write it's first declaration. He uses a
-keystroke and the declaration is replaced with a definition containing a
-appropriated return statement.
+He comes to the point where he would write its first declaration. He uses a
+keystroke and the declaration is replaced with a definition containing an
+appropriate return statement.
 
 \begin{lstlisting}[caption={Situation before quick implement},
 label={beforeimpl}, language=C++]
-
 class A {
   int function();|//<-cursor position
 };
@@ -171,7 +175,6 @@ class A {
 
 \begin{lstlisting}[caption={Situation after quick implement},
 label={beforeimpl}, language=C++]
-
 class A {
   int function()
   {
