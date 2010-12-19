@@ -135,14 +135,80 @@ listed in this section.
 
 \subsubsection{Namespaces}
 
-If the moved function definition is contained inside a namespace definition, a 
-new namespace definition shall be created. The function is then inserted into 
-the newly created namespace definition.
+If the moved function definition is contained inside a namespace definition,
+the function definition is moved with regard to the namespace. This means,
+toggling from \textit{in-class} to \textit{in-header} the definition is
+inserted before the namespace is closed in the header file.
+
+\begin{lstlisting}[caption={A.cpp},label={twofilesolution_impl},language=C++]
+namespace N { //namespace found
+class A {
+  void function() {
+    return;
+  }
+};
+X //<- new position inside namespace
+}
+\end{lstlisting}
+
+If the function is toggled from \textit{in-header} to the implementation file
+and there is no namespace definition, a new namespace is created.
+
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp,new namespace created},
+label={addnamespace1}, language=C++]
+#include "A.h"
+
+namespace N {
+//namespace created
+}
+
+#endif /* _A_H */
+\end{lstlisting}
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp,insterted func.},
+label={addnamespace2},language=C++]
+#include "A.h"
+
+namespace N {
+int A::x() { 
+  return 0;
+}
+}
+\end{lstlisting}
+\end{minipage}
 
 Contrariwise, namespace definitions that would become empty after removing the 
 last function shall be deleted.
 
-%TODO: Add an example
+\vspace{0.5cm}
+\begin{minipage}{.48\textwidth}
+\lstset{xrightmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp, empty namespace},
+label={delnamespace1}, language=C++]
+#include "A.h"
+
+namespace N {
+//empty namepsace
+}
+
+#endif /* _A_H */
+\end{lstlisting}
+\end{minipage}%
+\begin{minipage}{.48\textwidth}
+\lstset{xleftmargin=0.5cm}
+\begin{lstlisting}[caption={A.cpp, removed empty namepsace},
+label={delnamespace2},language=C++]
+#include "A.h"
+
+//no namespace
+\end{lstlisting}
+\end{minipage}
+
 
 \subsubsection{Templated member functions}
 
@@ -153,7 +219,7 @@ same header file.
 \item Toggle from in-header to in-class
 \end{enumerate}
 
-%TODO: Add an example
+%TODO: Add an example, NO, examples are at the end!
 
 \section{Implement Member Function}
 
@@ -187,7 +253,8 @@ implemented during the project.
 
 \section{Examples}
 
-%TODO: add a section introduction here
+For better understanding some examples will show how the toggle mechanism moves
+the definitions between various places.
 
 \subsubsection{Toggle free function from .cpp to .h}
 Let assume a free function in a header file with no declaration specified is
@@ -382,6 +449,7 @@ position we have seen in listing \ref{01toggleMemberFunction}. An empty
 namespace in a implementation file will be removed.
 
 \subsubsection{Toggle Templated Member Functions}
+\label{templatedmember}
 
 Due to the fact that the export keyword is not implemented by most of the
 compilers templated member functions can only resist inside header files. Thus
