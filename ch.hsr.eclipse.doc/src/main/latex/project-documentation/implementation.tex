@@ -14,16 +14,17 @@ simple, some exotic. The simplest one, toggling from inside a class to the same
 file outside the class, was chosen to be implemented first (See listings 
 \ref{funcdefPre} and \ref{funcdefPost}). 
 
-Before that, a skeleton plugin was built with a NullRefactoring to try whether 
-it was possible to develop a separate plugin instead of directly manipulating 
-the CDT source code. By this approach it was assured that the developed plugin 
-may be deployed easily even without being integrated into CDT.
+Before, a skeleton plugin was built with a NullRefactoring to try whether it was
+possible to develop a separate plugin instead of directly manipulating the CDT
+source code. By this approach it was assured that the developed plugin may be
+deployed easily even without being integrated into CDT.
 
-After the first refactoring was implemented, more cases were added by priority. 
+After the first refactoring was implemented, more cases were added by priority
+and order.
 
 \section{Architecture}
 
-In Eclipse, most of the architecture is already given. Some specialities of the 
+In Eclipse, most of the architecture is already given. Some specialties of the 
 toggle refactoring are presented in this section.
 
 \subsection{Basic call flow}
@@ -36,17 +37,66 @@ The sequence diagram in figure \ref{sd} illustrates the basic call flow when
   \label{sd}
 \end{figure}
 
-\subsection{The strategies}
+\subsection{Architectural decisions}
+
+During the development process some architectural decisions were made to
+structure the code and to separate the logik.
+
+\subsubsection{Strategies}
+
+The way to toggle from one place to another differs a lot depending on
+the current position. Having all logik in the same unit would need a complex
+conditional structure which is on one side confusing and on the other side
+slow.
+
+Therefore a strategy pattern based was introduced. For toggling a simple not
+templated member function there are three strategies needed. 
+
+\begin{itemize}
+\item ToggleFromClassToInHeaderStrategy
+\item ToggleFromInHeaderToImplementationStrategy
+\item ToggleFromImplementationHeaderOrClassStrategy
+\end{itemize}
+
+This having these tree strategies member functions can be
+toggled around in circle.\newline
+
+Having a templated class requires another strategy which toggles from
+\textit{in-header} back to \textit{in-class} as explained in section
+\ref{templatedmember}
+
+\begin{itemize}
+\item ToggleFromInHeaderToClassStrategy
+\end{itemize}
+
+All these strategies implement an interface with a \texttt{run()} method taking
+a \texttt{ModificationCollector} to collecting the changes made to the source
+code.
+
+\begin{lstlisting}[caption={IToggleRefactoringStrategy},
+label={01templatedMember}, language=Java]
+public interface IToggleRefactoringStrategy {
+  public void run(ModificationCollector col);
+}
+\end{lstlisting}
+
+An interface was chose because an abstract class containing all the methods
+needed by the various strategies was too big and unclear. This resulted in the
+Interface and an static helper class, named \texttt{ToggleNodeHelper}.
+
+\subsubsection{ToggleNodeHelper}
+
+\texttt{ToggleNodeHelper} contains a lot of methods which could be reused by
+other projects. in inherits from NodeHelper to make the integration of these
+method as smoothly as possible.
+
+\subsubsection{Strategy Factory}
+
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
 considered, based on the user selection. The following strategies have been
 implemented to cover the specified cases:
 
-\begin{itemize}
-\item ToggleFromClassToInHeaderStrategy
-\item ToggleFromImplementationHeaderOrClassStrategy
-\item ToggleFromInHeaderToClassStrategy
-\item ToggleFromInHeaderToImplementationStrategy
-\end{itemize}
+\subsubsection{Context}
 
 \subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
