@@ -42,6 +42,8 @@ public class ToggleRefactoringContext {
 	private IFile selectionFile;
 	private IIndexBinding binding;
 	private IASTName selectionName;
+	private boolean defaultAnswer;
+	private boolean settedDefaultAnswer;
 
 	public ToggleRefactoringContext(IIndex index, IFile file, TextSelection selection) {
 		this.index = index;
@@ -181,5 +183,21 @@ public class ToggleRefactoringContext {
 
 	private IASTFunctionDefinition findFunctionDefinition(IASTNode node) {
 		return ToggleNodeHelper.getAncestorOfType(node, IASTFunctionDefinition.class);
+	}
+
+	public void setDefaultAnswer(boolean defaultAnswer) {
+		this.defaultAnswer = defaultAnswer;
+	}
+
+	public boolean getDefaultAnswer() {
+		return defaultAnswer;
+	}
+
+	public void setSettedDefaultAnswer(boolean settedDefaultAnswer) {
+		this.settedDefaultAnswer = settedDefaultAnswer;
+	}
+
+	public boolean isSettedDefaultAnswer() {
+		return settedDefaultAnswer;
 	}
 }

@@ -34,6 +34,29 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements IToggleR
 			ToggleRefactoringContext context) {
 		this.context = context;
 		this.infoText = new TextEditGroup("Toggle function body placement");
+	}
+
+	private boolean isFreeFunction(IASTFunctionDefinition definition) {
+		return definition.getDeclarator().getName() instanceof ICPPASTQualifiedName;
+	}
+	
+	@Override
+	public void run(ModificationCollector modifications) {
+		newFileCheck();
+		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
+		removeDefinitionFromImplementation(implast);
+		if (includenode != null) {
+			implast.insertBefore(context.getDefinitionUnit(), 
+					context.getDefinitionUnit().getChildren()[0], includenode, infoText);
+		}
+		if (context.getDeclarationUnit() != null) {
+			addDefinitionToClass(modifications);
+		} else {
+			addDefinitionToHeader(modifications);
+		}
+	}
+
+	private void newFileCheck() {
 		if (context.getDeclarationUnit() == null) {
 			if (isFreeFunction(context.getDefinition())) {
 				throw new NotSupportedException("Not a free function. Cannot decide where to toggle");
@@ -49,25 +72,6 @@ public class ToggleFromImplementationToHeaderOrClassStrategy implements IToggleR
 					throw new NotSupportedException("Cannot create new File");
 				}
 			}
-		}
-	}
-
-	private boolean isFreeFunction(IASTFunctionDefinition definition) {
-		return definition.getDeclarator().getName() instanceof ICPPASTQualifiedName;
-	}
-	
-	@Override
-	public void run(ModificationCollector modifications) {
-		ASTRewrite implast = modifications.rewriterForTranslationUnit(context.getDefinitionUnit());
-		removeDefinitionFromImplementation(implast);
-		if (includenode != null) {
-			implast.insertBefore(context.getDefinitionUnit(), 
-					context.getDefinitionUnit().getChildren()[0], includenode, infoText);
-		}
-		if (context.getDeclarationUnit() != null) {
-			addDefinitionToClass(modifications);
-		} else {
-			addDefinitionToHeader(modifications);
 		}
 	}
 

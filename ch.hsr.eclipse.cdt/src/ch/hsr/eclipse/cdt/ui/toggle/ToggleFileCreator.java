@@ -39,17 +39,18 @@ public class ToggleFileCreator {
 	
 	public IASTTranslationUnit loadTranslationUnit() {
 		String filename;
-		if (context.getDeclaration() != null)
+		if (context.getDeclaration() != null) {
 			filename = context.getDeclaration().getContainingFilename();
-		else
+		} else {
 			filename = context.getDefinition().getContainingFilename();
+		}
 		String other;
-		if (ending.equals(".h"))
+		if (ending.equals(".h")) {
 			other = ".cpp";
-		else
+		} else {
 			other = ".h";
-		filename = filename.replaceAll("\\w*" + other + "$", "");
-		filename = filename + getNewFileName();
+		}
+		filename = filename.replaceAll("\\w*" + other + "$", "") + getNewFileName();
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
 		IASTTranslationUnit result = null;
 		try {
@@ -57,8 +58,9 @@ public class ToggleFileCreator {
 		} catch (CModelException e) {
 		} catch (CoreException e) {
 		}
-		if (result == null)
+		if (result == null) {
 			throw new NotSupportedException("Cannot find translation unit for sibling file");
+		}
 		return result;
 	}
 	
@@ -75,16 +77,20 @@ public class ToggleFileCreator {
 	}
 	
 	public boolean askUserForFileCreation(final ToggleRefactoringContext context) {
+		if (context.isSettedDefaultAnswer()) {
+			return context.getDefaultAnswer();
+		}
 		final Container<Boolean> answer = new Container<Boolean>();
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				Shell shell = UIPlugin.getDefault().getWorkbench().getWorkbenchWindows()[0].getShell();
 				String functionname;
-				if (context.getDeclaration() != null)
+				if (context.getDeclaration() != null) {
 					functionname = context.getDeclaration().getRawSignature();
-				else
+				} else {
 					functionname = context.getDefinition().getDeclarator().getRawSignature();
+				}
 				boolean createnew = MessageDialog.openQuestion(shell, "New Implementation file?", 
 						"Create a new file named: " + getNewFileName() + " and move " + functionname + "?");
 				answer.setObject(createnew);
