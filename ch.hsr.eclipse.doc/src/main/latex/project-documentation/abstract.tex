@@ -17,8 +17,8 @@ quickly. Project setup hints are listed in the appendix.
 
 \chapter*{Management Summary}
 
-In C++ there is the possibility to tell the compiler there exists a function
-with a so called \textit{declaration}. Since
+In C++ there is the possibility to tell the compiler that there exists a
+function with a so called \textit{declaration}. Since
 this does not specify what the function does, a \textit{definition} is needed
 with the functionality.
 
@@ -89,10 +89,11 @@ consuming error correction.
 
 \section*{Toggle Function definition}
 
-Refactorings do solve such problems by automating changes to source code, so
+Refactorings do solve such problems by automating dependent changes to source
+code, so
 less errors are introduced by hand.
 
-The ``One touch toggle refactoring'' moves function definitions in
+The ``One touch toggle refactoring'' moves a function definition in
 \textit{Eclipse} from one position to another and preserves correctness.
 
 This is done by searching for a function definition or declaration next to the
@@ -137,8 +138,8 @@ inline int function(int param1) {
 }
 \end{lstlisting}
 
-Toggling again moves the definition from out of the header file to the
-implementation file which should contain the actual functionality. If
+Toggling again moves the definition out of the header file to the 
+implementation file that should contain the actual functionality. If
 \texttt{function(int param1)} from listing \ref{togglefourth} is toggled,
 the definition will end up in the implementation file as shown in listing
 \ref{toggleimpl}.
@@ -157,12 +158,12 @@ All this moving functionality can be started with one keystroke.
 \section*{Quick Implement Function}
 
 To optain some coding flow and due to the fact that the \textit{Implement
-Method} (wrongly named with the Java terminology \textit{method}, and not \textit{function}) does
-not really fit into this fast-toggle working style, this semester theses
-re-implemented the implement function as a \textit{Quick Implement Function}
+Method} does not really fit into this fast-toggle working style, this semester
+thesis re-implemented the implement function as a \textit{Quick Implement
+Function}
 
-The Idea behind this is the following: The developer starts writing its class.
-He comes to the point where he would write its first declaration. He uses a
+The Idea behind this is the following: The developer starts writing a class.
+He comes to the point where he has written the first declaration. He uses a
 keystroke and the declaration is replaced with a definition containing an
 appropriate return statement.
 
@@ -193,12 +194,12 @@ and toggles the definition with the other keystroke to the header file.
 We would not have been able to achieve this project without the help of others.
 A big thanks goes to all of these people.\newline
 Specially we would like to thank Prof. Peter Sommerlad for the original idea
-of the toggle refactoring, as our supervisor of the project and for various cool
+of the toggle refactoring as our supervisor of the project and for various cool
 ideas in many problems we encountered. Lukas Felber who provided us with
 instant solutions where we struggled to continue. Emanuel Graf for his ideas and
 explanation in every subtopic of the CDT project. Thomas Corbat for help and
 ideas for various subtopics like comment handling. \newline
-Another big thank goes to our families and friends who were neglected during our
-semester thesis.
+Another big thank goes to our families and friends who were missed out a little
+bit during our semester thesis.
 \thispagestyle{empty}
 
