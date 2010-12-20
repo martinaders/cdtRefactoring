@@ -14,34 +14,30 @@ simple, some exotic. The simplest one, toggling from inside a class to the same
 file outside the class, was chosen to be implemented first (See listings 
 \ref{funcdefPre} and \ref{funcdefPost}). 
 
-Before, a skeleton plugin was built with a NullRefactoring to try whether it was
-possible to develop a separate plugin instead of directly manipulating the CDT
-source code. By this approach it was assured that the developed plugin may be
-deployed easily even without being integrated into CDT.
+Before, a skeleton plug-in was built with a \texttt{NullRefactoring} to try
+whether it was possible to develop a separate plug-in instead of directly
+manipulating the CDT source code. By this approach it was assured that the
+developed plug-in may be deployed easily even without being integrated into CDT.
 
-After the first refactoring was implemented, more cases were added by priority
-and order.
+After the first refactoring was implemented, more cases were added by order how
+a member function is toggled circularly.
 
 \section{Architecture}
 
-In Eclipse, most of the architecture is already given. Some specialties of the 
-toggle refactoring are presented in this section.
+In Eclipse, most of the architecture of a plug-in is already given. Some
+specialties of the toggle refactoring implementation are presented in this
+section.
 
-\subsection{Decisions}
-
-During the development process some architectural decisions were made to
-structure the code and to separate logic.
-
-\subsubsection{Strategies}
+\subsection{Strategies}
 
 The way to toggle from one place to another differs a lot depending on
 the current position. Having all logic in the same unit would need a complex
 conditional structure which is on one side confusing and on the other side
 slow.
 
-Consequently, a strategy pattern was introduced. For toggling a simple not
-templated member function, three strategies were used. With the help of 
-these, member functions may be toggled circularly.
+Consequently, a strategy pattern based code structure was introduced. For
+toggling a simple not templated member function, three strategies were used.
+With the help of these, member functions may be toggled circularly.
 
 \begin{itemize}
 \item ToggleFromClassToInHeaderStrategy
@@ -51,7 +47,8 @@ these, member functions may be toggled circularly.
 
 To support templated classes, another strategy is required which toggles from
 \textit{in-header} back to \textit{in-class} as explained in section
-\ref{templatedmember}.
+\ref{templatedmember}. This strategy is specially implemented to support
+templated functions.
 
 \begin{itemize}
 \item ToggleFromInHeaderToClassStrategy
@@ -72,31 +69,32 @@ An interface was chosen because an abstract class containing all the methods
 needed by the various strategies was too big and unclear. This resulted in the
 interface and a static helper class, named \texttt{ToggleNodeHelper}.
 
-\subsubsection{ToggleNodeHelper}
+\subsection{ToggleNodeHelper}
 
 \texttt{ToggleNodeHelper} contains a lot of methods which could be reused by
 other projects. It inherits from NodeHelper to make the integration of these
 methods as smooth as possible.
 
-\subsubsection{Context}
+\subsection{Context}
 
 The \texttt{ToggleRefactoringContext} is used to collect and store information 
-about definition, declaration and their corresponding translation units.
+about definitions, declarations and their corresponding translation units.
 
-The context is passed to other instances e.g. the strategy factory which
-passes it to the strategy by itself since the strategy is the main user of the
-context and retrieves all its information from the context.
+The context is passed then passed to the strategy factory. See \ref{factory}.
+The factory passes the context to the, by itself created strategy since the
+strategy is the main user of the context and retrieves all its information it.
 
 The context was introduced to prevent the code smell \textit{Too Many 
 Parameters}\cite{cwiki}. A common refactoring for this problem is to introduce a 
 parameter object which consolidates all arguments.
 
-The justification that the strategy searches the information by its own is due
+The justification that the context searches the information by its own is due
 to the fact that context would just be a very small data class and yet another
 class would be needed to search and collect the information which builds and
 returns the context.
 
-\subsubsection{Strategy Factory}
+\subsection{Strategy Factory}
+\label{factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
 considered, based on the context given. The strategy makes varous checks
@@ -143,12 +141,13 @@ changes are performed, they (surprisingly) also return the undo changes that are
 needed by the UndoManager. The functionality of the 
 \texttt{ToggleRefactoringRunner} is described in the following section.
 
-\subsubsection{Running the refactoring}\label{runnersec}
+\subsection{Running the refactoring}\label{runnersec}
 The \texttt{ToggleRefactoringRunner} is instantiated and run by the 
 \texttt{Tog- glingActionDelegate}. It is responsible for running the refactoring 
-in a separate job and for allowing only one toggling refactoring being active at 
-a time. To check whether another instance is already running, the job that is 
-run belongs to the family \texttt{FAMILY\_TOGGLE\_DEFINITION}.
+in a separate job and for allowing only one toggling refactoring instance being
+active. The job that is scheduled belongs to the family
+\texttt{FAMILY\_TOGGLE\_DEFINITION}. This is need to check weather there is
+only one instance.
 
 Listing \ref{runner} shows the simplified process without error checking. The 
 changes are collected, executed and registered at the undo manager.
@@ -175,7 +174,7 @@ performance.
 
 \subsection{A real world test environment}
 The COAST~\cite{COAST} source code was used as test environment for real-world 
-tests as it uses a lot of C++ code that can be toggled.
+tests as it uses a lot of C++ code features to test the toggling.
 
 \subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
 recognition for the test environment}
@@ -187,12 +186,13 @@ same. To make writing new tests easier, the comparison method was overridden to
 support fuzzy whitespace recognition.
 
 Leading tabs or whitespaces are recognized and it is assumed that the same
-indention is used for the whole file. In addition, trailing newlines that are
+indention is used for the whole file. In addition, trailing superfluous newlines
+that are
 added by the ASTRewriter are ignored.
 
-The changes made to the CDT test environment help writing new tests without
+The changes made to the CDT test environment helped writing new tests without
 having to care whether the ASTRewriter uses spaces or tabs for indention.
-Resulting code that looks the same now gives a green bar.
+Resulting code that looks the same now gives a positive test result.
 
 \subsection{Testing issues}
 
@@ -203,8 +203,7 @@ specify the test name.
 \subsubsection{Resource '/RegressionTestProject/A.h' does not exist.}
 
 The following issue was not resolved to its cause and is still active when the 
-tests are being run. However, tests still pass without failure. During the test 
-run, the following exception is shown on the Eclipse console:
+tests are being run.
 
 \begin{lstlisting}[caption={Randomly appearing error message},language=java]
 !ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
@@ -215,22 +214,12 @@ org.eclipse.core.internal.resources.\
 ResourceException: Resource '/RegressionTest\
 Project/A.h' does not exist.
   at...ces.Resource.checkExists(Resource.java:326)
-  at...Resource.checkAccessible(Resource.java:200)
-  at...l.resources.File.getContents(File.java:291)
-  at...aceFileContent(InternalParserUtil.java:145)
-  at...ser.FileContent.create(FileContent.java:83)
-  at...ser.FileContent.create(FileContent.java:67)
-  at...Reader(ProjectIndexerInputAdapter.java:288)
-  at...ask.parseFile(AbstractIndexerTask.java:755)
-  at....parseLinkage(AbstractIndexerTask.java:688)
-  at...rTask.runTask(AbstractIndexerTask.java:343)
-  at...OMIndexerTask.run(PDOMIndexerTask.java:127)
-  at...PDOMIndexerJob.run(PDOMIndexerJob.java:137)
-  at...re.internal.jobs.Worker.run(Worker.java:54)
-!SUBENTRY 1 org.eclipse.core.resources 4 368 ...
-!MESSAGE Resource '/RegressionTestProject/A.h' \
-does not exist.
+  [...]
 \end{lstlisting}
+
+Tests still pass without failure. During the semester thesis there was no deeper
+investigation done to this problem because it seemed this is no root of a
+problem. However it should be mentioned here.
 
 \subsubsection{Testing for exceptions}
 
