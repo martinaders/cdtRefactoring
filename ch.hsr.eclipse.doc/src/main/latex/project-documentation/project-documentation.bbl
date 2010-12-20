@@ -44,7 +44,15 @@ Peter Sommerlad, Guido Zgraggen, Thomas Corbat, and Lukas Felber.
   Object-oriented programming systems languages and applications}, OOPSLA
   Companion '08, pages 653--662, New York, NY, USA, 2008. ACM.
 
-\bibitem[va10]{cwiki}
+\bibitem[va10a]{assist}
+various authors.
+\newblock Content assist.
+\newblock
+  \url{http://help.eclipse.org/help32/topic/org.eclipse.platform.doc.isv/guide%
+/editors\_contentassist.htm}, December 2010.
+\newblock [Online; accessed 20-December-2010].
+
+\bibitem[va10b]{cwiki}
 various authors.
 \newblock Too many parameters.
 \newblock http://c2.com/cgi/wiki?TooManyParameters, December 2010.

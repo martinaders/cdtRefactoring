@@ -5,6 +5,10 @@
 %\item \textbf{}
 \item \textbf{AST}: Abstract Syntax Tree
 \item \textbf{CDT}: C/C++ Development Tooling for Eclipse
+\item \textbf{Content Assist}: Content assist allows you to provide context 
+sensitive content completion upon user request. Popup windows are used to 
+propose possible text choices to complete a phrase. The user can select these 
+choices for insertion in the text. \cite{assist}
 \item \textbf{Declaration}: ``A declaration introduces names into a translation 
 unit or redeclares names introduced by previous declarations. A declaration 
 specifies the interpretation and attributes of these names.''\cite{IsoCpp}
@@ -18,6 +22,10 @@ declaration, a using-declaration, or a using-directive.''\cite{IsoCpp}
 programming languages.
 \item \textbf{Free function}: Whenever free functions are mentioned throughout this document, function definitions are meant that reside in an arbitrary namespace but are not a member of any structure.
 \item \textbf{Header file}: A file with the file extensions .h, .hpp or .hxx
+\item \textbf{Problem statement}: If a source code range has syntactical errors, 
+the CDT parser wraps it into an \texttt{IASTProblem} which can be handled as if 
+it were a normal \texttt{IASTNode}. A problem statement is one possible kind of 
+an \texttt{IASTProblem}.
 \item \textbf{.rts file}: Before/after tests for refactorings may be written 
 inside a file with the extension ".rts" using a special syntax. CDT offers a 
 mechanism to automatically read those files, run the refactoring and compare the 
