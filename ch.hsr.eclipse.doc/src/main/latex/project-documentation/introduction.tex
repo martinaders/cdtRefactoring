@@ -15,17 +15,17 @@ Bachelor students at HSR may visit a C++ programming class where
 Eclipse is used to solve exercises. For the authors of this document, it was 
 clear after a while that
 touching the refactoring buttons was a dangerous action because in some cases
-descibed above they broke your code. Compile errors all over the place and
+described above they broke your code. Compile errors all over the place and
 difficult exercise assignments didn't make our life easier.
 
 One annoying problem in C++ is the separation of the source and the header
 files. This is a pain point for every programmer. Forgetting to update the
-function signature in one of the files will result in compilation error which
-causes either lack of understanding for beginners or loss of time.
+function signature in one of the files will result in compilation error causing
+either lack of understanding for beginners or loss of time.
 
 After two minutes of compile error hunting because of a function signature that 
-was out of sync in the header and the implementation file, it may be asked: Why 
-nobody has yet implemented a solution to prevent such an error?
+was out of sync in the header and the implementation file, it may be asked: Why
+has nobody yet implemented a solution to prevent such an error?
 
 Refactorings in CDT have a big field of interesting and unsolved problems. With 
 the support of the Institute of Software IFS at HSR Rapperswil, these problems 
@@ -75,7 +75,8 @@ inline void ClearClass::bigfunction {
 \end{lstlisting}
 
 The example shows that moving the function body does not only involve copying 
-code but also adds a scope operator \texttt{::} to the new definition. In addition, the 
+code but also adding a scope operator \textbf{::} to the new definition. In
+addition, the 
 former definition had to be replaced by a plain declaration. There are several 
 such changes required depending on the scope and properties (static, virtual, 
 etc.) of the function. Toggling multiple times should bring the code back to the 
@@ -128,12 +129,12 @@ plug-in.
 with Emanuel Graf as he is a CDT commiter.
  \item At the end the project will be handed to the supervisor with two CD's and
 two paper versions of the documentation. An update site is created where the
-functionality can be added to Eclipse. A website describes in short the
+functionality can be added to Eclipse. A website describes in short words the
 functionality and the project vision.
 \end{itemize}
 
 \subsection{Advanced objectives}
-All basic goals have been achieved. Additionally:
+All basic goals will be achieved. Additionally:
 \begin{itemize}
  \item Toggling function is fast. Less than a second.
 \end{itemize}
