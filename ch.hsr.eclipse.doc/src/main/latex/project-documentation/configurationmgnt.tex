@@ -48,7 +48,6 @@ ruby module made it quite stable.
 
 \section{Test environment}
 
-% eclipse-headless vs no-X-used?
 To execute the tests on a headless server with Hudson build server first a fake
 X Server was needed. Xvfb was used for the job. Maven has to be
 explicitly told which test class to execute and in which folder the test class
@@ -56,13 +55,14 @@ is located. If this is not done properly the tests will fail.
 
 \subsection{Test coverage}
 
-The test coverage tool Eclemma\footnote{www.eclemma.org} was a good help to find dead code and to think 
-about justification of code blocks. 
+Creating new files was not tested in the beginning due to the dialog box popping 
+up during execution. However, with the help of the same technique that was used 
+to test for errors, the problem could be solved. Before a dialog box is popped 
+up asking whether to create a new file, it is checked whether the test framework 
+has set a flag to skip that question.
 
-Creating new files was not tested due to the dialog box popping up during 
-execution. If a refactoring has to be done with more user interaction, it
-should be investigated how this may be tested. 
-%TODO: Sommerlad had an idea but I wasn't able to dechypher the note...
+The test coverage tool Eclemma\footnote{www.eclemma.org} was a good help to find 
+dead code and to think about justification of code blocks. 
 
 \subsection{Documentation}
 
