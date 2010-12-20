@@ -30,7 +30,7 @@ toggle refactoring are presented in this section.
 \subsection{Decisions}
 
 During the development process some architectural decisions were made to
-structure the code and to separate the logic.
+structure the code and to separate logic.
 
 \subsubsection{Strategies}
 
@@ -39,17 +39,15 @@ the current position. Having all logic in the same unit would need a complex
 conditional structure which is on one side confusing and on the other side
 slow.
 
-Therefore a strategy pattern based was introduced. For toggling a simple not
-templated member function there are three strategies needed. 
+Consequently, a strategy pattern was introduced. For toggling a simple not
+templated member function, three strategies were used. With the help of 
+these, member functions may be toggled circularly.
 
 \begin{itemize}
 \item ToggleFromClassToInHeaderStrategy
 \item ToggleFromInHeaderToImplementationStrategy
 \item ToggleFromImplementationHeaderOrClassStrategy
 \end{itemize}
-
-With the help of these three strategies, member functions may be toggled 
-circularly.
 
 To support templated classes, another strategy is required which toggles from
 \textit{in-header} back to \textit{in-class} as explained in section
@@ -77,22 +75,21 @@ interface and a static helper class, named \texttt{ToggleNodeHelper}.
 \subsubsection{ToggleNodeHelper}
 
 \texttt{ToggleNodeHelper} contains a lot of methods which could be reused by
-other projects. in inherits from NodeHelper to make the integration of these
-method as smoothly as possible.
+other projects. It inherits from NodeHelper to make the integration of these
+methods as smooth as possible.
 
 \subsubsection{Context}
 
-The \texttt{ToggleRefactoringContext} is used first to collect information
-about definition, declaration and their translation units. Further it stores
-this information.
+The \texttt{ToggleRefactoringContext} is used to collect and store information 
+about definition, declaration and their corresponding translation units.
 
-The context is then passed to other instances e.g. the strategy factory which
+The context is passed to other instances e.g. the strategy factory which
 passes it to the strategy by itself since the strategy is the main user of the
 context and retrieves all its information from the context.
 
-The context was introduced to prevent the code smell of a long parameter list. A
-common refactoring for this problem is to introduce a parameter object which 
-consolidates all arguments.
+The context was introduced to prevent the code smell \textit{Too Many 
+Parameters}\cite{cwiki}. A common refactoring for this problem is to introduce a 
+parameter object which consolidates all arguments.
 
 The justification that the strategy searches the information by its own is due
 to the fact that context would just be a very small data class and yet another
@@ -123,9 +120,6 @@ public IToggleRefactoringStrategy getStategy() {
 }
 \end{lstlisting}
 
-%TODO: Martin, can you add some words about the things you did, runner,
-% delegate, and so on...
-
 \subsection{Basic call flow}
 The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
 \textit{Toggle Function} is invoked.
@@ -146,10 +140,33 @@ separate job had to be scheduled by the ActionDelegate.
 
 In addition, the undo functionality had to be implemented separately. When the 
 changes are performed, they (surprisingly) also return the undo changes that are 
-needed by the UndoManager. The UndoManager is available through 
-\texttt{RefactoringCore.getUndoMa-} \newline
-\texttt{nager()}. See \texttt{ToggleRefactoringRunner} 
-for more details on the implementation.
+needed by the UndoManager. The functionality of the 
+\texttt{ToggleRefactoringRunner} is described in the following section.
+
+\subsubsection{Running the refactoring}\label{runnersec}
+The \texttt{ToggleRefactoringRunner} is instantiated and run by the 
+\texttt{Tog- glingActionDelegate}. It is responsible for running the refactoring 
+in a separate job and for allowing only one toggling refactoring being active at 
+a time. To check whether another instance is already running, the job that is 
+run belongs to the family \texttt{FAMILY\_TOGGLE\_DEFINITION}.
+
+Listing \ref{runner} shows the simplified process without error checking. The 
+changes are collected, executed and registered at the undo manager.
+
+\begin{lstlisting}[caption={running the refactoring},label={runner},language=java]
+status = refactoring.checkAllConditions(monitor);
+change = refactoring.createChange(monitor);
+change.initializeValidationData(monitor);
+
+IUndoManager undoManager = 
+    RefactoringCore.getUndoManager();
+undoManager.aboutToPerformChange(change);
+undoChange = change.perform(monitor);
+
+undoChange.initializeValidationData(monitor);
+undoManager.changePerformed(change, success);
+undoManager.addUndo("toggling", undoChange);
+\end{lstlisting}
 
 \section{Testing and performance environment}
 

@@ -12,10 +12,10 @@ A.~Simeon A.~Verhein.
 \bibitem[BG06]{GB06}
 Leo Büttiker and Emanuel Graf.
 \newblock C++ refactoring support für eclipse-cdt.
-\newblock Website, 2006.
-\newblock Available online at
+\newblock
   \url{http://ifsoftware.ch/uploads/tx_icscrm/i_da_2006_refactoring_support_fu%
-er_eclipse_cdt_leo_buettiker_emanuel_graf.pdf}; visited on December 13th 2010.
+er_eclipse_cdt_leo_buettiker_emanuel_graf.pdf}, 2006.
+\newblock [Online; accessed 13-December-2010].
 
 \bibitem[Fre10]{GCC}
 Free Software Foundation.
@@ -43,5 +43,11 @@ Peter Sommerlad, Guido Zgraggen, Thomas Corbat, and Lukas Felber.
 \newblock In {\em Companion to the 23rd ACM SIGPLAN conference on
   Object-oriented programming systems languages and applications}, OOPSLA
   Companion '08, pages 653--662, New York, NY, USA, 2008. ACM.
+
+\bibitem[va10]{cwiki}
+various authors.
+\newblock Too many parameters.
+\newblock http://c2.com/cgi/wiki?TooManyParameters, December 2010.
+\newblock [Online; accessed 19-December-2010].
 
 \end{thebibliography}
