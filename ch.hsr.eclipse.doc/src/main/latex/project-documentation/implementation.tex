@@ -30,6 +30,26 @@ In Eclipse, most of the architecture of a plug-in is already given. Some
 specialties of the toggle refactoring implementation are presented in this
 section.
 
+\subsection{Class Diagram}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/class_diagram.png}
+  \caption{class diagram of Toggle Function Definition}
+  \label{classdiagram}
+\end{figure}
+
+\subsection{Basic Call Flow}
+
+The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
+\textit{Toggle Function} is invoked.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/sequence_diagram.png}
+  \caption{Basic call flow when toggling a function definition}
+  \label{sd}
+\end{figure}
+
 \subsection{Strategies}
 
 The way to toggle from one place to another differs a lot depending on
@@ -82,13 +102,14 @@ methods as smooth as possible.
 The \texttt{ToggleRefactoringContext} is used to collect and store information 
 about definitions, declarations and their corresponding translation units.
 
-The context is passed then passed to the strategy factory. See \ref{factory}.
-The factory passes the context to the, by itself created strategy since the
-strategy is the main user of the context and retrieves all its information it.
+The context is passed then passed to the strategy factory. See section
+\ref{factory}. Then the factory creates the strategy and passes the context to
+this specific strategy. The strategy retrieves all the needed information about
+the current situation from the context.
 
-The context was introduced to prevent the code smell \textit{Too Many 
-Parameters}\cite{cwiki}. A common refactoring for this problem is to introduce a 
-parameter object which consolidates all arguments.
+The context was introduced to prevent the code smell \textit{long parameter
+List} \cite{Refactoring}. A common refactoring for this problem is to
+introduce a parameter object which consolidates all arguments.
 
 The justification that the context searches the information by its own is due
 to the fact that context would just be a very small data class and yet another
@@ -99,7 +120,7 @@ returns the context.
 \label{factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the context given. The strategy makes varous checks
+considered, based on the context given. The strategy makes various checks
 and decides which strategy will be returned.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
@@ -124,16 +145,6 @@ public IToggleRefactoringStrategy getStategy() {
 
 %TODO: add something here
 
-\subsection{Basic call flow}
-The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
-\textit{Toggle Function} is invoked.
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{seqdiagram/SequenceDiagram.png}
-  \caption{Basic call flow when toggling a function definition}
-  \label{sd}
-\end{figure}
-
 \subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
 executed several times in succession. When using a wizard, the 
@@ -142,9 +153,9 @@ inside a separate job. Since the toggle refactoring does not use the wizard, a
 separate job had to be scheduled by the ActionDelegate.
 
 In addition, the undo functionality had to be implemented separately. When the 
-changes are performed, they (surprisingly) also return the undo changes that are 
-needed by the UndoManager. The functionality of the 
-\texttt{ToggleRefactoringRunner} is described in the following section.
+changes are performed, they also return the undo changes that are needed by the
+UndoManager. The functionality of the \texttt{ToggleRefactoringRunner} is
+described in the following section.
 
 \subsection{Running the refactoring}\label{runnersec}
 The \texttt{ToggleRefactoringRunner} is instantiated and run by the 
@@ -174,25 +185,27 @@ undoManager.addUndo("toggling", undoChange);
 
 \section{Testing and Performance Environment}
 
-This section introduces strategies to simplify testing and monitoring of 
+This section introduces some approaches to simplify testing and monitoring of 
 performance.
 
 \subsection{Normal Testing}
 
-The toggle refactiong plug-in was covered with tests with over 80\%. Mainly the
+The test coverage for the toggle refactoring reached over 80\%. Mainly the
 refactoring tests from CDT were used for default testing. The test files were
-divided into the various C++ features for some simple default cases or need
-special handling. These files have the inner structure in which the toggle order
-was created. Namely from \textit{in-class} to \textit{in-header} to
-\textit{in-implementation}.
+divided into the various C++ features. They may require special handling or they
+must be supported because they are simple default cases. These files have the
+inner structure in which the toggle order was implemented. Namely from
+\textit{in-class} to \textit{in-header}, from \textit{in-header} to
+\textit{in-implementation} and from \textit{in-implementation} to
+\textit{in-class}.
 
-After a problem was found, an issue was created and a test case was introduced
-to the file of the specific C++ feature where the problem occurred. 
+After a problem was found, an issue was created in the wiki bug tracker and a
+test case was introduced to the file of the specific C++ feature where the
+problem occurred.
 
 \subsection{Testing for exceptions}
-
-Error testing is not actually an issue but the mechanism to test for exceptions 
-is not obvious, so an example will be shown at this point. 
+The mechanism to test for exceptions is not quite obvious, so an example will be
+shown at this point. 
 
 The .rts test file may include the following syntax:
 
@@ -234,10 +247,10 @@ of the plug-in is asked through the \texttt{ToggleFileCreator} if he wants to
 create a new file and move the function there.
 
 Long time it was not tested for this case and more than once this functionality
-was hurt and destroyed by simply not testing for it. 
+was hurt and destroyed accidentally 
 
-In the .rts file to test the toggling the \texttt{newfiles} variable has been
-introduced. This variable takes one or more file names separated by a comma.
+In the .rts file, the \texttt{newfiles} variable has been introduced. This
+variable takes one or more file names separated by a comma.
 
 \begin{lstlisting}[caption={Syntax to set variables inside a .rts file},
 language=java]
@@ -251,7 +264,7 @@ Further there is no need to write the initial code state of the file since it
 does not exist. However the final state must be written for comparison like
 any other test.
 
-\begin{lstlisting}[caption={Writing newfile test}]
+\begin{lstlisting}[caption={Writing test for newfile creation }]
 //!FreefunctionFromHeaderToImpl
 //#ch.hsr.ecl[...].ToggleRefactoringTest
 //@.config
@@ -277,8 +290,9 @@ void freefunction()
 \end{lstlisting}
 
 The files listed in the \texttt{newfiles} variable are deleted before the
-actual refactoring in the test is started. Then the new file gets created and
-is compared with the expected source.
+actual refactoring in the test is started. Then the new file gets created by
+the \texttt{ToggleFileCreator} and (which functionality is specifically tested
+here) gets compared with the expected source.
 
 %TODO: add some words about the answer no!
 
@@ -292,7 +306,7 @@ the test class.
 
 \subsection{Real World Test Environment}
 
-The toggle refactoring was tested with some open Source projects found out in
+The toggle refactoring was tested with some open source projects found out in
 the wild.
 
 \subsubsection{COAST}
@@ -312,8 +326,8 @@ plug-in did not work correctly. Functions were moved completely out of the
 namespace and were referenced with the full qualified namespace as shown in
 listing \ref{wrongnamespace1}. This is not very elegant.
 
-\begin{lstlisting}[caption={\texttt{function()} with reference to fully
-qualified namespace}, label={wrongnamespace1}, language=C++]
+\begin{lstlisting}[caption={\texttt{function()} with reference to namespace},
+label={wrongnamespace1}, language=C++]
 #ifndef A_H_
 #define A_H_
 
