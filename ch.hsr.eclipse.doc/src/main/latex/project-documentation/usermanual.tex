@@ -5,7 +5,7 @@ To quickly have a look at what was realized during the semester thesis, just
 install the \textit{Toggle Function Definition} code automation according to 
 this manual.
 
-\section{Installation of the plug-in}
+\section{Installation of the Plug-in}
 
 To try out the plug-in, you will need a running Eclipse Helios (3.6) installation with CDT already installed. Choose "Help", "Install New Software..." and type in the following url into the address bar:
 
@@ -16,7 +16,7 @@ update site is hosted on a virtual server that will be removed at the end of
 summer 2011. However, a copy of the whole virtual server may be found on the 
 attached CD.
 
-\subsection{Activate the menu item}
+\subsection{Activate the Menu Item}
 
 \begin{figure}[h]
 \includegraphics[width=0.4\textwidth]{images/customizeperspective.png}
@@ -32,21 +32,20 @@ current perspective. Right-click on the toolbar and choose
 and check \textbf{all} "C++ coding" boxes. The menu "Toggle Function Definition" 
 should now be visible inside the source menu.
 
-\section{Using the refactoring}
+\section{Using the Refactoring}
 
-The refactoring may be applied as soon as the cursor is placed inside a function 
-that is well defined. Any selection between the first and the last character of 
-the function definition (without comments) is considered valid for toggling. See 
-figure \ref{selection} for an example.
+Toggling is available whenever the cursor is inside a function declaration 
+or definition. Any selection between the first and the last character of 
+the function definition (without comments) is considered valid for toggling. 
+Figure \ref{selection} depicts all valid selection ranges in an example code.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.4\textwidth]{images/selection.png}
 \caption{region for valid selection positions}
 \label{selection}
 \end{figure}
-
-Now toggling the selected function definition is as easy as pressing 
-\texttt{Ctrl+Alt+v}.
+As soon as the cursor is inside the valid range, toggling may be invoked by 
+pressing \texttt{Ctrl+Alt+v}.
 
 \section{Example}
 
