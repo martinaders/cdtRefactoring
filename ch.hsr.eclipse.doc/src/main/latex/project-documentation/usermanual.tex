@@ -50,37 +50,37 @@ Now toggling the selected function definition is as easy as pressing
 
 \section{Example}
 
-The following graphics show an example workflow with the \textit{toggle 
-refactoring}. Figure \ref{exampleA} shows what happens to a regular member 
-function that was previously defined inside its class definition when the toggle 
-refactoring is invoked on it. The implementation of the member function 
-\texttt{move} becomes separated from the class definition.
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{images/differing_signatures.png}
+\caption{redundant declarations that were not both updated}
+\label{differingSignatures}
+\end{figure}
+Imagine the situation in figure \ref{differingSignatures} where a programmer 
+forgot to update a function signature of a function that was defined inside 
+another file.
+After finding and correcting the signatures, the programmer would like to define 
+the function directly inside the header file, removing the redundancy of a 
+separate definition. What would he do?
+
+Perhaps he would jump to the definition, copy its body, remove the definition, 
+jump back to the declaration, remove its semicolon, add curly brackets and paste 
+the copied function body. All in all, seven actions.
+
+\subsection{The Solution}
+This is the point where \textit{Toggle Function Body} makes life easier. Imagine 
+the same situation (with correct signatures though) and the user presses the key 
+combination \texttt{ctrl+shift+V}. Figure \ref{coolResult} shows what happens to 
+the code. The declaration got automatically replaced by the definition.
 
 \begin{figure}[h]
-\includegraphics[width=0.5\textwidth]{images/step1.png}
-\includegraphics[width=0.5\textwidth]{images/step2.png}
-\caption{initial situation and situation after first toggling}
-\label{exampleA}
+\centering
+\includegraphics[width=\textwidth]{images/resulting_function.png}
+\caption{by the touch of a key combination, the function definition is moved}
+\label{coolResult}
 \end{figure}
 
-When no source file exists that includes the header file, the user is asked 
-whether he wishes to move the function to a new source file named 
-\textit{Point.cpp} as shown in figure \ref{exampleB}.
-
-\begin{figure}[h]
-\includegraphics[width=\textwidth]{images/step3a.png}
-\caption{ask to create a new source file if none was found}
-\label{exampleB}
-\end{figure}
-
-The source file now got created. Function definition and declaration are 
-splitted up into two separate files. The function definition may now be toggled 
-back again into the class definition.
-
-\begin{figure}[h]
-\includegraphics[width=0.5\textwidth]{images/step3b.png}
-\includegraphics[width=0.5\textwidth]{images/step3c.png}
-\caption{situation after second toggle: Point.cpp newly created}
-\label{exampleC}
-\end{figure}
+The function is now defined in one place and its signature may be changed 
+without updating the declaration separately. Seven actions have been replaced by 
+just one keystroke. Convinced?
 
