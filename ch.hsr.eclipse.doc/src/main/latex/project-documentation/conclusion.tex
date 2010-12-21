@@ -1,4 +1,4 @@
-\chapter{Conclusions and future work}
+\chapter{Conclusions, Interpretation and Future Work}
 \thispagestyle{fancy}
 
 During the project, a lot of challenges have been discovered which will be 
@@ -39,7 +39,7 @@ semester or bachelor thesis.
 
 \section{Known issues}
 
-\subsection{Constructor / destructor bug}
+\subsection{Constructor / Destructor Bug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
 overridden partially. This bug can also be triggered when a function above a
@@ -55,7 +55,7 @@ also prevent this bug.
 \textbf{Solution}: Not yet solved.
 
 \label{newlines}
-\subsection{Unneccessary newlines}
+\subsection{Unneccessary Newlines}
 \textbf{Problem}: When toggling multiple times, a lot of newlines are generated 
 by the rewriter. 
 
@@ -96,7 +96,7 @@ implemented, it was a problem too that the generated text edits were changing
 their array positions, which made changes even more difficult. The resulting 
 code was unstable and this solution is not recommended. 
 
-\subsection{Comment handling}
+\subsection{Comment Handling}
 \textbf{Problem}: A lot of freestanding comments are generated when
 toggling multiple times. These comments become leading if a function gets
 toggled below these freestanding comments.
@@ -108,7 +108,7 @@ comment not caring how many spaces or lines there are between node and comment.
 
 \textbf{Solution}: No solution yet. This could be solved by a new rewriter.
 
-\subsection{Menu integration (partially solved)}
+\subsection{Menu Integration (partially solved)}
 \textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
 developing a separate plug-in.
 
@@ -122,7 +122,7 @@ items easier.
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
 Anyhow, the refactoring may always be invoked using the key binding. 
 
-\subsection{Preprocessor statements}
+\subsection{Preprocessor Statements}
 \label{preprocessor}
 \textbf{Problem}: If a preprocessor statement (e.g. \textit{\#ifdef}) is
 contained inside the parent of a rewritten, removed or inserted node, the
@@ -160,13 +160,15 @@ because this breaks the initial idea of the code flow.
 \textbf{Problem}: The whitespace issue was already discussed. Another issue is
 that the Doxygen \cite{Doxygen} syntax \texttt{//!} may not be used in the test
 files since this syntax is used to specify the test name.
+
 \textbf{Cause}: Refactoring tests need the \texttt{//!} syntax to specify the
 refactoring class which should be called for the selected code.
+
 \textbf{Solution}: It was not looked for a solution to this problem. A solution
 to this problem could be to change the syntax for controlling the refactoring
 tests to something else.
 
-\subsection{Resource '/RegressionTestProject/A.h' does not exist.}
+\subsection{Resource '/RegressionTestProject/A.h' does not Exist.}
 
 \textbf{Problem}: When running refactoring test cases, a message randomly
 popped up:
@@ -184,10 +186,11 @@ Project/A.h' does not exist.
 \end{lstlisting}
 
 \textbf{Cause}: Unknown (no deeper investigation)
+
 \textbf{Solution}: Tests still pass without failure. It seemed this is no root
 of a problem. However it should be mentioned here.
 
-\section{Solved issues}
+\section{Solved Issues}
 
 This section describes special cases that have been omitted intentionally or due 
 to lack of time. In addition, found limitations of the CDT are described here.
@@ -207,7 +210,7 @@ omitted. Additionally separated and isolated translation units were created and
 indexed with options to prevent reindexing of already indexed files.
 %TODO: add some code here how to do this
 
-\subsection{Accessing standalone header files}
+\subsection{Accessing Standalone Header Files}
 \textbf{Problem}: Header files that are not included in any source file by 
 default were not found by the indexer. Thus, it was not possible to analyze the 
 source code of the affected header file.
@@ -220,13 +223,15 @@ indexed.
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
 true.
 
-\subsection{Indexing all projects}
+\subsection{Indexing all Projects}
 
 \textbf{Problem}: Having multiple projects with the same file containing the
 same functions causes the plug-in to crash. 
+
 \textbf{Cause}: In the index provided by the \texttt{CRefactoring} class
 returns an index containing all the indexes over all the open projects. This
 option makes only sense for refactorings like an ``organize include statements''
+
 \textbf{Solution}: Providing our own project local index and omit functionality
 from CRefactoring class.
 
@@ -263,7 +268,7 @@ superfluous newlines that are added by the ASTRewriter are ignored and also
 trailing whitespaces at the end of a line. After that the edited code goes to
 the \texttt{assert()} for comparison.
 
-\subsection{Comments and macros}
+\subsection{Comments and Macros}
 \textbf{Problem}: Nodes inside a translation unit have to be copied to be 
 changed since they are frozen. When nodes are copied, their surrounding comments 
 get lost during rewrite\cite{Sommerlad:2008:RCR:1449814.1449817}. This was
@@ -319,7 +324,7 @@ whenever a node is being copied. Since \textit{copy} is abstract in
 require a change inside every node class.
 \end{itemize}
 
-\subsection{Toggling function-local functions}
+\subsection{Toggling Function-Local Functions}
 \textbf{Problem}: When using function-local functions, the refactoring may 
 produce code that won't compile.
 
@@ -331,7 +336,7 @@ that valid code will be generated.
 
 \textbf{Solution}: Toggling is disabled for such nested function definitions.
 
-\section{Further work}
+\section{Further Work}
 
 The toggle refactoring was developed as a separate plug-in so integration into 
 the CDT project should be possible if desired.
@@ -357,3 +362,160 @@ Better user feedback in case of errors could be provided.
 At the end there was no time left to do the \textit{Override virtual member
 function} refactoring. This is still left as a semester thesis.
 
+\section{Interpretation}
+\thispagestyle{fancy}
+
+After implementation, a personal look back was made on what the resulting
+refactoring is capable of and what may still need some improvement.
+
+\subsection{Features and Limitations}
+
+Toggling functions is available inside any class or namespace hierarchy and may 
+be invoked when the selection is anywhere inside a function declaration or
+body. 
+Basic templated functions are supported as well. However, there may be 
+template special cases that were not thought of.
+
+On the other side, the code generator removes preprocessor statements that stay 
+inside a node that has to be rewritten. Removing comments of removed nodes was 
+not achieved without changing the rewriter.
+
+\subsection{Performance Results}
+
+It is difficult to compare the speed with other refactorings of CDT since
+wizards are used for the other known refactorings. However, the goal was reached
+that the refactoring is executing almost instantly.
+
+It was planned to measure the speed of the JUnit tests. However, the displayed 
+time does not represent the actual speed of the refactoring. This may be due to 
+the fact that/ tests are not being invoked exactly the same way as the actual 
+refactoring./ The manually invoked refactoring is run with the help of
+\texttt{ToggleRefactoringRun- ner}.
+
+The results from the \textit{org.eclipse.test.performance} speed tests were not 
+used either. Since in reality the refactorings are much slower than the 
+(repeated) measurements, resulting values may only be compared relative to each 
+other.
+
+In the end, the only way to judge whether the refactorings became quicker is to 
+check out an older version and to try it out manually. Included libraries like
+iostream slowed down the refactoring noticeably before speed was improved.
+
+\subsection{Personal Review}
+
+Some words from the authors about the developed plug-in, project management, of 
+what was fun and what not.
+
+\subsubsection{Martin Schwab}
+
+What I like about the developed refactoring is that it was possible to
+implement 
+it without a wizard. However, the user needs full trust in the code generation 
+that it won't break code and this is currently not given when preprocessor 
+statements are used. Nevertheless I'm glad the developed plug-in is able to
+write 
+complex template definitions that I couldn't write myself without the C++ 
+specification by my side. This could save a lot of time and hassle for 
+programmers.
+
+What next? If the plug-in is integrated into CDT, I'd be interested in the 
+Eclipse Usage Data Collector
+\footnote{\url{http://www.eclipse.org/org/usagedata/results.php}} to check 
+whether users find out when and how they can profit from the refactoring and 
+whether they use it repeatedly. If the refactoring is considered helpful by 
+users and applied as it is designed to use, this should be reflected in a high 
+execution count compared to the user count.
+
+\subsubsection{Thomas Kallenberg}
+
+Personally I like the C++ programming language. Despite the complexity it can
+be an alternative to Java or other OOP languages. Specially if there is a focus
+on performance or other subjects where templates do fit nicely in the concept
+of the project.
+The one touch toggle refactoring is another step towards a better knowledge of
+C++.
+
+What I liked about the project was the clear and productive communication with
+the supervisor. The Environment to develop a CDT Refactoring provided enough
+functionality to develop a good refactoring in the given time scope but let us
+enough freedom to realize innovative ideas.
+
+The goal was to develop a plug-in that is used by the world an not thrown away.
+Even if we could not solve all issues, specially with comments and macros, I
+think we achieved the main task and realized our supervisors and customers 
+idea of a toggle definition.
+
+\subsubsection{What we would do the same way}
+
+Using Git\footnote{\url{http://www.kernel.org/pub/software/scm/git/}} for
+version 
+control was very useful. The provided development server was occasionally down 
+during the first weeks and it was possible to continue work locally. Being able 
+to work locally was also helpful to work on the train. 
+
+Working next to each other in the same study room was helpful to get quick 
+answers for questions, reduce slow written communication and playing a round of 
+table foot when concentration was used up.
+
+For each meeting, the planned tasks were collected inside the agenda, then 
+rubber-stamped by the supervisor and transformed into issues for the following 
+week. This way, a minimal administrative overhead was produced.
+
+\subsubsection{What we would not do the same way}
+
+\subsubsection*{Time management}
+During most of the project, time was tracked for every issue. 
+However, the collected data was not actively used to measure team velocity and 
+estimate further issues. This valuable data could have been used for better 
+scope prediction.
+
+\subsubsection*{Commits not Connected with Issues}
+
+During the project we ``forgot'' sometimes to trak our time. Sometimes it was
+really simply forgotten and sometimes it was delayed (and then forgotten) to
+speed up implementation of the functionality. This is clearly not a good thing
+since the danger is high to forget about the tracked time as it happend to us
+many times.
+
+As an improvements in the bachelor thesis we thought about connecting every
+commit to the version control with an issue. It could even be checked with a
+server side script during commiting. If the commit message does not contain a
+valid issue number the commit is rejected. This forces the developer to connect
+his commit to an issue.
+
+\subsubsection*{Wiki and Documentation differences}
+
+The special cases that were listed on the project wiki were useful to 
+communicate but it may have saved time if they were directly integrated into 
+the documentation.
+
+\subsubsection*{Writing Documentation at the End}
+
+We knew about the fact that writing documentation at the end is a hard thing
+due to time shortage. We created the documentation structure early and started
+to write some text to it. But somewhere in the middle of the project we did not
+kept in mind to continue this. This led to the fact that the documentation 
+
+Chapters like specification should be written early. The wiki is not read but
+the documentation is read and if written early mistakes do not life long as long
+as the documentation is read several times.
+
+\subsubsection*{Redmine fine tuning}
+
+The default Redmine \textit{trackers} and \textit{categories} that were used 
+were not sufficient to track time in a way that shiny charts could be produced 
+for categories like ''implementation'', ''documentation'' and ''administration. 
+
+\subsubsection*{Multiple git branches}
+
+While using one master git branch for every developer, a second git branch 
+called development was introduced. During half a week new work was committed to
+the
+development branch and then both trees were merged. The idea behind this was to
+always have a stable master branch. This allowed to carelessly mess around
+inside the development branch which resulted in nobody daring
+to pull from the others branch. Inside the master branch everything was already
+merged and
+the development branch was in an ``always unstable'' condition.
+If something unstable is introduced to the repository one should explicitly use
+a separate branch and include this in the master as soon as possible.
