@@ -20,7 +20,9 @@ manipulating the CDT source code. By this approach it was assured that the
 developed plug-in may be deployed easily even without being integrated into CDT.
 
 After the first refactoring was implemented, more cases were added by order how
-a member function is toggled circularly.
+a member function is toggled circularly. Mostly it was worked with a test
+driven development approach. First write a test and then implement the
+functionality to get a positive test restult.
 
 \section{Architecture}
 
@@ -177,7 +179,15 @@ performance.
 
 \subsection{Normal Testing}
 
-%TODO: add some tests
+The toggle refactiong plug-in was covered with tests with over 80\%. Mainly the
+refactoring tests from CDT were used for default testing. The test files were
+divided into the various C++ features for some simple default cases or need
+special handling. These files have the inner structure in which the toggle order
+was created. Namely from \textit{in-class} to \textit{in-header} to
+\textit{in-implementation}.
+
+After a problem was found, an issue was created and a test case was introduced
+to the file of the specific C++ feature where the problem occurred. 
 
 \subsection{Testing for exceptions}
 
@@ -214,11 +224,71 @@ if (fatalError)
 \end{lstlisting}
 
 All in all, the special refactoring test environment developed by \cite{GB06} 
-was a big help for refactoring relaxedly.
+was a big help for relaxed refactoring.
 
-\subsection{Testing User Inputs}
+\subsection{Testing New File Creation}
 
-%TODO: add something here.
+In case a member function is toggled from \textit{in-header} to
+\textit{in-implementation} and the implementation file does not exist, the user
+of the plug-in is asked through the \texttt{ToggleFileCreator} if he wants to
+create a new file and move the function there.
+
+Long time it was not tested for this case and more than once this functionality
+was hurt and destroyed by simply not testing for it. 
+
+In the .rts file to test the toggling the \texttt{newfiles} variable has been
+introduced. This variable takes one or more file names separated by a comma.
+
+\begin{lstlisting}[caption={Syntax to set variables inside a .rts file},
+language=java]
+//@.config
+filename=A.h
+newfiles=A.cpp, B.h, C.h
+//@A.h
+\end{lstlisting}
+
+Further there is no need to write the initial code state of the file since it
+does not exist. However the final state must be written for comparison like
+any other test.
+
+\begin{lstlisting}[caption={Writing newfile test}]
+//!FreefunctionFromHeaderToImpl
+//#ch.hsr.ecl[...].ToggleRefactoringTest
+//@.config
+filename=A.h
+newfiles=A.cpp
+//@A.h
+void /*$*/freefunction/*$$*/() {
+    return;
+}
+//=
+void freefunction();
+
+//@A.cpp
+//=
+
+
+#include "A.h"
+
+void freefunction()
+{
+    return;
+}
+\end{lstlisting}
+
+The files listed in the \texttt{newfiles} variable are deleted before the
+actual refactoring in the test is started. Then the new file gets created and
+is compared with the expected source.
+
+%TODO: add some words about the answer no!
+
+\subsubsection{User Inputs}
+
+The easiest solution to test user inputs, beeing aware that it is not the
+nicest, is to Mock the Refactoring the return a internal reference to the
+\texttt{ToggleRefactoringContext}. The context however has the ability to set
+predefined answer values to the question of the file creation, which is done in
+the test class.
 
 \subsection{Real World Test Environment}
 
@@ -286,14 +356,14 @@ deleted. Have a look at section \ref{preprocessor} for this problem.
 
 \subsection{Performance tests}
 
-The simplest way to assess the speed of the refactoring is to look at the jUnit 
+The simplest way to assess the speed of the refactoring is to look at the JUnit
 time measurements. The first test that is run takes more time and represents the 
 time needed for first time toggling when the refactoring infrastructure has to 
 be loaded. 
 
-All performance tests must be executed on the same developer machine, taking the 
-average time of three consecutive runs of all tests. Five scenarios have been 
-chosen to be able to observe the performance of the toggle refactoring:
+All performance tests have been executed on the same developer machine, taking
+the average time of three consecutive runs of all tests. Five scenarios have
+been chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
 \item First time toggling: Includes loading of the infrastructure and will take 
