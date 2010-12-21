@@ -62,8 +62,7 @@ public class ToggleRefactoring extends CRefactoring {
 			strategy = new ToggleStrategyFactory(context).getAppropriateStategy();
 		} catch (InterruptedException e) {
 		} catch (NotSupportedException e) {
-			System.err.println("not implemented: " + e.getMessage());
-			initStatus.addFatalError("fatal");
+			initStatus.addFatalError(e.getMessage());
 		} finally {
 			fIndex.releaseReadLock();
 		}
