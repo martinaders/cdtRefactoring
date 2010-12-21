@@ -38,8 +38,10 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 	@Override
 	public void run() {
 		Job[] jobs = Job.getJobManager().find(RefactoringJob.FAMILY_TOGGLE_DEFINITION);
-		if (jobs.length > 0)
+		if (jobs.length > 0) {
 			System.err.println("Another Toggling-Job still in progress, aborting.");
+			return;
+		}
 		new RefactoringJob(refactoring).schedule();
 	}
 }
