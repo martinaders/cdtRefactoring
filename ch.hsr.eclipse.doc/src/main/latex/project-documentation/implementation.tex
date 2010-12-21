@@ -125,7 +125,6 @@ and decides which strategy will be returned.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
 label={strategy}, language=Java]
-
 public IToggleRefactoringStrategy getStategy() {
   if (context.getDefinition() == null) {
     throw new NotSupportedException(...
@@ -157,31 +156,60 @@ changes are performed, they also return the undo changes that are needed by the
 UndoManager. The functionality of the \texttt{ToggleRefactoringRunner} is
 described in the following section.
 
-\subsection{Running the refactoring}\label{runnersec}
-The \texttt{ToggleRefactoringRunner} is instantiated and run by the 
-\texttt{Tog- glingActionDelegate}. It is responsible for running the refactoring 
-in a separate job and for allowing only one toggling refactoring instance being
-active. The job that is scheduled belongs to the family
-\texttt{FAMILY\_TOGGLE\_DEFINITION}. This is needed to check weather there is
-only one instance.
+\subsection{Running the Refactoring}\label{runnersec}
+Present refactorings use a \texttt{RefactoringWizard} together with a 
+\texttt{Wi- zardOpenOperation} to execute a refactoring. Listing \ref{wizardRun} 
+shows CDT's \texttt{HideMethodRefactoringRunner} run method as an example.
 
-Listing \ref{runner} shows the simplified process without error checking. The 
-changes are collected, executed and registered at the undo manager.
-
-\begin{lstlisting}[caption={running the refactoring},label={runner},language=java]
-status = refactoring.checkAllConditions(monitor);
-change = refactoring.createChange(monitor);
-change.initializeValidationData(monitor);
-
-IUndoManager undoManager = 
-    RefactoringCore.getUndoManager();
-undoManager.aboutToPerformChange(change);
-undoChange = change.perform(monitor);
-
-undoChange.initializeValidationData(monitor);
-undoManager.changePerformed(change, success);
-undoManager.addUndo("toggling", undoChange);
+\begin{lstlisting}[caption={shorted run method of HideMethodRefactoringRunner},label={wizardRun}, language=Java]
+public void run() {
+  CRefactoring refactoring = 
+     new HideMethodRefactoring(...);
+  HideMethodRefactoringWizard wizard = 
+     new HideMethodRefactoringWizard(refactoring);
+  RefactoringWizardOpenOperation operator = 
+     new RefactoringWizardOpenOperation(wizard);
+  operator.run(shellProvider.getShell(), 
+     refactoring.getName());
+}
 \end{lstlisting}
+
+As discussed before, no wizard is used to start \textit{Toggle Function 
+Definition}. Instead, the refactoring is executed directly by the 
+\texttt{ToggleRefactoringRunner}. This means that the latter class needs to take 
+care of what the \texttt{WizardOpenOperation} was responsible before.
+
+The responsibilities of \texttt{ToggleRefactoringRunner} and 
+\texttt{Refacto- ringJob} are explained in the following sections.
+
+\subsubsection{Run Inside a Separate Job}
+\textit{Toggle Function Definition} does not use modal dialogs and therefore 
+could invoked multiple times in parallel. However, this 
+
+Multiple instances of The \texttt{ToggleRefactoringRunner} must not TODO:***CONTINUE***
+
+\subsubsection{Support Undoing Changes}
+TODO:***CONTINUE***
+%The \texttt{ToggleRefactoringRunner} has to take care of registering undo 
+%changes by itself. Listing \ref{runner} shows the simplified process without 
+%error checking. \texttt{createChange} first 
+
+%The changes are collected, executed 
+%and registered at the undo manager.
+
+%\begin{lstlisting}[caption={running the refactoring},label={runner},language=java]
+%change = refactoring.createChange(monitor);
+%change.initializeValidationData(monitor);
+
+%IUndoManager undoManager = 
+%    RefactoringCore.getUndoManager();
+%undoManager.aboutToPerformChange(change);
+%undoChange = change.perform(monitor);
+
+%undoChange.initializeValidationData(monitor);
+%undoManager.changePerformed(change, success);
+%undoManager.addUndo("toggling", undoChange);
+%\end{lstlisting}
 
 \section{Testing and Performance Environment}
 
