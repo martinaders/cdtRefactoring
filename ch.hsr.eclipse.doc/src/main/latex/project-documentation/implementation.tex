@@ -118,6 +118,10 @@ public IToggleRefactoringStrategy getStategy() {
 }
 \end{lstlisting}
 
+\subsection{Stopping with Exception}
+
+%TODO: add something here
+
 \subsection{Basic call flow}
 The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
 \textit{Toggle Function} is invoked.
@@ -146,7 +150,7 @@ The \texttt{ToggleRefactoringRunner} is instantiated and run by the
 \texttt{Tog- glingActionDelegate}. It is responsible for running the refactoring 
 in a separate job and for allowing only one toggling refactoring instance being
 active. The job that is scheduled belongs to the family
-\texttt{FAMILY\_TOGGLE\_DEFINITION}. This is need to check weather there is
+\texttt{FAMILY\_TOGGLE\_DEFINITION}. This is needed to check weather there is
 only one instance.
 
 Listing \ref{runner} shows the simplified process without error checking. The 
@@ -167,61 +171,16 @@ undoManager.changePerformed(change, success);
 undoManager.addUndo("toggling", undoChange);
 \end{lstlisting}
 
-\section{Testing and performance environment}
+\section{Testing and Performance Environment}
 
 This section introduces strategies to simplify testing and monitoring of 
 performance.
 
-\subsection{A real world test environment}
-The COAST~\cite{COAST} source code was used as test environment for real-world 
-tests as it uses a lot of C++ code features to test the toggling.
+\subsection{Normal Testing}
 
-\subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
-recognition for the test environment}
+%TODO: add some tests
 
-As described in past theses at HSR, the refactoring testing environment
-needed an exact definition of the generated code. This was annoying because
-same-looking code samples could result in a red bar if white spaces were not the
-same. To make writing new tests easier, the comparison method was overridden to
-support fuzzy whitespace recognition.
-
-Leading tabs or whitespaces are recognized and it is assumed that the same
-indention is used for the whole file. In addition, trailing superfluous newlines
-that are
-added by the ASTRewriter are ignored.
-
-The changes made to the CDT test environment helped writing new tests without
-having to care whether the ASTRewriter uses spaces or tabs for indention.
-Resulting code that looks the same now gives a positive test result.
-
-\subsection{Testing issues}
-
-The whitespace issue was already discussed. Another issue is that the Doxygen 
-syntax //! may not be used in the test files since this syntax is used to 
-specify the test name.
-
-\subsubsection{Resource '/RegressionTestProject/A.h' does not exist.}
-
-The following issue was not resolved to its cause and is still active when the 
-tests are being run.
-
-\begin{lstlisting}[caption={Randomly appearing error message},language=java]
-!ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
-!MESSAGE Error: Resource '/RegressionTestProject/\
-A.h' does not exist.
-!STACK 1
-org.eclipse.core.internal.resources.\
-ResourceException: Resource '/RegressionTest\
-Project/A.h' does not exist.
-  at...ces.Resource.checkExists(Resource.java:326)
-  [...]
-\end{lstlisting}
-
-Tests still pass without failure. During the semester thesis there was no deeper
-investigation done to this problem because it seemed this is no root of a
-problem. However it should be mentioned here.
-
-\subsubsection{Testing for exceptions}
+\subsection{Testing for exceptions}
 
 Error testing is not actually an issue but the mechanism to test for exceptions 
 is not obvious, so an example will be shown at this point. 
@@ -258,6 +217,74 @@ if (fatalError)
 All in all, the special refactoring test environment developed by \cite{GB06} 
 was a big help for refactoring relaxedly.
 
+\subsection{Testing User Inputs}
+
+%TODO: add something here.
+
+\subsection{Real World Test Environment}
+
+The toggle refactoring was tested with some open Source projects found out in
+the wild.
+
+\subsubsection{COAST}
+The COAST~\cite{COAST} source code was used as test environment for real-world 
+tests as it uses a lot of C++ code features to test the toggling.
+
+Toggling some functions in COAST, we discovered that macros are not toggled
+correctly and are replaced by an \texttt{NullStatement} resulting in a function
+with a lot of semicolons.
+
+\subsubsection{WebKit}
+Testing to toggle functions from Webkit~\cite{Webkit} code showed us two
+problems.
+
+First Webkit uses a lot of namespaces. Until this point the Toggle
+plug-in did not work correctly. Functions were moved completely out of the
+namespace and were referenced with the full qualified namespace as shown in
+listing \ref{wrongnamespace1}. This is not very elegant.
+
+\begin{lstlisting}[caption={\texttt{function()} with reference to fully
+qualified namespace}, label={wrongnamespace1}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N
+class A {
+  void function();
+};
+}
+
+inline void N::A::function() {
+  return;
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+The behavior was changed later to the following.
+
+\begin{lstlisting}[caption={A.h, function definition in namespace},
+label={wrongnamespace2}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  void function();
+};
+
+inline void A::function() {
+  return;
+}
+
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+An other Problem discovered with Webkit was that Preprocessor Statments were
+deleted. Have a look at section \ref{preprocessor} for this problem.
+
 \subsection{Performance tests}
 
 The simplest way to assess the speed of the refactoring is to look at the jUnit 
@@ -282,6 +309,4 @@ infrastructure.
 \end{enumerate}
 
 Another technique to measure time more accurately was checked out. For this, the 
-\textit{org.eclipse.test.performance} plugin was used. 
-
-
+\textit{org.eclipse.test.performance} plugin was used.

@@ -123,6 +123,7 @@ by the user manually. See the manual in \ref{cmdGroup} to solve this issue.
 Anyhow, the refactoring may always be invoked using the key binding. 
 
 \subsection{Preprocessor statements}
+\label{preprocessor}
 \textbf{Problem}: If a preprocessor statement (e.g. \textit{\#ifdef}) is
 contained inside the parent of a rewritten, removed or inserted node, the
 preprocessor statement is deleted. Listing \ref{prepro} shows an example where a
@@ -153,6 +154,38 @@ which supports preprocessor statements.
 There was a small work around for this problem by warning about the presence of
 a preprocessor statement in the affected files. In the end this was dropped
 because this breaks the initial idea of the code flow.
+
+\subsection{Doxygen}
+
+\textbf{Problem}: The whitespace issue was already discussed. Another issue is
+that the Doxygen \cite{Doxygen} syntax \texttt{//!} may not be used in the test
+files since this syntax is used to specify the test name.
+\textbf{Cause}: Refactoring tests need the \texttt{//!} syntax to specify the
+refactoring class which should be called for the selected code.
+\textbf{Solution}: It was not looked for a solution to this problem. A solution
+to this problem could be to change the syntax for controlling the refactoring
+tests to something else.
+
+\subsection{Resource '/RegressionTestProject/A.h' does not exist.}
+
+\textbf{Problem}: When running refactoring test cases, a message randomly
+popped up:
+
+\begin{lstlisting}[caption={Randomly appearing error message},language=java]
+!ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
+!MESSAGE Error: Resource '/RegressionTestProject/\
+A.h' does not exist.
+!STACK 1
+org.eclipse.core.internal.resources.\
+ResourceException: Resource '/RegressionTest\
+Project/A.h' does not exist.
+  at...ces.Resource.checkExists(Resource.java:326)
+  [...]
+\end{lstlisting}
+
+\textbf{Cause}: Unknown (no deeper investigation)
+\textbf{Solution}: Tests still pass without failure. It seemed this is no root
+of a problem. However it should be mentioned here.
 
 \section{Solved issues}
 
@@ -208,6 +241,27 @@ updated with outdated offset information.
 
 \textbf{Solution}: The current selection is now based directly on the current 
 active editor part's selection and fetched every time when toggling is started.
+
+\subsection{Fuzzy Whitespace Recognition Test Environment}
+
+\textbf{Problem}: 
+In past theses at HSR, the refactoring testing environment needed an exact
+definition of the generated code. This was annoying because same-looking code
+samples could result in a red bar if white spaces were not the same. To make
+writing new tests easier, the comparison method was overridden to support fuzzy
+whitespace recognition.
+
+\textbf{Cause}: The \texttt{TesterHelper} in the CDT test environment does
+compare the whole actual and expected code as \texttt{String} with \cite{JUnit}
+\texttt{AssertEquals(String, String)}. This leads to the a failing test as
+soon as a single whitespace is different between the expected and the actual
+code.
+
+\textbf{Solution}: Leading whitespaces are recognized on both. Then the smallest
+common divider is taken as as a tab length and replaced by a tabulator. Trailing
+superfluous newlines that are added by the ASTRewriter are ignored and also
+trailing whitespaces at the end of a line. After that the edited code goes to
+the \texttt{assert()} for comparison.
 
 \subsection{Comments and macros}
 \textbf{Problem}: Nodes inside a translation unit have to be copied to be 
