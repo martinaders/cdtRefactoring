@@ -14,6 +14,7 @@ package ch.hsr.eclipse.cdt.ui.toggle;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.TextSelection;
@@ -39,7 +40,7 @@ public class ToggleRefactoringRunner extends RefactoringRunner {
 	public void run() {
 		Job[] jobs = Job.getJobManager().find(RefactoringJob.FAMILY_TOGGLE_DEFINITION);
 		if (jobs.length > 0) {
-			System.err.println("Another Toggling-Job still in progress, aborting.");
+			CUIPlugin.log("no concurrent toggling allowed", new NotSupportedException(""));
 			return;
 		}
 		new RefactoringJob(refactoring).schedule();
