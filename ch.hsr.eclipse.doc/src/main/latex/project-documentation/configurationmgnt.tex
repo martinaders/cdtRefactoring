@@ -9,7 +9,13 @@ more efficiently.
 
 Configuration management always seems to be the same. This section describes 
 what techniques were used throughout this project and what product versions were 
-needed to realize an agile production environment for Eclipse plug-in development.
+needed to realize an agile production environment for Eclipse plug-in
+development.
+
+\subsection{Project Server}
+
+As a project Server Ubuntu Linux 10.04.1 LTS (Lucid Lynx) on a VmWare Cluster
+was used.
 
 \subsection{Git}
 
@@ -30,9 +36,10 @@ stable during the project.
 
 \subsection{Hudson}
 
-To get the tests executed on the fake X sever, the \texttt{DISPLAY} environment
-variable must be set. If not, tests will fail with a cryptic
-SWTError.
+Hudson is a build server for executing repeated build jobs. It is specialized
+for executing Java projects. To get the tests executed on the fake X sever, the
+\texttt{DISPLAY} environment variable must be set. If not, tests will fail with
+a cryptic SWTError.
 
 There is a plug-in for Hudson to set the environment variable to
 the right value. In most cases this is \textbf{:0}.
@@ -61,8 +68,8 @@ to test for errors, the problem could be solved. Before a dialog box is popped
 up asking whether to create a new file, it is checked whether the test framework 
 has set a flag to skip that question.
 
-The code coverage tool EclEmma\footnote{http://www.eclemma.org} was a good help 
-to find dead code and to think about justification of code blocks. 
+The code coverage tool EclEmma was a good help to find dead code and to think
+about justification of code blocks.
 
 \subsection{Documentation}
 
