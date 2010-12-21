@@ -20,13 +20,35 @@ manipulating the CDT source code. By this approach it was assured that the
 developed plug-in may be deployed easily even without being integrated into CDT.
 
 After the first refactoring was implemented, more cases were added by order how
-a member function is toggled circularly.
+a member function is toggled circularly. Mostly it was worked with a test
+driven development approach. First write a test and then implement the
+functionality to get a positive test restult.
 
 \section{Architecture}
 
 In Eclipse, most of the architecture of a plug-in is already given. Some
 specialties of the toggle refactoring implementation are presented in this
 section.
+
+\subsection{Class Diagram}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/class_diagram.png}
+  \caption{class diagram of Toggle Function Definition}
+  \label{classdiagram}
+\end{figure}
+
+\subsection{Basic Call Flow}
+
+The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
+\textit{Toggle Function} is invoked.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/sequence_diagram.png}
+  \caption{Basic call flow when toggling a function definition}
+  \label{sd}
+\end{figure}
 
 \subsection{Strategies}
 
@@ -80,13 +102,14 @@ methods as smooth as possible.
 The \texttt{ToggleRefactoringContext} is used to collect and store information 
 about definitions, declarations and their corresponding translation units.
 
-The context is passed then passed to the strategy factory. See \ref{factory}.
-The factory passes the context to the, by itself created strategy since the
-strategy is the main user of the context and retrieves all its information it.
+The context is passed then passed to the strategy factory. See section
+\ref{factory}. Then the factory creates the strategy and passes the context to
+this specific strategy. The strategy retrieves all the needed information about
+the current situation from the context.
 
-The context was introduced to prevent the code smell \textit{Too Many 
-Parameters}\cite{cwiki}. A common refactoring for this problem is to introduce a 
-parameter object which consolidates all arguments.
+The context was introduced to prevent the code smell \textit{long parameter
+List} \cite{Refactoring}. A common refactoring for this problem is to
+introduce a parameter object which consolidates all arguments.
 
 The justification that the context searches the information by its own is due
 to the fact that context would just be a very small data class and yet another
@@ -97,7 +120,7 @@ returns the context.
 \label{factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the context given. The strategy makes varous checks
+considered, based on the context given. The strategy makes various checks
 and decides which strategy will be returned.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
@@ -117,23 +140,9 @@ public IToggleRefactoringStrategy getStategy() {
 }
 \end{lstlisting}
 
-\subsection{Class Diagram}
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{images/class_diagram.png}
-  \caption{class diagram of Toggle Function Definition}
-  \label{classdiagram}
-\end{figure}
+\subsection{Stopping with Exception}
 
-\subsection{Basic Call Flow}
-The sequence diagram in figure \ref{sd} illustrates the basic call flow when 
-\textit{Toggle Function} is invoked.
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{images/sequence_diagram.png}
-  \caption{Basic call flow when toggling a function definition}
-  \label{sd}
-\end{figure}
+%TODO: add something here
 
 \subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
@@ -143,9 +152,10 @@ inside a separate job. Since the toggle refactoring does not use the wizard, a
 separate job had to be scheduled by the ActionDelegate.
 
 In addition, the undo functionality had to be implemented separately. When the 
-changes are performed, they (surprisingly) also return the undo changes that are 
-needed by the UndoManager. The functionality of the 
-\texttt{ToggleRefactoringRunner} is described in the following section.
+changes are performed, they also return the undo changes that are needed by the
+UndoManager. The functionality of the \texttt{ToggleRefactoringRunner} is
+described in the following section.
+
 
 \subsection{Running the Refactoring}\label{runnersec}
 Present refactorings use a \texttt{RefactoringWizard} together with a 
@@ -246,64 +256,29 @@ The process of registering the changes at the undo manager is long and may be
 looked up in the \texttt{RefactoringJob} class.
 
 
-\section{Testing and performance environment}
+\section{Testing and Performance Environment}
 
-This section introduces strategies to simplify testing and monitoring of 
+This section introduces some approaches to simplify testing and monitoring of 
 performance.
 
-\subsection{A real world test environment}
-The COAST~\cite{COAST} source code was used as test environment for real-world 
-tests as it uses a lot of C++ code features to test the toggling.
+\subsection{Normal Testing}
 
-\subsection[Fuzzy whitespace recognition for the tests]{Fuzzy whitespace 
-recognition for the test environment}
+The test coverage for the toggle refactoring reached over 80\%. Mainly the
+refactoring tests from CDT were used for default testing. The test files were
+divided into the various C++ features. They may require special handling or they
+must be supported because they are simple default cases. These files have the
+inner structure in which the toggle order was implemented. Namely from
+\textit{in-class} to \textit{in-header}, from \textit{in-header} to
+\textit{in-implementation} and from \textit{in-implementation} to
+\textit{in-class}.
 
-As described in past theses at HSR, the refactoring testing environment
-needed an exact definition of the generated code. This was annoying because
-same-looking code samples could result in a red bar if white spaces were not the
-same. To make writing new tests easier, the comparison method was overridden to
-support fuzzy whitespace recognition.
+After a problem was found, an issue was created in the wiki bug tracker and a
+test case was introduced to the file of the specific C++ feature where the
+problem occurred.
 
-Leading tabs or whitespaces are recognized and it is assumed that the same
-indention is used for the whole file. In addition, trailing superfluous newlines
-that are
-added by the ASTRewriter are ignored.
-
-The changes made to the CDT test environment helped writing new tests without
-having to care whether the ASTRewriter uses spaces or tabs for indention.
-Resulting code that looks the same now gives a positive test result.
-
-\subsection{Testing issues}
-
-The whitespace issue was already discussed. Another issue is that the Doxygen 
-syntax //! may not be used in the test files since this syntax is used to 
-specify the test name.
-
-\subsubsection{Resource '/RegressionTestProject/A.h' does not exist.}
-
-The following issue was not resolved to its cause and is still active when the 
-tests are being run.
-
-\begin{lstlisting}[caption={Randomly appearing error message},language=java]
-!ENTRY org.eclipse.cdt.core 4 0 2010-12-13 ...
-!MESSAGE Error: Resource '/RegressionTestProject/\
-A.h' does not exist.
-!STACK 1
-org.eclipse.core.internal.resources.\
-ResourceException: Resource '/RegressionTest\
-Project/A.h' does not exist.
-  at...ces.Resource.checkExists(Resource.java:326)
-  [...]
-\end{lstlisting}
-
-Tests still pass without failure. During the semester thesis there was no deeper
-investigation done to this problem because it seemed this is no root of a
-problem. However it should be mentioned here.
-
-\subsubsection{Testing for exceptions}
-
-Error testing is not actually an issue but the mechanism to test for exceptions 
-is not obvious, so an example will be shown at this point. 
+\subsection{Testing for exceptions}
+The mechanism to test for exceptions is not quite obvious, so an example will be
+shown at this point. 
 
 The .rts test file may include the following syntax:
 
@@ -335,18 +310,147 @@ if (fatalError)
 \end{lstlisting}
 
 All in all, the special refactoring test environment developed by \cite{GB06} 
-was a big help for refactoring relaxedly.
+was a big help for relaxed refactoring.
+
+\subsection{Testing New File Creation}
+
+In case a member function is toggled from \textit{in-header} to
+\textit{in-implementation} and the implementation file does not exist, the user
+of the plug-in is asked through the \texttt{ToggleFileCreator} if he wants to
+create a new file and move the function there.
+
+Long time it was not tested for this case and more than once this functionality
+was hurt and destroyed accidentally 
+
+In the .rts file, the \texttt{newfiles} variable has been introduced. This
+variable takes one or more file names separated by a comma.
+
+\begin{lstlisting}[caption={Syntax to set variables inside a .rts file},
+language=java]
+//@.config
+filename=A.h
+newfiles=A.cpp, B.h, C.h
+//@A.h
+\end{lstlisting}
+
+Further there is no need to write the initial code state of the file since it
+does not exist. However the final state must be written for comparison like
+any other test.
+
+\begin{lstlisting}[caption={Writing test for newfile creation }]
+//!FreefunctionFromHeaderToImpl
+//#ch.hsr.ecl[...].ToggleRefactoringTest
+//@.config
+filename=A.h
+newfiles=A.cpp
+//@A.h
+void /*$*/freefunction/*$$*/() {
+    return;
+}
+//=
+void freefunction();
+
+//@A.cpp
+//=
+
+
+#include "A.h"
+
+void freefunction()
+{
+    return;
+}
+\end{lstlisting}
+
+The files listed in the \texttt{newfiles} variable are deleted before the
+actual refactoring in the test is started. Then the new file gets created by
+the \texttt{ToggleFileCreator} and (which functionality is specifically tested
+here) gets compared with the expected source.
+
+%TODO: add some words about the answer no!
+
+\subsubsection{User Inputs}
+
+The easiest solution to test user inputs, beeing aware that it is not the
+nicest, is to Mock the Refactoring the return a internal reference to the
+\texttt{ToggleRefactoringContext}. The context however has the ability to set
+predefined answer values to the question of the file creation, which is done in
+the test class.
+
+\subsection{Real World Test Environment}
+
+The toggle refactoring was tested with some open source projects found out in
+the wild.
+
+\subsubsection{COAST}
+The COAST~\cite{COAST} source code was used as test environment for real-world 
+tests as it uses a lot of C++ code features to test the toggling.
+
+Toggling some functions in COAST, we discovered that macros are not toggled
+correctly and are replaced by an \texttt{NullStatement} resulting in a function
+with a lot of semicolons.
+
+\subsubsection{WebKit}
+Testing to toggle functions from Webkit~\cite{Webkit} code showed us two
+problems.
+
+First Webkit uses a lot of namespaces. Until this point the Toggle
+plug-in did not work correctly. Functions were moved completely out of the
+namespace and were referenced with the full qualified namespace as shown in
+listing \ref{wrongnamespace1}. This is not very elegant.
+
+\begin{lstlisting}[caption={\texttt{function()} with reference to namespace},
+label={wrongnamespace1}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N
+class A {
+  void function();
+};
+}
+
+inline void N::A::function() {
+  return;
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+The behavior was changed later to the following.
+
+\begin{lstlisting}[caption={A.h, function definition in namespace},
+label={wrongnamespace2}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+namespace N {
+class A {
+  void function();
+};
+
+inline void A::function() {
+  return;
+}
+
+}
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+An other Problem discovered with Webkit was that Preprocessor Statments were
+deleted. Have a look at section \ref{preprocessor} for this problem.
 
 \subsection{Performance tests}
 
-The simplest way to assess the speed of the refactoring is to look at the jUnit 
+The simplest way to assess the speed of the refactoring is to look at the JUnit
 time measurements. The first test that is run takes more time and represents the 
 time needed for first time toggling when the refactoring infrastructure has to 
 be loaded. 
 
-All performance tests must be executed on the same developer machine, taking the 
-average time of three consecutive runs of all tests. Five scenarios have been 
-chosen to be able to observe the performance of the toggle refactoring:
+All performance tests have been executed on the same developer machine, taking
+the average time of three consecutive runs of all tests. Five scenarios have
+been chosen to be able to observe the performance of the toggle refactoring:
 
 \begin{enumerate}
 \item First time toggling: Includes loading of the infrastructure and will take 
@@ -361,6 +465,4 @@ infrastructure.
 \end{enumerate}
 
 Another technique to measure time more accurately was checked out. For this, the 
-\textit{org.eclipse.test.performance} plug-in was used. 
-
-
+\textit{org.eclipse.test.performance} plug-in was used.
