@@ -264,7 +264,7 @@ class A {
 \end{lstlisting}
 
 Function \texttt{foo()} needs to be toggled. The next position of the
-definition is ouside of the class but keept in the namespace definition. At the
+definition is ouside of the class but kept in the namespace definition. At the
 position the definition was, a declaration is inserted as in listing
 \ref{02toggleMemberFunction}.
 
@@ -273,7 +273,7 @@ below the class in the header file. Listing \ref{02_1toggleMemberFunction}
 
 If there are any special keywords like \texttt{virtual} or \texttt{static},
 these are adapted to the new definition. Definitions in the header file need
-the keyword \texttt{inline} prepended. The keyword \texttt{virtual}
+the prefixed keyword \texttt{inline}. The keyword \texttt{virtual}
 is only allowed inside a class definition.
 
 \begin{lstlisting}[caption={A.h, function definition outside class definition in
@@ -498,7 +498,16 @@ keyword which is not supported by many compilers.
 
 \subsection{Expected Results}
 
-%TODO: add something here
+Toggling Member functions should work for the default cases. ``Normal'' member
+functions should be toggled fast without producing inconsistent code. 
+
+Templated member functions should be supported in a normal way. It is not the
+idea to give support for obscure tricks with template metaprogramming or other
+strange things which the usual C++ programmer does not use. 
+
+Additionally free (non-member) functions should be supported too. This means the
+refactoring should also work for C projects in eclipse and as good as for C++
+projects.
 
 \section{Quick Implement Function}
 

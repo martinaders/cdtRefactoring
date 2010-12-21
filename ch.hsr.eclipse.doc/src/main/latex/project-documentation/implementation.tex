@@ -141,8 +141,47 @@ public IToggleRefactoringStrategy getStategy() {
 \end{lstlisting}
 
 \subsection{Stopping with Exception}
+Refactorings that use a wizard may communicate with the user by displaying 
+warnings and errors. Those are internally collected in a 
+\texttt{RefactoringStatus} object by the refactorings.
 
-%TODO: add something here
+This approach was used too until it became too tedious to always pass and 
+process the status parameter in all classes used during 
+\texttt{checkInitialConditions(...)} in \texttt{ToggleRefactoring}.
+Every method that needed to abort the checking process needed to use code as 
+in listing \ref{initStatus}.
+
+\begin{lstlisting}[caption={exemplary use of the RefactoringStatus},
+label={initStatus}, language=Java]
+public RefactoringStatus findSomeNode() {
+  ...
+  if (hadSomeProblem) {
+    initStatus.addFatalError("fatal");
+    return initStatus;
+  }
+  ...
+  return initStatus
+}
+\end{lstlisting}
+
+The latter use of \texttt{RefactoringStatus} consumes five lines of code and 
+uses up the return value in each method. To solve this, a 
+\texttt{NotSupportedException} was introduced which may be thrown by any client 
+of \texttt{checkInitialConditions}. There, the exception is catched and 
+transformed into a RefactoringStatus as shown in \ref{catchNotSupp}
+
+\begin{lstlisting}[caption={checkInitialConditions(...) forwarding an exception},
+label={catchNotSupp}, language=Java]
+public RefactoringStatus checkInitialConditions(..
+  try {
+    ...
+  } catch (NotSupportedException e) {
+    initStatus.addFatalError(e.getMessage());
+  }
+  return initStatus;
+}
+\end{lstlisting}
+
 
 \subsection{Implications of not using a refactoring wizard}
 No wizard was used for this refactoring since it must be fast and may be 
