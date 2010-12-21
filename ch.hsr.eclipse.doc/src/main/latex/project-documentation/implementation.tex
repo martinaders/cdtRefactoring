@@ -173,34 +173,78 @@ care of what the \texttt{WizardOpenOperation} was responsible before.
 The responsibilities of \texttt{ToggleRefactoringRunner} and 
 \texttt{Refacto- ringJob} are explained in the following sections.
 
-\subsubsection{Run Inside a Separate Job}
-\textit{Toggle Function Definition} does not use modal dialogs and therefore 
-could invoked multiple times in parallel. However, this 
+\subsubsection{Run a Separate Job}
+Why does the refactoring have to run in a separate job?
 
-Multiple instances of The \texttt{ToggleRefactoringRunner} must not TODO:***CONTINUE***
+\textit{Toggle Function Definition} does not use wizards and therefore 
+has no UI blocking modal dialogs. Any process like waiting for the indexer would 
+just freeze the user interface. Running the refactoring in a separate job 
+allows the user to continue using Eclipse as long as he does not change the 
+affected source code.
 
-\subsubsection{Support Undoing Changes}
-TODO:***CONTINUE***
-%The \texttt{ToggleRefactoringRunner} has to take care of registering undo 
-%changes by itself. Listing \ref{runner} shows the simplified process without 
-%error checking. \texttt{createChange} first 
+Running the refactoring in a separate job is straightforward:
+\begin{lstlisting}[caption={ToggleRefactoringRunner starting the job},
+label={jobstart}, language=Java]
+public void run() {
+  ...
+  new RefactoringJob(refactoring).schedule();
+}
+\end{lstlisting}
 
-%The changes are collected, executed 
-%and registered at the undo manager.
+\subsubsection{Avoid Concurrent Refactoring Instances}
+Why is queuing refactoring jobs not allowed?
 
-%\begin{lstlisting}[caption={running the refactoring},label={runner},language=java]
-%change = refactoring.createChange(monitor);
-%change.initializeValidationData(monitor);
+Also because of not using modal dialogs, it is possible to invoke another 
+concurrent instance of the refactoring. Even though the refactoring is run 
+in a separate job, multiple instances were decided not to be allowed. Note 
+that selected code could be removed during refactoring and a subsequent 
+refactoring's selection would be invalid.
 
-%IUndoManager undoManager = 
-%    RefactoringCore.getUndoManager();
-%undoManager.aboutToPerformChange(change);
-%undoChange = change.perform(monitor);
+To decide whether another refactoring is still running, the \texttt{Refac- 
+toringJob} is assigned to a special kind of jobs by overriding the \texttt{be- 
+longsTo() } method of \texttt{org.eclipse.core.runtime.jobs.Job}. See listing 
+\ref{belongsTo}.
 
-%undoChange.initializeValidationData(monitor);
-%undoManager.changePerformed(change, success);
-%undoManager.addUndo("toggling", undoChange);
-%\end{lstlisting}
+\begin{lstlisting}[caption={RefactoringJob is assigned to a separate family of 
+jobs},label={belongsTo},language=java]
+public final static Object FAMILY_TOGGLE_DEFINITION
+    = new Object();
+
+@Override
+public boolean belongsTo(Object family) {
+  return family == FAMILY_TOGGLE_DEFINITION;
+}
+\end{lstlisting}
+
+With the help of the overriden \texttt{belongsTo()} method, the job manager can 
+now check whether another job of the same family is running. Listing 
+\ref{avoidsecond} shows how a second refactoring instance is avoided by the 
+\textit{ToggleRefactoringRunner}.
+
+\begin{lstlisting}[caption={ToggleRefactoringRunner avoiding a 2$^{nd}$ refactoring instance},
+label={avoidsecond}, language=Java]
+public void run() {
+  Job[] jobs = Job.getJobManager()
+   .find(RefactoringJob.FAMILY_TOGGLE_DEFINITION);
+  if (jobs.length > 0) {
+    CUIPlugin.log(...);
+    return;
+  }
+  new RefactoringJob(refactoring).schedule();
+}
+\end{lstlisting}
+
+
+\subsubsection{Execute Refactoring and Support Undoing it}
+Running a refactoring is essentially calling its methods 
+\texttt{checkAll- Conditions} and \texttt{createChanges}. The returned 
+changes are performed using \texttt{changes.perform(...)}. The 
+\texttt{perform} method returns the changes needed to undo the performed 
+changes.
+
+The process of registering the changes at the undo manager is long and may be 
+looked up in the \texttt{RefactoringJob} class.
+
 
 \section{Testing and performance environment}
 
