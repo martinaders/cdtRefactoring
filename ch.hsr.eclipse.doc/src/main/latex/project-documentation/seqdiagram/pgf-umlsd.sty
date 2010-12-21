@@ -68,7 +68,7 @@ Sequence Diagrams.]
 \newcommand{\newthread}[3][gray!30]{
   \newinst{#2}{#3}
   \stepcounter{threadnum}
-  \node[below of=inst\theinstnum,node distance=0.8cm] (thread\thethreadnum) {};
+  \node[below of=inst\theinstnum,node distance=3.8cm] (thread\thethreadnum) {};
   \tikzstyle{threadcolor\thethreadnum}=[fill=#1]
   \tikzstyle{instcolor#2}=[fill=#1]
 }
@@ -78,6 +78,36 @@ Sequence Diagrams.]
   \begin{pgfonlayer}{threadground}
     \draw[threadstyle] (#1.west) -- (#1.east) -- (#2.east) -- (#2.west) -- cycle;
   \end{pgfonlayer}
+}
+
+% a function call
+% Example:
+% \begin{kall}[height]{caller}{function}{callee}{return}
+% \end{kall}
+\newenvironment{kall}[5][1]{
+  \stepcounter{seqlevel}
+  \stepcounter{callevel} % push
+  \path
+  (#2)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (cf\thecallevel) {}
+  (#4.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (ct\thecallevel) {};
+  
+  \draw[->,>=triangle 60] ({cf\thecallevel}) -- (ct\thecallevel)
+  node[midway, above] {\tiny #3};
+  \def\l\thecallevel{#1}
+  \def\f\thecallevel{#2}
+  \def\t\thecallevel{#4}
+  \def\returnvalue{#5}
+  \tikzstyle{threadstyle}+=[instcolor#2]
+}
+{
+  \addtocounter{seqlevel}{\l\thecallevel}
+  \path
+  (\f\thecallevel)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rf\thecallevel) {}
+  (\t\thecallevel.\threadbias)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (rt\thecallevel) {};
+%  \draw[dashed,->,>=angle 60] ({rt\thecallevel}) -- (rf\thecallevel)
+%  node[midway, above]{\tiny \returnvalue};
+  \drawthread{ct\thecallevel}{rt\thecallevel}
+  \addtocounter{callevel}{-1} % pop
 }
 
 % a function call
