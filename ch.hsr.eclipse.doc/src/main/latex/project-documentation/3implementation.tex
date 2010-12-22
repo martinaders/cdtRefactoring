@@ -87,8 +87,8 @@ public interface IToggleRefactoringStrategy {
 \end{lstlisting}
 
 An interface was chosen because an abstract class containing all the methods
-needed by the various strategies was too big and unclear. This resulted in the
-interface and a static helper class named \texttt{ToggleNodeHelper}.
+needed by the various strategies was too big and unclear. This was solved with
+an interface and a static helper class named \texttt{ToggleNodeHelper}.
 
 \subsection{ToggleNodeHelper}
 
@@ -101,32 +101,32 @@ methods as smooth as possible.
 The \texttt{ToggleRefactoringContext} is used to collect and store information 
 about definitions, declarations and their corresponding translation units.
 
-The context is passed then passed to the strategy factory. See section
+The context is then passed to the strategy factory. See section
 \ref{factory}. Then the factory creates the strategy and passes the context to
 this specific strategy. The strategy retrieves all the needed information about
 the current situation from the context.
 
-The context was introduced to prevent the code smell \textit{long parameter
-List} \cite{Refactoring}. A common refactoring for this problem is to
-introduce a parameter object which consolidates all arguments.
+The context was introduced to prevent the code smell \textit{Long Parameter
+List} \cite{Refactoring}. A common refactoring for this smell is to
+introduce a \textit{Parameter Object} which consolidates all arguments.
 
-The justification that the context searches the information by its own is due
+The context searches the information by its own due
 to the fact that context would just be a very small data class and yet another
-class would be needed to search and collect the information which builds and
+class would be needed to search and collect the information, builds and
 returns the context.
 
 \subsection{Strategy Factory}
 \label{factory}
 
 The \textit{ToggleStrategyFactory} is used to decide which strategy should be 
-considered, based on the context given. The strategy makes various checks
+considered based on the passed context. The strategy makes various checks
 and decides which strategy will be returned.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
 label={strategy}, language=Java]
 public IToggleRefactoringStrategy getStategy() {
   if (context.getDefinition() == null) {
-    throw new NotSupportedException(...
+    throw new NotSupportedException(...);
   }
   ...
   if (isInClassSituation()) {
@@ -146,11 +146,11 @@ warnings and errors. Those are internally collected in a
 
 This approach was used too until it became too tedious to always pass and 
 process the status parameter in all classes used during 
-\texttt{checkInitialConditions(...)} in \texttt{ToggleRefactoring}.
+\texttt{ToggleRefactoring}'s \texttt{checkInitialConditions(...)}.
 Every method that needed to abort the checking process needed to use code as 
 in listing \ref{initStatus}.
 
-\begin{lstlisting}[caption={exemplary use of the RefactoringStatus},
+\begin{lstlisting}[caption={Exemplary use of the RefactoringStatus},
 label={initStatus}, language=Java]
 public RefactoringStatus findSomeNode() {
   ...
@@ -169,7 +169,7 @@ uses up the return value in each method. To solve this, a
 of \texttt{checkInitialConditions}. There, the exception is catched and 
 transformed into a RefactoringStatus as shown in \ref{catchNotSupp}
 
-\begin{lstlisting}[caption={checkInitialConditions(...) forwarding an exception},
+\begin{lstlisting}[caption={\texttt{checkInitialConditions} forwarding an excep\-tion},
 label={catchNotSupp}, language=Java]
 public RefactoringStatus checkInitialConditions(..
   try {
@@ -199,7 +199,7 @@ Present refactorings use a \texttt{RefactoringWizard} together with a
 \texttt{Wi- zardOpenOperation} to execute a refactoring. Listing \ref{wizardRun} 
 shows CDT's \texttt{HideMethodRefactoringRunner} run method as an example.
 
-\begin{lstlisting}[caption={shorted run method of HideMethodRefactoringRunner},label={wizardRun}, language=Java]
+\begin{lstlisting}[caption={Shorted run method of HideMethodRefactoringRunner},label={wizardRun}, language=Java]
 public void run() {
   CRefactoring refactoring = 
      new HideMethodRefactoring(...);
@@ -241,11 +241,11 @@ public void run() {
 \subsubsection{Avoid Concurrent Refactoring Instances}
 Why is queuing refactoring jobs not allowed?
 
-Also because of not using modal dialogs, it is possible to invoke another 
-concurrent instance of the refactoring. Even though the refactoring is run 
-in a separate job, multiple instances were decided not to be allowed. Note 
-that selected code could be removed during refactoring and a subsequent 
-refactoring's selection would be invalid.
+As an addition consequence of not using modal dialogs, it is possible to invoke
+another concurrent instance of the refactoring. Even though the refactoring runs
+in a separate job, it was decided to not allow multiple instances of the
+refactoring. Note that selected code could be removed during refactoring and a
+subsequent refactoring's selection would be invalid.
 
 To decide whether another refactoring is still running, the \texttt{Refac- 
 toringJob} is assigned to a special kind of jobs by overriding the \texttt{be- 
@@ -268,7 +268,7 @@ now check whether another job of the same family is running. Listing
 \ref{avoidsecond} shows how a second refactoring instance is avoided by the 
 \textit{ToggleRefactoringRunner}.
 
-\begin{lstlisting}[caption={ToggleRefactoringRunner avoiding a 2$^{nd}$ refactoring instance},
+\begin{lstlisting}[caption={ToggleRefactoringRunner avoiding a second refactoring instance},
 label={avoidsecond}, language=Java]
 public void run() {
   Job[] jobs = Job.getJobManager()
@@ -299,7 +299,7 @@ performance.
 
 \subsection{Normal Testing}
 
-The test coverage for the toggle refactoring reached over 80\%. Mainly the
+The test coverage for the toggle refactoring reached over 80\%. Main\-ly the
 refactoring tests from CDT were used for default testing. The test files were
 divided into the various C++ features. They may require special handling or they
 must be supported because they are simple default cases. These files have the
@@ -369,8 +369,8 @@ newfiles=A.cpp, B.h, C.h
 //@A.h
 \end{lstlisting}
 
-Further there is no need to write the initial code state of the file since it
-does not exist. However the final state must be written for comparison like
+Further, there is no need to write the initial code state of the file, since it
+does not exist. However the final state must be written for comparison like in
 any other test.
 
 \begin{lstlisting}[caption={Writing test for newfile creation }]
@@ -400,15 +400,13 @@ void freefunction()
 
 The files listed in the \texttt{newfiles} variable are deleted before the
 actual refactoring in the test is started. Then the new file gets created by
-the \texttt{ToggleFileCreator} and (which functionality is specifically tested
-here) gets compared with the expected source.
-
-%TODO: add some words about the answer no!
+the \texttt{ToggleFileCreator} (which functionality is specifically tested
+here) and gets compared with the expected source.
 
 \subsubsection{User Inputs}
 
-The easiest solution to test user inputs, beeing aware that it is not the
-nicest, is to Mock the Refactoring the return a internal reference to the
+The easiest solution to test user inputs, being aware that it is not the
+nicest, is to mock the refactoring and to return an internal reference to the
 \texttt{ToggleRefactoringContext}. The context however has the ability to set
 predefined answer values to the question of the file creation, which is done in
 the test class.
@@ -422,18 +420,18 @@ the wild.
 The COAST~\cite{COAST} source code was used as test environment for real-world 
 tests as it uses a lot of C++ code features to test the toggling.
 
-Toggling some functions in COAST, we discovered that macros are not toggled
+Toggling some functions in COAST, it was discovered that macros are not toggled
 correctly and are replaced by an \texttt{NullStatement} resulting in a function
-with a lot of semicolons.
+with a lot of semicolons. This was then fixed in later versions.
 
 \subsubsection{WebKit}
 Testing to toggle functions from Webkit~\cite{Webkit} code showed us two
 problems.
 
-First Webkit uses a lot of namespaces. Until this point the Toggle
-plug-in did not work correctly. Functions were moved completely out of the
-namespace and were referenced with the full qualified namespace as shown in
-listing \ref{wrongnamespace1}. This is not very elegant.
+First, Webkit uses a lot of namespaces. Until this point the Toggle
+plug-in did not work correctly with namespaces. Functions were moved completely
+out of the namespace and were referenced with the full qualified namespace as
+shown in listing \ref{wrongnamespace1}. This is not very elegant.
 
 \begin{lstlisting}[caption={\texttt{function()} with reference to namespace},
 label={wrongnamespace1}, language=C++]
@@ -474,7 +472,7 @@ inline void A::function() {
 #endif /* A_H_ */
 \end{lstlisting}
 
-An other Problem discovered with Webkit was that Preprocessor Statments were
+An other problem discovered with Webkit was that preprocessor statments were
 deleted. Have a look at section \ref{preprocessor} for this problem.
 
 \subsection{Performance Tests}
@@ -502,4 +500,5 @@ infrastructure.
 \end{enumerate}
 
 Another technique to measure time more accurately was checked out. For this, the 
-\textit{org.eclipse.test.performance} plug-in was used.
+\textit{org.eclipse.test.performance} plug-in was used. This does not lead to
+satisfying results as stated in \ref{performancefail}
