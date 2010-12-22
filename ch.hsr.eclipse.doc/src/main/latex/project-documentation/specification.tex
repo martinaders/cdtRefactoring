@@ -493,8 +493,8 @@ inline void A::function(T & t) {
 
 Toggling again will put the definition back to it's original position in the
 class definition as shown in listing \ref{templatedMember}. Since having a
-template declaration in another file than the definition it needs the export
-keyword which is not supported by many compilers.
+template definition not in the same file than the declaration, the export
+keyword is needed. Unfortunately this is not supported by many compilers.
 
 \subsection{Expected Results}
 

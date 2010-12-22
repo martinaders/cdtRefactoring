@@ -20,7 +20,8 @@ its implementations by different compilers) may offer a lot more features
 than two developers could ever think of. It is not sure whether the covered
 special cases are enough general to cover all language constructs that may
 exist. Even programming against the C++ language specification is no guarantee
-that the refactoring will behave correctly out in the wild.
+that the refactoring will behave correctly out in the wild because compilers
+provide their own extensions or limitations.
 
 All in all, the developer team is proud of the solution although aware of the 
 fact that there may still be some improvements needed to satisfy a large 
@@ -120,7 +121,8 @@ items easier.
 
 \textbf{Workaround}: The menu was added using \textit{plug-in.xml} and may be added 
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
-Anyhow, the refactoring may always be invoked using the key binding. 
+Anyhow, the refactoring may always be invoked using the key binding
+of ALT-Meta-V.
 
 \subsection{Preprocessor Statements}
 \label{preprocessor}
@@ -208,7 +210,7 @@ that checked for problems inside the translation unit.
 \textbf{Solution}: The super call to \textit{checkInitialConditions} was
 omitted. Additionally separated and isolated translation units were created and
 indexed with options to prevent reindexing of already indexed files.
-%TODO: add some code here how to do this
+%TODO: add some code here how to do this, and why this worked?
 
 \subsection{Accessing Standalone Header Files}
 \textbf{Problem}: Header files that are not included in any source file by 
@@ -218,10 +220,11 @@ source code of the affected header file.
 \textbf{Cause}: By default, the indexer preference option 
 \textit{IndexerPreferences.KEY\_INDEX\_UNUSED\_HEADERS\_WITH\_DEFAULT\_LANG} is 
 set to false. However, this option is needed for standalone header files to be 
-indexed.
+indexed. 
 
 \textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
-true.
+true. This sets the indexer option per project since the index is retrieved per
+single project.
 
 \subsection{Indexing all Projects}
 
@@ -312,6 +315,7 @@ every comment may be preserved.
 Contra: does not deal with macros, five classes need to be changed in CDT, 
 comments need to be moved by hand. See the branch 'inject' inside the repository 
 to study this solution.
+%TODO: disscued with emanuel?
 \item Find and insert comments by hand using an IASTComment. 
 
 Pro: lets the developer decide where to put the comment. 
@@ -372,13 +376,12 @@ refactoring is capable of and what may still need some improvement.
 
 Toggling functions is available inside any class or namespace hierarchy and may 
 be invoked when the selection is anywhere inside a function declaration or
-body. 
-Basic templated functions are supported as well. However, there may be 
-template special cases that were not thought of.
+body. Basic templated functions are supported as well. However, there may be 
+template special cases that we have not thought of.
 
 On the other side, the code generator removes preprocessor statements that stay 
 inside a node that has to be rewritten. Removing comments of removed nodes was 
-not achieved without changing the rewriter.
+not achieved without changing the rewriter since this is a bug in the rewriter.
 
 \subsection{Performance Results}
 
@@ -386,11 +389,11 @@ It is difficult to compare the speed with other refactorings of CDT since
 wizards are used for the other known refactorings. However, the goal was reached
 that the refactoring is executing almost instantly.
 
-It was planned to measure the speed of the JUnit tests. However, the displayed 
-time does not represent the actual speed of the refactoring. This may be due to 
-the fact that/ tests are not being invoked exactly the same way as the actual 
-refactoring./ The manually invoked refactoring is run with the help of
-\texttt{ToggleRefactoringRun- ner}.
+It was planned to measure the speed of the JUnit tests as explained in section
+\ref{performance}. However, the displayed time does not represent the
+actual speed of the refactoring. This may be due to the fact that/ tests are not
+being invoked exactly the same way as the actual refactoring./ The manually
+invoked refactoring is run with the help of \texttt{ToggleRefactoringRun- ner}.
 
 The results from the \textit{org.eclipse.test.performance} speed tests were not 
 used either. Since in reality the refactorings are much slower than the 
@@ -449,8 +452,8 @@ idea of a toggle definition.
 Using Git\cite{GIT} for
 version 
 control was very useful. The provided development server was occasionally down 
-during the first weeks and it was possible to continue work locally. Being able 
-to work locally was also helpful to work on the train. 
+during the first weeks and it was possible to continue work locally with version
+control. Being able to work locally was also helpful to work on the train. 
 
 Working next to each other in the same study room was helpful to get quick 
 answers for questions, reduce slow written communication and playing a round of 
