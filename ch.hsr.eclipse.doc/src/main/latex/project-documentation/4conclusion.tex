@@ -1,7 +1,7 @@
 \chapter{Conclusions, Interpretation and Future Work}
 \thispagestyle{fancy}
 
-During the project, a lot of challenges have been discovered which will be 
+During the project, a lot of challenges have been discovered which were
 documented in the following sections along with a look back on the whole project 
 and an outlook on what could be done in further theses. 
 
@@ -39,6 +39,9 @@ work has been done until now. This is still left to be implemented as another
 semester or bachelor thesis.
 
 \section{Known Issues}
+
+This section presents some unresolved problems or bugs which could not be fixed
+during the semester thesis.
 
 \subsection{Constructor / Destructor Bug}\label{ctorBug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
@@ -159,15 +162,14 @@ because this breaks the initial idea of the code flow.
 
 \subsection{Doxygen}
 
-\textbf{Problem}: The whitespace issue was already discussed. Another issue is
-that the Doxygen \cite{Doxygen} syntax \texttt{//!} may not be used in the test
-files since this syntax is used to specify the test name.
+\textbf{Problem}: Doxygen \cite{Doxygen} syntax \texttt{//!} may not be used in
+the test files since this syntax is used to specify the test name.
 
 \textbf{Cause}: Refactoring tests need the \texttt{//!} syntax to specify the
 refactoring class which should be called for the selected code.
 
 \textbf{Solution}: It was not looked for a solution to this problem. A solution
-to this problem could be to change the syntax for controlling the refactoring
+could be to change the syntax for controlling the refactoring
 tests to something else.
 
 \subsection['/RegressionTestProject/A.h' does not Exist]{Resource '/RegressionTestProject/A.h' does not Exist}
@@ -194,8 +196,7 @@ of a problem. However it should be mentioned here.
 
 \section{Solved Issues}
 
-This section describes special cases that have been omitted intentionally or due 
-to lack of time. In addition, found limitations of the CDT are described here.
+This section describes issues that have been resolved during this thesis.
 
 \subsection{Speed}
 \textbf{Problem}: Refactoring, especially the first run, was very slow in the 
@@ -208,9 +209,12 @@ consumed by the \textit{checkInitialConditions} method of \textit{CRefactoring}
 that checked for problems inside the translation unit.
 
 \textbf{Solution}: The super call to \textit{checkInitialConditions} was
-omitted. Additionally separated and isolated translation units were created and
-indexed with options to prevent reindexing of already indexed files.
-%TODO: add some code here how to do this, and why this worked?
+omitted. This was possible since calling the super method is not
+necessary. For example, the translation unit provided by the
+\texttt{CRefactoring} is initialized here. But this is not used by the toggle
+plug-in because it uses smaller, per file translation units. Additionally the
+project files were indexed with options to prevent reindexing of already indexed
+files.
 
 \subsection{Accessing Standalone Header Files}
 \textbf{Problem}: Header files that are not included in any source file by 
@@ -255,7 +259,7 @@ active editor part's selection and fetched every time when toggling is started.
 \textbf{Problem}: 
 In past theses at HSR, the refactoring testing environment needed an exact
 definition of the generated code. This was annoying because same-looking code
-samples could result in a red bar if white spaces were not the same. To make
+samples resulted in a red bar if white spaces were not the same. To make
 writing new tests easier, the comparison method was overridden to support fuzzy
 whitespace recognition.
 
@@ -371,7 +375,7 @@ function} refactoring. This is still left as a semester thesis.
 \section{Interpretation}
 \thispagestyle{fancy}
 
-After implementation, a personal look back was made on what the resulting
+After implementation, a personal look backwards was made on what the resulting
 refactoring is capable of and what may still need some improvement.
 
 \subsection{Features and Limitations}
@@ -386,6 +390,7 @@ inside a node that has to be rewritten. Removing comments of removed nodes was
 not achieved without changing the rewriter since this is a bug in the rewriter.
 
 \subsection{Performance Results}
+\label{performancefail}
 
 It is difficult to compare the speed with other refactorings of CDT since
 wizards are used for the other known refactorings. However, the goal was reached
@@ -393,9 +398,9 @@ that the refactoring is executing almost instantly.
 
 It was planned to measure the speed of the JUnit tests as explained in section
 \ref{performance}. However, the displayed time does not represent the
-actual speed of the refactoring. This may be due to the fact that/ tests are not
-being invoked exactly the same way as the actual refactoring./ The manually
-invoked refactoring is run with the help of \texttt{ToggleRefactoringRun- ner}.
+actual speed of the refactoring. This may be due to the fact that tests are not
+being invoked exactly the same way as the actual refactoring. The manually
+invoked refactoring is run with the help of \texttt{ToggleRefactoringRunner}.
 
 The results from the \textit{org.eclipse.test.performance} speed tests were not 
 used either. Since in reality the refactorings are much slower than the 
@@ -477,15 +482,15 @@ scope prediction.
 
 \subsubsection*{Commits not Connected with Issues}
 
-During the project we ``forgot'' sometimes to trak our time. Sometimes it was
-really simply forgotten and sometimes it was delayed (and then forgotten) to
-speed up implementation of the functionality. This is clearly not a good thing
-since the danger is high to forget about the tracked time as it happend to us
-many times.
+During the project we ``forgot'' sometimes to track our time. Sometimes it was
+forgotten and sometimes it was delayed (and then forgotten) to
+speed up implementation of the functionality. This is clearly not a good
+behavior since the danger is high to forget about the tracked time as it
+happened to us many times.
 
 As an improvements in the bachelor thesis we thought about connecting every
 commit to the version control with an issue. It could even be checked with a
-server side script during commiting. If the commit message does not contain a
+server side script during committing. If the commit message does not contain a
 valid issue number the commit is rejected. This forces the developer to connect
 his commit to an issue.
 
@@ -515,19 +520,19 @@ implementation needs to be documented early.
 
 The default Redmine \textit{trackers} and \textit{categories} that were used 
 were not sufficient to track time in a way that shiny charts could be produced 
-for categories like ''implementation'', ''documentation'' and ''administration. 
+for categories like ''implementation'', ''documentation'' and ''administration.
+For future projects we need more fine grained categories and trackers. 
 
 \subsubsection*{Multiple Git Branches}
 
 While using one master git branch for every developer, a second git branch 
 called development was introduced. During half a week new work was committed to
-the
-development branch and then both trees were merged. The idea behind this was to
-always have a stable master branch. This allowed to carelessly mess around
-inside the development branch which resulted in nobody daring
-to pull from the others branch. Inside the master branch everything was already
-merged and
-the development branch was in an ``always unstable'' condition.
-If something unstable is introduced to the repository one should explicitly use
-a separate branch and include this in the master as soon as possible.
+the development branch and then both trees were merged. The idea behind this was
+to have always a stable master branch. This allowed to carelessly mess
+around
+inside the development branch which resulted in nobody daring to pull from the
+others branch. Inside the master branch everything was already merged and the
+development branch was in an ``always unstable'' condition. If something
+unstable is introduced to the repository one should explicitly use a separate
+branch and include this in the master as soon as possible.
 
