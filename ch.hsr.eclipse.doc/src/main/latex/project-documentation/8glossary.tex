@@ -4,40 +4,54 @@
 \begin{itemize}
 %\item \textbf{}
 \item \textbf{AST}: Abstract Syntax Tree
+
 \item \textbf{CDT}: C/C++ Development Tooling for Eclipse
+
 \item \textbf{Content Assist}: Content assist allows you to provide context 
 sensitive content completion upon user request. Popup windows are used to 
 propose possible text choices to complete a phrase. The user can select these 
 choices for insertion in the text. \cite{assist}
+
 \item \textbf{Declaration}: ``A declaration introduces names into a translation 
 unit or redeclares names introduced by previous declarations. A declaration 
 specifies the interpretation and attributes of these names.''\cite{IsoCpp}
+
 \item \textbf{Definition}: ``A declaration is a definition unless it declares a 
 function without specifying the function’s body, it contains the extern 
 specifier or a linkage-specification and neither an initializer nor a 
 function-body, it declares a static data member in a class definition, it is a 
 class name declaration, it is an opaque-enum-declaration, or it is a typedef 
 declaration, a using-declaration, or a using-directive.''\cite{IsoCpp}
+
 \item \textbf{Doxygen}: A documentation system that supports multiple 
 programming languages.
-\item \textbf{Free function}: Whenever free functions are mentioned throughout this document, function definitions are meant that reside in an arbitrary namespace but are not a member of any structure.
+
+\item \textbf{Free function}: Whenever free functions are mentioned throughout
+this document, non-member functions are meant in the C++ terminology. These are
+functions which are not part of a structure or a class.
+
 \item \textbf{Header file}: A file with the file extensions .h, .hpp or .hxx
-\item \textbf{Member function}: A function that belongs to a type (e.g. any 
-class, struct, union).
+
 \item \textbf{Non-member function}: A function that does not belong to any type.
+
 \item \textbf{Problem statement}: If a source code range has syntactical errors, 
 the CDT parser wraps it into an \texttt{IASTProblem} which can be handled as if 
 it were a normal \texttt{IASTNode}. A problem statement is one possible kind of 
 an \texttt{IASTProblem}.
+
 \item \textbf{.rts file}: Before/after tests for refactorings may be written 
 inside a file with the extension ".rts" using a special syntax. CDT offers a 
 mechanism to automatically read those files, run the refactoring and compare the 
 sources.
+
 \item \textbf{Source file}: A file with the file extensions .c, .cpp or .cxx
+
 \item \textbf{Toggle refactoring}: The developed \textit{Toggle Function 
 Definition} code automation was referred to by this name because it is shorter.
+
 \item \textbf{Toggling}: The act of invoking the plug-in developed during this 
 project to move a function definition to another place.
+
 \item \textbf{Translation unit}: ``The text of the program is kept in units 
 called \textit{source files} [...]. A source file together with all the headers and 
 source files included via the preprocessing directive \texttt{\#include}, less 
