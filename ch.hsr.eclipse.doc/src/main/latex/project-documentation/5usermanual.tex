@@ -7,7 +7,9 @@ this manual.
 
 \section{Installation of the Plug-in}
 
-To try out the plug-in, you will need a running Eclipse Helios (3.6) installation with CDT already installed. Choose "Help", "Install New Software..." and type in the following url into the address bar:
+To try out the plug-in, you will need a running Eclipse Helios (3.6) 
+installation with CDT 7.0.1 already installed. Choose "Help", "Install New 
+Software..." and type in the following url into the address bar:
 
 \url{http://sinv-56042.edu.hsr.ch/updatesite}
 
@@ -40,18 +42,18 @@ Figure \ref{selection} depicts all valid selection ranges in an example code.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.4\textwidth]{images/selection.png}
-\caption{region for valid selection positions}
+\caption{Region for valid selection positions}
 \label{selection}
 \end{figure}
 As soon as the cursor is inside the valid range, toggling may be invoked by 
-pressing \texttt{Ctrl+Alt+v}.
+pressing \texttt{Ctrl+Shift+v}.
 
 \section{Example}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{images/differing_signatures.png}
-\caption{redundant declarations that were not both updated}
+\caption{Redundant declarations that were not both updated}
 \label{differingSignatures}
 \end{figure}
 Imagine the situation in figure \ref{differingSignatures} where a programmer 
@@ -75,7 +77,7 @@ the code. The declaration got automatically replaced by the definition.
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{images/resulting_function.png}
-\caption{by the touch of a key combination, the function definition is moved}
+\caption{By the touch of a key combination, the function definition is moved}
 \label{coolResult}
 \end{figure}
 

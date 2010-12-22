@@ -3,7 +3,7 @@
 
 During the project, a lot of challenges have been discovered which were
 documented in the following sections along with a look back on the whole project 
-and an outlook on what could be done in further theses. 
+and an outlook on what could be done in future theses. 
 
 \section{Conclusions}
 
@@ -21,7 +21,7 @@ than two developers could ever think of. It is not sure whether the covered
 special cases are enough general to cover all language constructs that may
 exist. Even programming against the C++ language specification is no guarantee
 that the refactoring will behave correctly out in the wild because compilers
-provide their own extensions or limitations.
+provide their own extensions and limitations.
 
 All in all, the developer team is proud of the solution although aware of the 
 fact that there may still be some improvements needed to satisfy a large 
@@ -35,7 +35,7 @@ Definition}.
 
 \subsection{Override Virtual Function}
 No deeper investigation on how this refactoring could benefit from the developed 
-work has been done until now. This is still left to be implemented as another
+work has been done until now. This is still left to be implemented for another
 semester or bachelor thesis.
 
 \section{Known Issues}
@@ -113,8 +113,8 @@ comment not caring how many spaces or lines there are between node and comment.
 \textbf{Solution}: No solution yet. This could be solved by a new rewriter.
 
 \subsection{Menu Integration (partially solved)}
-\textbf{Problem}: Adding a new menu item to the refactor menu is difficult when 
-developing a separate plug-in.
+\textbf{Problem}: Adding a new menu item to the ''refactor`` menu is difficult 
+when developing a separate plug-in.
 
 \textbf{Cause}: Menu items are hardcoded inside
 \textit{CRefactoringActionGroup}. No way was found to replace or change this 
@@ -122,10 +122,10 @@ class within a separate plug-in. In addition, the use of the
 \textit{org.eclipse.ui.actionSets} extension point does not make inserting new 
 items easier.
 
-\textbf{Workaround}: The menu was added using \textit{plug-in.xml} and may be added 
+\textbf{Workaround}: The menu was added using \textit{plugin.xml} and may be added 
 by the user manually. See the manual in \ref{cmdGroup} to solve this issue. 
 Anyhow, the refactoring may always be invoked using the key binding
-of ALT-Meta-V.
+of \texttt{Ctrl+Shift+V}.
 
 \subsection{Preprocessor Statements}
 \label{preprocessor}
@@ -156,9 +156,9 @@ class WillBeRewrittenImplicitly {
 \textbf{Solution}: None yet. This has to be solved by a fix for the rewriter
 which supports preprocessor statements.
 
-There was a small work around for this problem by warning about the presence of
+There was a small workaround for this problem by warning about the presence of
 a preprocessor statement in the affected files. In the end this was dropped
-because this breaks the initial idea of the code flow.
+because this breaks the initial idea of a fast code flow.
 
 \subsection{Doxygen}
 
@@ -203,12 +203,12 @@ This section describes issues that have been resolved during this thesis.
 beginning. Including a big header file slowed down the process even more.
 
 \textbf{Cause}: The first thought was that header file indexing was the cause. 
-However, the indexer option that skips already indexed headers is enabled in 
-\textit{CRefactoring}. In the end, it was found out that most of the time was 
-consumed by the \textit{checkInitialConditions} method of \textit{CRefactoring} 
+However, the indexer option that skips already indexed headers is already enabled in 
+\texttt{CRefactoring}. In the end, it was found out that most of the time was 
+consumed by the \texttt{checkInitialConditions} method of \texttt{CRefactoring} 
 that checked for problems inside the translation unit.
 
-\textbf{Solution}: The super call to \textit{checkInitialConditions} was
+\textbf{Solution}: The super call to \texttt{checkInitialConditions} was
 omitted. This was possible since calling the super method is not
 necessary. For example, the translation unit provided by the
 \texttt{CRefactoring} is initialized here. But this is not used by the toggle
@@ -222,12 +222,12 @@ default were not found by the indexer. Thus, it was not possible to analyze the
 source code of the affected header file.
 
 \textbf{Cause}: By default, the indexer preference option 
-\textit{IndexerPreferences.KEY\_INDEX\_UNUSED\_HEADERS\_WITH\_DEFAULT\_LANG} is 
-set to false. However, this option is needed for standalone header files to be 
+\texttt{IndexerPreferences.KEY\_INDEX\_UNUSED\_HEADERS\_WITH\_DEFAULT\_LANG} is 
+set to \texttt{false}. However, this option is needed for standalone header files to be 
 indexed. 
 
-\textbf{Solution}: Set the described option in \textit{IndexerPreferences} to 
-true. This sets the indexer option per project since the index is retrieved per
+\textbf{Solution}: Set the described option in \texttt{IndexerPreferences} to 
+\texttt{true}. This sets the indexer option per project since the index is retrieved per
 single project.
 
 \subsection{Indexing all Projects}
@@ -235,20 +235,20 @@ single project.
 \textbf{Problem}: Having multiple projects with the same file containing the
 same functions causes the plug-in to crash. 
 
-\textbf{Cause}: In the index provided by the \texttt{CRefactoring} class
+\textbf{Cause}: The index provided by the \texttt{CRefactoring} class
 returns an index containing all the indexes over all the open projects. This
-option makes only sense for refactorings like an ``organize include statements''
+option only makes sense for refactorings like an ``organize include statements''
 
-\textbf{Solution}: Providing our own project local index and omit functionality
+\textbf{Solution}: Providing our own project local index and omitting functionality
 from CRefactoring class.
 
 \subsection{Selection}
 \textbf{Problem}: After toggling multiple times, the wrong functions were 
 toggled or no selected function was found at all. 
 
-\textbf{Cause}: The region provided by \textit{CRefactoring} pointed to a wrong 
+\textbf{Cause}: The region provided by \texttt{CRefactoring} pointed to a wrong 
 code offset. This happens due to the fact that 
-\textit{IWorkbenchWindowActionDelegate}'s \textit{selectionChanged} method is 
+\textit{IWorkbenchWindowActionDelegate}'s \texttt{selectionChanged} method is 
 updated with outdated offset information.
 
 \textbf{Solution}: The current selection is now based directly on the current 
@@ -265,14 +265,14 @@ whitespace recognition.
 
 \textbf{Cause}: The \texttt{TesterHelper} in the CDT test environment does
 compare the whole actual and expected code as \texttt{String} with \cite{JUnit}
-\texttt{AssertEquals(String, String)}. This leads to the a failing test as
+\texttt{AssertEquals(String, String)}. This leads to a failing test as
 soon as a single whitespace is different between the expected and the actual
 code.
 
-\textbf{Solution}: Leading whitespaces are recognized on both. Then the smallest
-common divider is taken as as a tab length and replaced by a tabulator. Trailing
-superfluous newlines that are added by the ASTRewriter are ignored and also
-trailing whitespaces at the end of a line. After that the edited code goes to
+\textbf{Solution}: Leading whitespaces are recognized in both expected and actual source code. Then the smallest
+common divider is taken as as a tab length and replaced by a tabulator. 
+Trailing superfluous newlines that are added by the ASTRewriter are ignored and also
+trailing whitespaces at the end of a line. After that the edited code is sent to
 the \texttt{assert()} for comparison.
 
 \subsection{Comments and Macros}
@@ -289,8 +289,8 @@ deleted when no information about the macro is found.
 
 \textbf{Cause}: The rewriter is using a method in \texttt{ASTCommenter} to get a 
 \texttt{NodeCommentMap} of the rewritten translation unit. If a node is copied, 
-it has another reference which won't be inside the comment map anymore. Thus, 
-when the rewriter writes the new node, it won't notice that the node was 
+it has another reference which will not be inside the comment map anymore. Thus, 
+when the rewriter writes the new node, it will not notice that the node was 
 replaced by another.
 
 \textbf{Solutions}:
@@ -300,37 +300,37 @@ them using an ASTLiteralNode.
 
 Pro: It works without changing the CDT core and macros are not expanded. 
 
-Contra: Breaks indentation and inserts unneeded newlines. This solution was used 
-finally because whitespace issues may be dealt with the formatter.
+Contra: Breaks indentation and inserts unneeded newlines. This solution was finally used.
+Afterwards, whitespace issues may be dealt with the formatter.
 \item Do as \texttt{ExtractFunction} does: rewrite each statement inside the 
 function body separately. 
 
-Pro: automatic indentation. 
+Pro: Automatic indentation. 
 
-Contra: touches the body although it does not need to be changed in any way. 
-\item Change the CDT: Inside the \texttt{ChangeGenerator.generateChange}, the 
+Contra: Touches the body although it does not need to be changed in any way. 
+\item Change the CDT: Inside the \texttt{ChangeGenerator.generate- Change}, the 
 \texttt{NodeCommentMap} of the translation unit is fetched. By writing a patch, 
 it was possible to insert new mappings into this map. This allowed to move 
 comments of an old node to any newly created node. 
 
-Pro: automatic indentation, developer may choose where to put the comments, 
+Pro: Automatic indentation, developer may choose where to put the comments, 
 every comment may be preserved. 
 
-Contra: does not deal with macros, five classes need to be changed in CDT, 
+Contra: Does not deal with macros, five classes need to be changed in CDT, 
 comments need to be moved by hand. See the branch 'inject' inside the repository 
 to study this solution. Due to intellectual property issues, this solution was 
 not reviewed by the Institute For Software. To find out whether it is an 
 acceptable solution the patch should be reviewed by the CDT community. Anyhow, a 
 less disruptive solution was found for the problem.
-\item Find and insert comments by hand using an IASTComment. 
+\item Find and insert comments by hand using an \texttt{IASTComment}. 
 
-Pro: lets the developer decide where to put the comment. 
+Pro: Lets the developer decide where to put the comment. 
 
 Contra: Feature is commented-out in the 7.0.1 release of CDT, comments need to 
 be moved by hand.
 \item Other solutions may be possible. An idea could be to register the comments 
-whenever a node is being copied. Since \textit{copy} is abstract in 
-\textit{IASTNode} and implemented separately inside every node, this would 
+whenever a node is being copied. Since \texttt{copy} is abstract in 
+\texttt{IASTNode} and implemented separately inside every node, this would 
 require a change inside every node class.
 \end{itemize}
 
@@ -339,7 +339,7 @@ require a change inside every node class.
 produce code that won't compile.
 
 \textbf{Cause}: Despite in the C++ standard\cite{IsoCpp} function-local 
-functions are not allowed, the Gnu C Compiler allows to define such nested 
+functions are not allowed, the GNU C compiler allows to define such nested 
 functions\cite{GCC}. In this case the selection detection finds the nested 
 function if selected and it is tried to toggle it. However, it is not guaranteed 
 that valid code will be generated.
@@ -369,8 +369,8 @@ ensured such a work will be done by the Institut fuer Software.
 A mechanism could be implemented that fixes indentation after refactoring.
 Better user feedback in case of errors could be provided.
 
-At the end there was no time left to do the \textit{Override virtual member
-function} refactoring. This is still left as a semester thesis.
+At the end there was no time left to do the \textit{Override Virtual Member
+Function} refactoring. This is still left as a semester thesis.
 
 \section{Interpretation}
 \thispagestyle{fancy}
@@ -421,14 +421,14 @@ what was fun and what not.
 What I like about the developed refactoring is that it was possible to
 implement 
 it without a wizard. However, the user needs full trust in the code generation 
-that it won't break code and this is currently not given when preprocessor 
-statements are used. Nevertheless I'm glad the developed plug-in is able to
+that it will not break code and this is currently not given when preprocessor 
+statements are used. Nevertheless I am glad the developed plug-in is able to
 write 
-complex template definitions that I couldn't write myself without the C++ 
+complex template definitions that I could not write myself without the C++ 
 specification by my side. This could save a lot of time and hassle for 
 programmers.
 
-What next? If the plug-in is integrated into CDT, I'd be interested in the 
+What next? If the plug-in is integrated into CDT, I would be interested in the 
 Eclipse Usage Data Collector \cite{usageData} to check whether users find out 
 when and how they can profit from the refactoring and whether they use it 
 repeatedly. If the refactoring is considered helpful by users and applied as it 
@@ -445,7 +445,7 @@ The one touch toggle refactoring is another step towards a better knowledge of
 C++.
 
 What I liked about the project was the clear and productive communication with
-the supervisor. The Environment to develop a CDT Refactoring provided enough
+the supervisor. The environment to develop a CDT refactoring provided enough
 functionality to develop a good refactoring in the given time scope but let us
 enough freedom to realize innovative ideas.
 
@@ -473,16 +473,16 @@ week. This way, a minimal administrative overhead was produced.
 \subsubsection{What we Would not do the Same Way}
 \label{notgood}
 
-\subsubsection*{Time Management}
+\subsubsection{Time Management}
 
 During most of the project, time was tracked for every issue. 
 However, the collected data was not actively used to measure team velocity and 
 estimate further issues. This valuable data could have been used for better 
 scope prediction.
 
-\subsubsection*{Commits not Connected with Issues}
+\subsubsection{Commits not Connected with Issues}
 
-During the project we ``forgot'' sometimes to track our time. Sometimes it was
+During the project we sometimes ``forgot'' to track our time. Sometimes it was
 forgotten and sometimes it was delayed (and then forgotten) to
 speed up implementation of the functionality. This is clearly not a good
 behavior since the danger is high to forget about the tracked time as it
@@ -494,36 +494,36 @@ server side script during committing. If the commit message does not contain a
 valid issue number the commit is rejected. This forces the developer to connect
 his commit to an issue.
 
-\subsubsection*{Wiki and Documentation differences}
+\subsubsection{Wiki and Documentation Differences}
 
 The special cases that were listed on the project wiki were useful to 
 communicate but it may have saved time if they were directly integrated into 
 the documentation.
 
-\subsubsection*{Writing Documentation at the End}
+\subsubsection{Writing Documentation at the End}
 
 We knew about the fact that writing documentation at the end is a hard thing
 due to time shortage. We created the documentation structure early and started
 to write some text to it. But somewhere in the middle of the project we did not
 kept in mind to continue this. This and changes to the code until the end led
 to a lot of stress in the last two weeks since the documentation was not
-written so far as expected.
+written as far as expected.
 
 Chapters like specification should be written early. The wiki is not read, but
-the documentation is read and if written early mistakes do not life long, as
-long as the documentation is read several times.
+the documentation is read and if written early mistakes do not live long, as
+long as the documentation is reviewed continuously.
 
 Glossary should be written continuously and even some parts of the
 implementation needs to be documented early.
 
-\subsubsection*{Redmine Fine Tuning}
+\subsubsection{Redmine Fine Tuning}
 
 The default Redmine \textit{trackers} and \textit{categories} that were used 
 were not sufficient to track time in a way that shiny charts could be produced 
 for categories like ''implementation'', ''documentation'' and ''administration.
 For future projects we need more fine grained categories and trackers. 
 
-\subsubsection*{Multiple Git Branches}
+\subsubsection{Multiple Git Branches}
 
 While using one master git branch for every developer, a second git branch 
 called development was introduced. During half a week new work was committed to
