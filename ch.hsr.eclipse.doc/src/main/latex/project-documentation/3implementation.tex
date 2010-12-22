@@ -3,16 +3,16 @@
 
 From the three specified refactorings, \textit{Toggle Function Definition} has 
 been implemented in depth. This chapter explains how the refactoring was 
-implemented and which problems had to be solved during development.
+implemented and how it was tested.
 
 \section{Implementation approach}
 
-At the beginning, as many cases as possible were collected on the project wiki 
-to gain a view on what had to be realized, what was planned to take into scope 
-and what had nothing to do with toggling function definitions. Some cases were 
-simple, some exotic. The simplest one, toggling from inside a class to the same 
-file outside the class, was chosen to be implemented first (See listings 
-\ref{funcdefPre} and \ref{funcdefPost}). 
+At the beginning, as many different cases as possible were collected on the
+project wiki to gain a view on what had to be realized, what was planned to take
+into scope and what had nothing to do with toggling function definitions. Some
+cases were simple, some exotic. The simplest one, toggling from inside a class
+to the same file outside the class, was chosen to be implemented first (See
+listings \ref{funcdefPre} and \ref{funcdefPost}). 
 
 Before, a skeleton plug-in was built with a \texttt{NullRefactoring} to try
 whether it was possible to develop a separate plug-in instead of directly
@@ -52,10 +52,9 @@ The sequence diagram in figure \ref{sd} illustrates the basic call flow when
 
 \subsection{Strategies}
 
-The way to toggle from one place to another differs a lot depending on
-the current position. Having all logic in the same unit would need a complex
-conditional structure which is on one side confusing and on the other side
-slow.
+The way to toggle from one place to another differs depending on the current
+position. Having all logic in the same unit would need a complex conditional
+structure which is on one side confusing and on the other side slow.
 
 Consequently, a strategy pattern based code structure was introduced. For
 toggling a simple not templated member function, three strategies were used.
@@ -77,8 +76,8 @@ templated functions.
 \end{itemize}
 
 All these strategies implement an interface with a \texttt{run()} method taking
-a \texttt{ModificationCollector} to collect the changes to be applied to the 
-source code.
+a \texttt{ModificationCollector} argument to collect the changes to be applied
+to the source code.
 
 \begin{lstlisting}[caption={IToggleRefactoringStrategy},
 label={01templatedMember}, language=Java]
@@ -89,7 +88,7 @@ public interface IToggleRefactoringStrategy {
 
 An interface was chosen because an abstract class containing all the methods
 needed by the various strategies was too big and unclear. This resulted in the
-interface and a static helper class, named \texttt{ToggleNodeHelper}.
+interface and a static helper class named \texttt{ToggleNodeHelper}.
 
 \subsection{ToggleNodeHelper}
 

@@ -10,8 +10,9 @@ refactoring uses no wizard at all and is tolerant to imprecise code selection.
 
 This document discusses the uses of the plug-in as well as the issues that had 
 to be handled during the project. Students developing a new refactoring tool
-may have a look at the problems section to be able to start with their own
-project quickly. Project setup hints are listed in the appendix.
+may have a look at the conclusion chapter, to not doing the same mistakes we
+did again and the Project Setup chapter to start with their own project quickly.
+Project setup hints are listed in the appendix.
 \end{abstract}
 
 \chapter*{Management Summary}
@@ -60,7 +61,7 @@ label={twofile1}, language=C++]
 #define A_H_
 
 class A {
-  void foo();
+  void function();
 };
 
 #endif /* A_H_ */
@@ -72,7 +73,7 @@ class A {
 label={twofile2}, language=C++ ]
 #include "A.h"
 
-void A::foo() {
+void A::function() {
   return
 }
 
@@ -104,7 +105,7 @@ If no separate declaration existed before, the old definition is replaced by a
 newly created declaration.
 
 All this is done without any wizard and kept speedy to not break the work flow.
-The refactoring is bound to a key.
+The refactoring is bound to the key combination Alt-Shift-V.
 
 \begin{lstlisting}[caption={Startposition of toggling},
 label={togglefirst}, language=C++]
@@ -119,7 +120,7 @@ class A {
 label={togglethird}, language=C++]
 class A {
   int function(int param) {
-    return 42; |
+    return 42;
   }
 };
 
@@ -147,7 +148,7 @@ the definition will end up in the implementation file as shown in listing
 label={toggleimpl}, language=C++]
 #include "A.h"
 
-int A::function(int param1) {
+int A::function(int param) {
   return 42;
 }
 \end{lstlisting}
@@ -160,9 +161,9 @@ thesis re-implemented the implement function as a \textit{Quick Implement
 Function}.
 
 The idea behind this is the following: The developer starts writing a class.
-He comes to the point where he has written the first declaration. Then, by using a
-keystroke the declaration is replaced with a definition containing an
-appropriate return statement.
+He comes to the point where he has written the first declaration and then, by
+using a keystroke Alt-Shift-Z, the declaration is replaced with a definition
+containing an appropriate return statement.
 
 \begin{lstlisting}[caption={Situation before quick implement},
 label={beforeimpl}, language=C++]
@@ -182,7 +183,8 @@ class A {
 \end{lstlisting}
 
 The developer can continue to write the functionality of \texttt{func- tion()}
-and toggles the definition with the other keystroke to the header file.
+and toggles the definition with the other keystroke Alt-Shift-V to the header
+file.
 
 \thispagestyle{empty}
 \pagebreak
@@ -192,9 +194,9 @@ We would not have been able to achieve this project without the help of others.
 A big thanks goes to all of these people.\newline
 Specially we would like to thank Prof. Peter Sommerlad for the original idea
 of the toggle refactoring, for supervising the project and for various cool
-ideas in many problems we encountered. Lukas Felber who provided us with
-instant solutions where we struggled to continue. Emanuel Graf for his ideas and
-explanation in every subtopic of the CDT project. Thomas Corbat for help and
+ideas in many problems we encountered, Lukas Felber who provided us with
+instant solutions where we struggled to continue, Emanuel Graf for his ideas and
+explanation in every subtopic of the CDT project and Thomas Corbat for help and
 ideas for various subtopics like comment handling. \newline
 Another big thank goes to our families and friends who were missed out a little
 bit during our semester thesis.

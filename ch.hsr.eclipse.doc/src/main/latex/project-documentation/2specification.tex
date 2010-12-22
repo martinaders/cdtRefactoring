@@ -36,10 +36,10 @@ allowed by some compilers, the outermost function parent should be toggled.
 \label{positions}
 In C++ there are three possible positions where a function definition may occur.
 Listing \ref{classheaderimpl} shows an example where the definition of a member
-function is placed inside its class definition. Placing implementation code
-right in the class definition is the most intuitive behaviour for Java
-developers. New code blocks created by \textit{Implement Member Function} are
-placed inside the class definition too.
+function is placed inside its class definition. New code blocks created by
+\textit{Implement Member Function} are placed inside the class definition too.
+Placing implementation code right in the class definition is also the most
+intuitive behaviour for Java developers.
 
 \begin{lstlisting}[caption={In-class implementation in A.h},
 label={classheaderimpl}, language=C++ ]
@@ -48,7 +48,7 @@ label={classheaderimpl}, language=C++ ]
 
 namespace N {
 class A {
-  int x() {
+  int function() {
     return 0;
   }
 };
@@ -77,10 +77,10 @@ label={inheaderimpl}, language=C++ ]
 
 namespace N {
 class A {
-  int x();
+  int function();
 };
 
-inline int A::x() {
+inline int A::function() {
   return 0;
 }
 }
@@ -99,13 +99,14 @@ position will be called \textit{in-implementation} throughout this document.
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
 \lstset{xrightmargin=0.5cm}
-\begin{lstlisting}[caption={A.h},label={twofilesolution_header},language=C++]
+\begin{lstlisting}[caption={A.h, with declaration},
+label={twofilesolution_header}, language=C++]
 #ifndef A_H_
 #define A_H_
 
 namespace N {
 class A {
-  int x();
+  int function();
 };
 }
 
@@ -114,11 +115,12 @@ class A {
 \end{minipage}%
 \begin{minipage}{.48\textwidth}
 \lstset{xleftmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp},label={twofilesolution_implem},language=C++]
+\begin{lstlisting}[caption={A.cpp, with definition},
+label={twofilesolution_implem}, language=C++]
 #include "A.h"
 
 namespace N {
-int A::x() { 
+int A::function() { 
   return 0;
 }
 }
@@ -161,10 +163,10 @@ int main() {
 }
 \end{lstlisting}
 
-First it is checked if a file named with the same name as the original
-implementation file exists (A.h in this example). If not, a new file is created
-with the
-appropriate include guards. See listing \nolinebreak\ref{02freefuncNewFile}.
+First it is checked if there exists a file with the same name as the original
+implementation file. A.h in this example. If not, a new file is created
+with the appropriate include guards. See listing
+\nolinebreak\ref{02freefuncNewFile}.
 
 \begin{lstlisting}[caption={Newly created A.h}, label={02freefuncNewFile},
 language=C++]
@@ -191,9 +193,8 @@ int freefunction() {
 
 If toggled again, the declaration of \texttt{freefunction()} remains inside the
 header file, while the definition is inserted into the implementation file and
-an
-include statement is prepended to the implementation file. Listing
-\nolinebreak\ref{03freefuncEnd} and \ref{04freefuncEnd} shows the end
+an include statement is inserted at the beginning if of the implementation file.
+Listing \nolinebreak\ref{03freefuncEnd} and \ref{04freefuncEnd} shows the end
 situation.
 
 \vspace{0.5cm}
@@ -255,7 +256,7 @@ label={01toggleMemberFunction}, language=C++]
 
 namespace N {
 class A {
-  virtual void foo() {
+  virtual void function() {
     return;
   }
 };
@@ -263,7 +264,7 @@ class A {
 #endif /* A_H_ */
 \end{lstlisting}
 
-Function \texttt{foo()} needs to be toggled. The next position of the
+Function \texttt{function()} needs to be toggled. The next position of the
 definition is ouside of the class but kept in the namespace definition.
 The definition is replaced by a declaration as in \ref{02toggleMemberFunction}.
 
@@ -275,17 +276,18 @@ these are adapted to the new definition. Definitions in the header file need
 the prefixed keyword \texttt{inline}. The keyword \texttt{virtual}
 is only allowed inside a class definition.
 
-\begin{lstlisting}[caption={A.h, function definition outside class definition in
+\begin{lstlisting}[caption={A.h, function definition outside of class definition
+in
 header}, label={02toggleMemberFunction}, language=C++]
 #ifndef A_H_
 #define A_H_
 
 namespace N {
 class A {
-  vitual void foo();
+  vitual void function();
 };
 
-inline void A::foo() {
+inline void A::function() {
   return;
 }
 }
@@ -299,17 +301,17 @@ label={02_1toggleMemberFunction}, language=C++]
 #define A_H_
 
 class A {
-  virtual void foo();
+  virtual void function();
 };
 
-inline void A::foo() {
+inline void A::function() {
   return;
 }
 
 #endif /* A_H_ */
 \end{lstlisting}
 
-If \texttt{foo()} gets toggled again, the definition is moved to the
+If \texttt{function()} gets toggled again, the definition is moved to the
 implementation file and if necessary a namespace definition is created where
 the function gets inserted. Nothing remains outside of the class definition in the
 header file and the declaration in the class does not change.
@@ -324,7 +326,7 @@ label={03toggleMemberFunction}, language=C++]
 
 namespace N {
 class A {
-  void foo();
+  void function();
 };
 }
 
@@ -338,7 +340,7 @@ label={03_1toggleMemberFunction}, language=C++ ]
 #include "A.h"
 
 namespace N {
-void A::foo() {
+void A::function() {
   return
 }
 }
@@ -348,10 +350,8 @@ void A::foo() {
 \end{lstlisting}
 \end{minipage}
 
-If \texttt{foo()} is toggled once again, the original starting
-position from listing \ref{01toggleMemberFunction} is reached. An
-empty namespace in an implementation file will be removed.
-
+If \texttt{function()} is toggled once again, the original starting
+position from listing \ref{01toggleMemberFunction} is reached.
 
 \subsection{Special Cases}
 
@@ -408,8 +408,8 @@ int A::function() {
 \end{lstlisting}
 \end{minipage}
 
-Contrariwise, namespace definitions that become empty after removing the 
-last function definition shall be deleted.
+Namespace definitions that become empty after removing the last function
+definition shall be deleted.
 
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
@@ -531,12 +531,40 @@ statement is created in the body.
 
 \subsection*{Example}
 
-%TODO: add something here
+\begin{lstlisting}[caption={A.h, with declaration and no definition},
+label={implementMethod1}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+class A {
+  int function();
+};
+
+#endif /* A_H_ */
+\end{lstlisting}
+
+Selecting \texttt{function()} and using the \textit{Quick Implement Function}
+key Ctrl-Shift-Z results in the following listing \ref{implementMethod2}.
+
+\begin{lstlisting}[caption={A.h, with declaration and no definition},
+label={implementMethod2}, language=C++]
+#ifndef A_H_
+#define A_H_
+
+class A {
+  int function()
+  {
+    return int()
+  }
+};
+
+#endif /* A_H_ */
+\end{lstlisting}
 
 \subsection{Expected Result}
 As described above, functions may only be toggled when they provide a function 
-body. This refactoring shall provide a facility to create an empty function body 
-with a default return value to enable \textit{Toggle Function Definition}.
+body. This refactoring shall provide a facility to create an function body with
+a default return value to enable \textit{Toggle Function Definition}.
 
 The re-implementation of \textit{Implement Function} must be very fast. 
 
