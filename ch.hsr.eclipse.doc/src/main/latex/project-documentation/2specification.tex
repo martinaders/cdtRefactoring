@@ -18,16 +18,14 @@ following chapters.
 
 \subsection{Activation}
 
-Most important is this basic rule: A function definition must exist.
-
-For the selected function, a function definition must exist in an
+For the selected function, a function definition must exist in the current or an
 associated file. If no definition exists, the refactoring aborts. There may be
 more than one declaration. However it is not specified to which one will be
-toggled and it will be toggled to the first declaration that is found.
+toggled. It will be toggled to any declaration that is found first.
 
-The refactoring shall allow selections anywhere inside the function, weather 
-inside the signature, function (try) body, catch handlers or template 
-declarations.
+The refactoring shall allow selections anywhere inside the function, whether
+inside the signature, function (try) body, a catch handler or a template 
+declaration.
 
 If functions are defined inside a function body which is non-standard but
 allowed by some compilers, the outermost function parent should be toggled.
@@ -55,6 +53,7 @@ class A {
   }
 };
 }
+
 #endif /* A_H_ */
 \end{lstlisting}
 
@@ -62,13 +61,13 @@ To keep the interface clear, function definitions may be placed outside the
 class definition but are still located in the same (header) file. Such a
 function is called \textit{inlined}. See Listing \ref{inheaderimpl}.\newline
 
-For templates, this is the only position outside of the class definition where
+For templates, this is the only position outside the class definition where
 the implementation may be placed, due to problems of the \texttt{export} keyword
 \cite{ext03}. This means: templated functions cannot be placed outside the
 header file. Except for functions which are specially marked with above
 \texttt{export} keyword.
 
-The following listings show an example of what will be
+Listing \ref{inheaderimpl} shows an example of what will be
 called \textit{in-header situation} throughout this document.
 
 \begin{lstlisting}[caption={In-header implementation in A.h},
@@ -85,6 +84,7 @@ inline int A::x() {
   return 0;
 }
 }
+
 #endif /* A_H_ */
 \end{lstlisting}
 
@@ -93,7 +93,7 @@ source file may be used for the definitions while the declarations remain in the
 header file.
 
 An example for this position of a function definition is shown in
-listings \ref{twofilesolution_header} and \ref{twofilesolution_impl}. This
+listings \ref{twofilesolution_header} and \ref{twofilesolution_implem}. This
 position will be called \textit{in-implementation} throughout this document.
 
 \vspace{0.5cm}
@@ -114,7 +114,7 @@ class A {
 \end{minipage}%
 \begin{minipage}{.48\textwidth}
 \lstset{xleftmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp},label={twofilesolution_impl},language=C++]
+\begin{lstlisting}[caption={A.cpp},label={twofilesolution_implem},language=C++]
 #include "A.h"
 
 namespace N {
@@ -199,7 +199,7 @@ situation.
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
 \lstset{xrightmargin=0.5cm}
-\begin{lstlisting}[caption={A.h, inserted decla- ration},
+\begin{lstlisting}[caption={A.h, inserted decla-\\ration},
 label={03freefuncEnd}, language=C++]
 #ifndef A_H_
 #define A_H_
@@ -214,7 +214,7 @@ int freefunction();
 \end{minipage}%
 \begin{minipage}{.48\textwidth}
 \lstset{xleftmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp, inserted definition},
+\begin{lstlisting}[caption={A.cpp, inserted defi-\\nition},
 label={04freefuncEnd},language=C++]
 #include "A.h"
 
@@ -237,12 +237,12 @@ file, resulting in a header file already shown in listing
 For functions inside classes, toggling is expected to be available for three 
 positions:
 \begin{enumerate}
-\item Toggle from in-class to in-header
-\item Toggle from in-header to in-file
-\item Toggle from in-file to in-class
+\item Toggle from in-class (to in-header)
+\item Toggle from in-header (to in-file)
+\item Toggle from in-file (to in-class)
 \end{enumerate}
 
-\subsubsection*{Example}
+\subsubsection{Example}
 
 The starting point for toggling member functions could be a class with a
 function definition inside like in listing
@@ -264,12 +264,11 @@ class A {
 \end{lstlisting}
 
 Function \texttt{foo()} needs to be toggled. The next position of the
-definition is ouside of the class but kept in the namespace definition. At the
-position the definition was, a declaration is inserted as in listing
-\ref{02toggleMemberFunction}.
+definition is ouside of the class but kept in the namespace definition.
+The definition is replaced by a declaration as in \ref{02toggleMemberFunction}.
 
 If there is no namespace definition, the function definition will be placed
-below the class in the header file. Listing \ref{02_1toggleMemberFunction}
+below the class in the header file. See listing \ref{02_1toggleMemberFunction}.
 
 If there are any special keywords like \texttt{virtual} or \texttt{static},
 these are adapted to the new definition. Definitions in the header file need
@@ -286,7 +285,7 @@ class A {
   vitual void foo();
 };
 
-inline void foo() {
+inline void A::foo() {
   return;
 }
 }
@@ -303,7 +302,7 @@ class A {
   virtual void foo();
 };
 
-inline void foo() {
+inline void A::foo() {
   return;
 }
 
@@ -312,7 +311,7 @@ inline void foo() {
 
 If \texttt{foo()} gets toggled again, the definition is moved to the
 implementation file and if necessary a namespace definition is created where
-the function gets inserted. Nothing stays outside of the class definition in the
+the function gets inserted. Nothing remains outside of the class definition in the
 header file and the declaration in the class does not change.
 
 \vspace{0.5cm}
@@ -350,8 +349,8 @@ void A::foo() {
 \end{minipage}
 
 If \texttt{foo()} is toggled once again, the original starting
-position is reached we have seen in listing \ref{01toggleMemberFunction}. An
-empty namespace in a implementation file will be removed.
+position from listing \ref{01toggleMemberFunction} is reached. An
+empty namespace in an implementation file will be removed.
 
 
 \subsection{Special Cases}
@@ -363,18 +362,18 @@ listed in this section.
 \subsubsection{Namespaces}
 
 If the moved function definition is contained inside a namespace definition,
-the function definition is moved with regard to the namespace. This means,
+the function definition is moved with regard to the namespace. This means when
 toggling from \textit{in-class} to \textit{in-header} the definition is
 inserted before the namespace is closed in the header file.
 
-\begin{lstlisting}[caption={A.h},label={twofilesolution_impl},language=C++]
+\begin{lstlisting}[caption={A.h},label={namspac},language=C++]
 namespace N { //namespace found
 class A {
   void function() {
     return;
   }
 };
-X //<- new position inside namespace
+X // <- new position inside namespace
 }
 \end{lstlisting}
 
@@ -384,7 +383,7 @@ and there is no namespace definition, a new namespace is created.
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
 \lstset{xrightmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp, new namespace created},
+\begin{lstlisting}[caption={A.cpp, new name-\\space created},
 label={addnamespace1}, language=C++]
 #include "A.h"
 
@@ -397,12 +396,12 @@ namespace N {
 \end{minipage}%
 \begin{minipage}{.48\textwidth}
 \lstset{xleftmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp,insterted function},
+\begin{lstlisting}[caption={A.cpp, insterted \\function},
 label={addnamespace2},language=C++]
 #include "A.h"
 
 namespace N {
-int A::x() { 
+int A::function() { 
   return 0;
 }
 }
@@ -415,7 +414,7 @@ last function definition shall be deleted.
 \vspace{0.5cm}
 \begin{minipage}{.48\textwidth}
 \lstset{xrightmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp, empty namespace},
+\begin{lstlisting}[caption={A.cpp, empty na-\\mespace},
 label={delnamespace1}, language=C++]
 #include "A.h"
 
@@ -428,7 +427,7 @@ namespace N {
 \end{minipage}%
 \begin{minipage}{.48\textwidth}
 \lstset{xleftmargin=0.5cm}
-\begin{lstlisting}[caption={A.cpp, removed empty namepsace},
+\begin{lstlisting}[caption={A.cpp, removed \\empty namepsace},
 label={delnamespace2},language=C++]
 #include "A.h"
 
@@ -443,7 +442,7 @@ label={delnamespace2},language=C++]
 \subsubsection{Templated Member Functions}
 
 Another exception is a templated member function that may only be toggled
-inside the same header file. There, two strategy are interesting.
+inside the same header file. There, two strategies are interesting.
 \begin{enumerate}
 \item Toggle from in-class to in-header
 \item Toggle from in-header to in-class
@@ -454,7 +453,7 @@ inside the same header file. There, two strategy are interesting.
 
 The starting situation is shown in listing \ref{templatedMember}.
 
-\begin{lstlisting}[caption={A.h, in class definition with template parameters},
+\begin{lstlisting}[caption={A.h, \textit{in-class} definition with template parameters},
 label={templatedMember}, language=C++]
 #ifndef A_H_
 #define A_H_
@@ -469,11 +468,10 @@ class A {
 #endif /* A_H_ */
 \end{lstlisting}
 
-Toggling now \texttt{function(T \& t)} does not differ from toggling a non
-templated member function and will result in the following listing
-\ref{02templatedMember}.
+Toggling \texttt{function(T \& t)} now does not differ from toggling a non
+templated member function and will result in listing \ref{02templatedMember}.
 
-\begin{lstlisting}[caption={A.h, in header definition with template parameters},
+\begin{lstlisting}[caption={A.h, \textit{in-header} definition with template parameters},
 label={02templatedMember}, language=C++]
 #ifndef A_H_
 #define A_H_
@@ -483,7 +481,7 @@ class A {
   void function(T & t);
 };
 
-tempalte <typename T>
+template <typename T>
 inline void A::function(T & t) {
   return;
 }
@@ -491,12 +489,12 @@ inline void A::function(T & t) {
 #endif /* A_H_ */
 \end{lstlisting}
 
-Toggling again will put the definition back to it's original position in the
-class definition as shown in listing \ref{templatedMember}. Since having a
-template definition not in the same file than the declaration, the export
-keyword is needed. Unfortunately this is not supported by many compilers.
+Toggling again will put the definition back to its original position in the
+class definition as shown in listing \ref{templatedMember}. When a
+template definition is in another file than the declaration, the export
+keyword is needed. However, this is not supported by many compilers.
 
-\subsection{Expected Results}
+\subsection{Expected Result}
 
 Toggling Member functions should work for the default cases. ``Normal'' member
 functions should be toggled fast without producing inconsistent code. 
@@ -506,8 +504,7 @@ idea to give support for obscure tricks with template metaprogramming or other
 strange things which the usual C++ programmer does not use. 
 
 Additionally free (non-member) functions should be supported too. This means the
-refactoring should also work for C projects in eclipse and as good as for C++
-projects.
+refactoring should work for C projects in Eclipse as good as for C++ projects.
 
 \section{Quick Implement Function}
 
@@ -519,12 +516,12 @@ This refactoring shall be active as soon as a function declaration is selected
 that has no associated definition. The original idea was to use this
 refactoring on declarations without a trailing semicolon. This is problematic
 because the state without a semicolon is saved before the refactoring starts.
-This however results in a so called \textit{problem statement}. This means the
-parser of the compiler found an error in this section, resulting in a corrupt
-index.\newline
+This however results in a so called \textit{problem node}. This means the
+parser of the compiler found an error in this source code range, resulting in 
+a corrupt index.
 
-In the short time it was left to implement this feature it was not achieved to
-parse the problem statement and generate correct code out of it.\newline 
+In the short time left to implement this feature it was not achieved to
+parse the problem node and generate correct code out of it.
 
 So, an already completed function declaration can be transformed to a function
 definition by using the ``Quick Implement Member Function'' hot-key which
@@ -541,7 +538,7 @@ As described above, functions may only be toggled when they provide a function
 body. This refactoring shall provide a facility to create an empty function body 
 with a default return value to enable \textit{Toggle Function Definition}.
 
-The re-implementation of \textit{implement function} must be very fast. 
+The re-implementation of \textit{Implement Function} must be very fast. 
 
 \section{Override Virtual Member Function}
 

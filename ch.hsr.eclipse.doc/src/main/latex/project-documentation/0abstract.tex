@@ -5,8 +5,7 @@ Eclipse C++ Development Toolkit (CDT) using the Eclipse refactoring mechanism.
 The resulting plug-in enables a C++ developer to move function definitions easily 
 between header and source files.
 
-The new plug-in differs from existing plug-ins by minimizing in the way that it
-minimizes human interaction by providing a single keystroke interface. The
+The new plug-in differs from existing refactorings single keystroke interaction. The
 refactoring uses no wizard at all and is tolerant to imprecise code selection.
 
 This document discusses the uses of the plug-in as well as the issues that had 
@@ -25,10 +24,10 @@ with the functionality.
 \begin{lstlisting}[caption={class with declaration and separated definition},
 label={declanddef}, language=C++]
 class A {
-  int function(int param1); //declaration
+  int function(int param); //declaration
 };
 
-inline int function(int param1)
+inline int function(int param)
 {
   return param1 + 23; //definition
 }
@@ -39,8 +38,8 @@ Every definition is a declaration too.
 \begin{lstlisting}[caption={class with declaration and definition},
 label={defonly}, language=C++]
 class A {
-  int function(int param1) { //decl. and def.
-    return param1 += 23;
+  int function(int param) { //decl. and def.
+    return param + 23;
   }
 };
 \end{lstlisting}
@@ -48,8 +47,8 @@ class A {
 Since a declaration and definition can be separated, differences may occur
 between the signature of the definition and the signature of the declaration.
 This is not allowed. 
-Imagine now that changing a function signature in C++ is an unthankful task.
-As an additional barrier, a declaration and a definition may occur in two
+Now imagine that changing a function signature in C++ is an unthankful task.
+As an additional difficulty, a declaration and a definition may appear in two
 different files.
 
 \vspace{0.5cm}
@@ -89,12 +88,12 @@ consuming error correction.
 
 \section*{Toggle Function Definition}
 
-Refactorings do solve such problems by automating dependent changes to source
-code, so
-less errors are introduced by hand.
+Refactorings are solving such problems by automating dependent changes to source
+code, so less errors are introduced by hand.
 
-The ``One touch toggle refactoring'' moves a function definition in
-\textit{Eclipse} from one position to another and preserves correctness.
+\textit{Toggle Function Definition} moves a function definition inside an 
+Eclipse CDT source editor from one position to another and preserves 
+correctness.
 
 This is done by searching for a function definition or declaration next to the
 user's code selection. Then, according to the found
@@ -110,7 +109,7 @@ The refactoring is bound to a key.
 \begin{lstlisting}[caption={Startposition of toggling},
 label={togglefirst}, language=C++]
 class A {
-  int function(int param1) {
+  int function(int param) {
     return 42; | //<- cursor position
   }
 };
@@ -119,32 +118,32 @@ class A {
 \begin{lstlisting}[caption={New position is found},
 label={togglethird}, language=C++]
 class A {
-  int function(int param1) {
+  int function(int param) {
     return 42; |
   }
 };
 
-X //<-new position is here
+X // <- new position is here
 \end{lstlisting}
 
 \begin{lstlisting}[caption={Class with declaration and inlined definition},
 label={togglefourth}, language=C++]
 class A {
-  int function(int param1);
+  int function(int param);
 };
 
-inline int function(int param1) {
+inline int function(int param) {
   return 42;
 }
 \end{lstlisting}
 
 Toggling again moves the definition out of the header file to the 
 implementation file that should contain the actual functionality. If
-\texttt{function(int param1)} from listing \ref{togglefourth} is toggled,
+\texttt{function(int param)} from listing \ref{togglefourth} is toggled,
 the definition will end up in the implementation file as shown in listing
 \ref{toggleimpl}.
 
-\begin{lstlisting}[caption={defintion in a implementation file},
+\begin{lstlisting}[caption={Defintion in an implementation file},
 label={toggleimpl}, language=C++]
 #include "A.h"
 
@@ -155,14 +154,14 @@ int A::function(int param1) {
 
 \section*{Quick Implement Function}
 
-To optain some coding flow and due to the fact that the \textit{Implement
+To obtain some coding flow and due to the fact that \textit{Implement
 Method} does not really fit into this fast-toggle working style, this semester
 thesis re-implemented the implement function as a \textit{Quick Implement
-Function}
+Function}.
 
-The Idea behind this is the following: The developer starts writing a class.
-He comes to the point where he has written the first declaration. He uses a
-keystroke and the declaration is replaced with a definition containing an
+The idea behind this is the following: The developer starts writing a class.
+He comes to the point where he has written the first declaration. Then, by using a
+keystroke the declaration is replaced with a definition containing an
 appropriate return statement.
 
 \begin{lstlisting}[caption={Situation before quick implement},
@@ -182,7 +181,7 @@ class A {
 };
 \end{lstlisting}
 
-The developer can continue to write the functionality of \texttt{function()}
+The developer can continue to write the functionality of \texttt{func- tion()}
 and toggles the definition with the other keystroke to the header file.
 
 \thispagestyle{empty}
@@ -192,7 +191,7 @@ and toggles the definition with the other keystroke to the header file.
 We would not have been able to achieve this project without the help of others.
 A big thanks goes to all of these people.\newline
 Specially we would like to thank Prof. Peter Sommerlad for the original idea
-of the toggle refactoring as our supervisor of the project and for various cool
+of the toggle refactoring, for supervising the project and for various cool
 ideas in many problems we encountered. Lukas Felber who provided us with
 instant solutions where we struggled to continue. Emanuel Graf for his ideas and
 explanation in every subtopic of the CDT project. Thomas Corbat for help and

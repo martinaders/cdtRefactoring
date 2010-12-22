@@ -170,7 +170,7 @@ refactoring class which should be called for the selected code.
 to this problem could be to change the syntax for controlling the refactoring
 tests to something else.
 
-\subsection{Resource '/RegressionTestProject/A.h' does not Exist.}
+\subsection['/RegressionTestProject/A.h' does not Exist]{Resource '/RegressionTestProject/A.h' does not Exist}
 
 \textbf{Problem}: When running refactoring test cases, a message randomly
 popped up:
@@ -250,7 +250,7 @@ updated with outdated offset information.
 \textbf{Solution}: The current selection is now based directly on the current 
 active editor part's selection and fetched every time when toggling is started.
 
-\subsection{Fuzzy Whitespace Recognition Test Environment}
+\subsection{Fuzzy Whitespace Recognition}
 
 \textbf{Problem}: 
 In past theses at HSR, the refactoring testing environment needed an exact
@@ -314,8 +314,10 @@ every comment may be preserved.
 
 Contra: does not deal with macros, five classes need to be changed in CDT, 
 comments need to be moved by hand. See the branch 'inject' inside the repository 
-to study this solution.
-%TODO: disscued with emanuel?
+to study this solution. Due to intellectual property issues, this solution was 
+not reviewed by the Institute For Software. To find out whether it is an 
+acceptable solution the patch should be reviewed by the CDT community. Anyhow, a 
+less disruptive solution was found for the problem.
 \item Find and insert comments by hand using an IASTComment. 
 
 Pro: lets the developer decide where to put the comment. 
@@ -340,7 +342,7 @@ that valid code will be generated.
 
 \textbf{Solution}: Toggling is disabled for such nested function definitions.
 
-\section{Further Work}
+\section{Future Work}
 
 The toggle refactoring was developed as a separate plug-in so integration into 
 the CDT project should be possible if desired.
