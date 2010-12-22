@@ -1,5 +1,6 @@
 package ch.hsr.eclipse.cdt.ui.toggle;
 
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,9 +48,9 @@ class RefactoringJob extends Job {
 			undoChange = change.perform(monitor);
 			success = true;
 		} catch (IllegalStateException e) {
-			System.err.println("Another refactoring is still in progress, aborting.");
+			CUIPlugin.log("Another refactoring is still in progress, aborting.", e);
 		} catch (CoreException e) {
-			System.err.println("Failure during generation of changes. Toggled too fast?");
+			CUIPlugin.log("Failure during generation of changes.", e);
 		} finally {
 			undoChange.initializeValidationData(monitor);
 			undoManager.changePerformed(change, success);

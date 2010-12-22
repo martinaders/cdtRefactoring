@@ -24,7 +24,6 @@ import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
 import org.eclipse.cdt.internal.ui.refactoring.ModificationCollector;
 import org.eclipse.cdt.internal.ui.refactoring.utils.ASTHelper;
-import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -126,7 +125,6 @@ public class NewImplementRefactoring extends CRefactoring {
 			IASTSimpleDeclaration oldDeclaration,
 			IASTFunctionDefinition func, ASTRewrite rewrite, TextEditGroup edit) {
 		String leadingcomment = ToggleNodeHelper.getLeadingComments(oldDeclaration, unit);
-		System.out.println("leadingcomment: " + leadingcomment);
 		String declSpec = func.getDeclSpecifier().toString();
 		rewrite.replace(func.getDeclSpecifier(), new ASTLiteralNode(leadingcomment + declSpec), edit);
 	}

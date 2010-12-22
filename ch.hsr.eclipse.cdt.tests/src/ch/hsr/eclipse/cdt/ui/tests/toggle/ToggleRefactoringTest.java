@@ -13,8 +13,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import ch.hsr.eclipse.cdt.ui.toggle.ToggleRefactoring;
-
 public class ToggleRefactoringTest extends RefactoringTest {
 
 	private boolean fatalError;

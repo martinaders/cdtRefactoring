@@ -48,15 +48,10 @@ public class ToggleRefactoringContext {
 	public ToggleRefactoringContext(IIndex index, IFile file, TextSelection selection) {
 		this.index = index;
 		this.selectionFile = file;
-		System.out.print("Stage 1: ");
 		findSelectionUnit();
-		System.out.print("complete\nStage 2: ");
 		findSelectedFunctionDeclarator(selection);
-		System.out.print("complete\nStage 3: ");
 		findBinding();
-		System.out.print("complete\nStage 4: ");
 		findDeclaration();
-		System.out.print("complete\nStage 5: ");
 		findDefinition();
 	}
 
@@ -68,9 +63,6 @@ public class ToggleRefactoringContext {
 		try {
 			binding = index.findBinding(selectionName);
 		} catch (CoreException e) {
-		}
-		if (binding == null) {
-			System.err.println("no binding was found, hopefully falling back to visitors");
 		}
 	}
 
@@ -93,8 +85,6 @@ public class ToggleRefactoringContext {
 			}
 		} catch (CoreException e) {
 		}
-		if (targetDeclaration == null)
-			System.out.print("(no declaration found) ");
 	}
 
 	public void findDefinition() {
