@@ -39,7 +39,7 @@ semester or bachelor thesis.
 
 \section{Known issues}
 
-\subsection{Constructor / Destructor Bug}
+\subsection{Constructor / Destructor Bug}\label{ctorBug}
 \textbf{Problem}: Let CDT create a new class with a constructor and a destructor. 
 Then toggle the constructor out of the class definition. The Destructor will be 
 overridden partially. This bug can also be triggered when a function above a
@@ -349,7 +349,7 @@ unimplemented methods", "toggle all methods to an implementation file".
 A big problem in this refactoring was the rewriter. Since it is limited in its
 functionality by limited support for comments, no preprocessor statement
 support, inserting newlines over and over, and even producing wrong code with
-the constructor bug (see section \ref{Constructor / Destructor bug}), it is
+the constructor bug (see section \ref{ctorBug}), it is
 extremely time consuming to find workarounds for such problems.
 Therefore before any new refactoring is developed, the rewriter should be
 fixed or rewritten.
@@ -419,12 +419,11 @@ specification by my side. This could save a lot of time and hassle for
 programmers.
 
 What next? If the plug-in is integrated into CDT, I'd be interested in the 
-Eclipse Usage Data Collector
-\footnote{\url{http://www.eclipse.org/org/usagedata/results.php}} to check 
-whether users find out when and how they can profit from the refactoring and 
-whether they use it repeatedly. If the refactoring is considered helpful by 
-users and applied as it is designed to use, this should be reflected in a high 
-execution count compared to the user count.
+Eclipse Usage Data Collector \cite{usageData} to check whether users find out 
+when and how they can profit from the refactoring and whether they use it 
+repeatedly. If the refactoring is considered helpful by users and applied as it 
+is designed to use, this should be reflected in a high execution count compared 
+to the user count.
 
 \subsubsection{Thomas Kallenberg}
 
@@ -447,7 +446,7 @@ idea of a toggle definition.
 
 \subsubsection{What we would do the same way}
 
-Using Git\footnote{\url{http://www.kernel.org/pub/software/scm/git/}} for
+Using Git\cite{GIT} for
 version 
 control was very useful. The provided development server was occasionally down 
 during the first weeks and it was possible to continue work locally. Being able 

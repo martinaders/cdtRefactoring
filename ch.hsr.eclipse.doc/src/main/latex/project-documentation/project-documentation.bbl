@@ -3,7 +3,15 @@
 \bibitem[30910]{IsoCpp}
 ISO/IEC JTC1 SC22 WG21~N 3092.
 \newblock {\em IS 14882: Programming Languages -- C++}.
-\newblock March 2010.
+\newblock International Organization for Standardization, Geneva, Switzerland,
+  March 2010.
+
+\bibitem[ass10]{assist}
+Content assist.
+\newblock
+  \url{http://help.eclipse.org/help32/topic/org.eclipse.platform.doc.isv/guide%
+/editors\_contentassist.htm}, 2010.
+\newblock [Online; accessed 20-December-2010].
 
 \bibitem[AV08]{AV08}
 A.~Simeon A.~Verhein.
@@ -17,11 +25,38 @@ Leo Büttiker and Emanuel Graf.
 er_eclipse_cdt_leo_buettiker_emanuel_graf.pdf}, 2006.
 \newblock [Online; accessed 13-December-2010].
 
+\bibitem[Dox10]{Doxygen}
+Doxygen -- generate documentation from source code.
+\newblock \url{http://www.doxygen.org/}, 2010.
+\newblock [Online; accessed 21-December-2010].
+
+\bibitem[ecl10]{eclEmma}
+Eclemma -- java code coverage for eclipse.
+\newblock \url{http://www.eclemma.org}, 2010.
+\newblock [Online; accessed 17-December-2010].
+
+\bibitem[Fow99]{Refactoring}
+Martin Fowler.
+\newblock {\em Refactoring -- Improving the Design of Existing Code}.
+\newblock Object Technology Series. Addison Wesley, October 1999.
+
+\bibitem[{Fre}06]{ltk}
+{Frenzel, Leif}.
+\newblock The language toolkit: An api for automated refactorings in
+  eclipse-based ides.
+\newblock {\em Eclipse Magazin}, 5, January 2006.
+\newblock see \url{http://www.eclipse.org/articles/Article-LTK/ltk.html}.
+
 \bibitem[Fre10]{GCC}
 Free Software Foundation.
-\newblock {\em Nested Functions - Using the GNU Compiler Collection (GCC)}, Dec
+\newblock {\em Nested Functions - Using the GNU Compiler Collection (GCC)},
   2010.
-\newblock \url{http://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html}.
+\newblock [Online; accessed 24-December-2010].
+
+\bibitem[GIT10]{GIT}
+Download page for git version control system.
+\newblock \url{http://www.kernel.org/pub/software/scm/git/}, 2010.
+\newblock [Online; accessed 16-December-2010].
 
 \bibitem[Hub10]{COAST}
 Marcel Huber.
@@ -29,6 +64,26 @@ Marcel Huber.
 \newblock personal communication, 2010.
 \newblock also known as WebDisplay2
   \url{http://wiki.hsr.ch/APF/files/WebDisplay2_Architecture.pdf}.
+
+\bibitem[hud10]{hudson}
+Hudson -- extensible continuous integration server.
+\newblock \url{http://hudson-ci.org/}, 2010.
+\newblock [Online; accessed 17-December-2010].
+
+\bibitem[JUn10]{JUnit}
+Junit.org -- resources for test driven development.
+\newblock \url{http://www.junit.org/}, 2010.
+\newblock [Online; accessed 21-December-2010].
+
+\bibitem[mav10]{maven}
+Apache maven.
+\newblock \url{http://maven.apache.org/}, 2010.
+\newblock [Online; accessed 16-December-2010].
+
+\bibitem[red10]{redmine}
+Redmine -- project management web application.
+\newblock \url{http://www.redmine.org/}, 2010.
+\newblock [Online; accessed 22-December-2010].
 
 \bibitem[SP03]{ext03}
 Herb Sutter and Tom Plum.
@@ -44,18 +99,24 @@ Peter Sommerlad, Guido Zgraggen, Thomas Corbat, and Lukas Felber.
   Object-oriented programming systems languages and applications}, OOPSLA
   Companion '08, pages 653--662, New York, NY, USA, 2008. ACM.
 
-\bibitem[va10a]{assist}
-various authors.
-\newblock Content assist.
-\newblock
-  \url{http://help.eclipse.org/help32/topic/org.eclipse.platform.doc.isv/guide%
-/editors\_contentassist.htm}, December 2010.
-\newblock [Online; accessed 20-December-2010].
+\bibitem[tyc10]{tycho}
+Tycho -- sonatype.
+\newblock \url{http://tycho.sonatype.org/}, 2010.
+\newblock [Online; accessed 17-December-2010].
 
-\bibitem[va10b]{cwiki}
-various authors.
-\newblock Too many parameters.
-\newblock http://c2.com/cgi/wiki?TooManyParameters, December 2010.
-\newblock [Online; accessed 19-December-2010].
+\bibitem[usa10]{usageData}
+Usage data collector results.
+\newblock \url{http://www.eclipse.org/org/usagedata/results.php}, 2010.
+\newblock [Online; accessed 16-December-2010].
+
+\bibitem[Web10]{Webkit}
+The webkit open source project.
+\newblock \url{http://webkit.org/}, 2010.
+\newblock [Online; accessed 22-December-2010].
+
+\bibitem[xvf10]{xvfb}
+Xvfb -- virtual framebuffer x server for x version 11.
+\newblock \url{http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html}, 2010.
+\newblock [Online; accessed 22-December-2010].
 
 \end{thebibliography}

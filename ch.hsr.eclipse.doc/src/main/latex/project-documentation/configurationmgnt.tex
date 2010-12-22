@@ -1,11 +1,11 @@
-\chapter{Project setup}
+\chapter{Project Setup}
 \thispagestyle{fancy}
 
 Project setup needed two weeks to become stable. In this chapter, solutions are 
 described that may help future projects to build up their project environment 
 more efficiently.
 
-\section{Configuration management}
+\section{Configuration Management}
 
 Configuration management always seems to be the same. This section describes 
 what techniques were used throughout this project and what product versions were 
@@ -13,7 +13,7 @@ needed to realize an agile production environment for Eclipse plug-in developmen
 
 \subsection{Git}
 
-As a version control system, git was used. This time it was not used like an SVN
+As a version control system, Git\cite{GIT} was used. This time it was not used like an SVN
 replacement but instead to get some redundancy by storing the source code on
 multiple servers. Both project developers had their ``own`` git server on which
 the developer committed. It was merged between these servers and then pushed to
@@ -24,36 +24,36 @@ improve trust for the master branch.
 
 \subsection{Maven and Tycho}
 
-Tycho is a plug-in for Maven to build an Eclipse plug-in and to execute its tests.
+Tycho\cite{tycho} is a plug-in for Maven\cite{maven} v3.0 to build an Eclipse plug-in and to execute its tests.
 Maven3 is required for this to work. Although Maven3 is beta, it was proven
 stable during the project.
 
-\subsection{Hudson}
+\subsection{Continuous Integration}
 
 To get the tests executed on the fake X sever, the \texttt{DISPLAY} environment
 variable must be set. If not, tests will fail with a cryptic
 SWTError.
 
-There is a plug-in for Hudson to set the environment variable to
+There is a plug-in for Hudson\cite{hudson} to set the environment variable to
 the right value. In most cases this is \textbf{:0}.
 
-\section{Project management - Redmine}
+\section{Project Management - Redmine}
 
-Redmine was used to track issues, milestones and agendas and as an information 
+Redmine\cite{redmine} was used to track issues, milestones and agendas and as an information 
 radar for the supervisor.
 
-The redmine version used crashed every now and then. This issue went away after
+The Redmine version used crashed every now and then. This issue went away after
 some memory upgrade. Redmine depends how it is configured. Using the passenger
 ruby module made it quite stable. 
 
-\section{Test environment}
+\section{Test Environment}
 
 To execute the tests on a headless server with Hudson build server first a fake
-X Server was needed. Xvfb was used for the job. Maven has to be
+X Server was needed. Xvfb\cite{xvfb} was used for the job. Maven has to be
 explicitly told which test class to execute and in which folder the test class
 is located. If this is not done properly the tests will fail.
 
-\subsection{Test coverage}
+\subsection{Test Coverage}
 
 Creating new files was not tested in the beginning due to the dialog box popping 
 up during execution. However, with the help of the same technique that was used 
@@ -61,7 +61,7 @@ to test for errors, the problem could be solved. Before a dialog box is popped
 up asking whether to create a new file, it is checked whether the test framework 
 has set a flag to skip that question.
 
-The code coverage tool EclEmma\footnote{http://www.eclemma.org} was a good help 
+The code coverage tool EclEmma\cite{eclEmma} was a good help 
 to find dead code and to think about justification of code blocks. 
 
 \subsection{Documentation}
