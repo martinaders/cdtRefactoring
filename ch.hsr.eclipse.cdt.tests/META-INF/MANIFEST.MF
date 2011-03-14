@@ -16,9 +16,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.cdt.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.cdt.internal.ui.refactoring,
- org.eclipse.jface.viewers,
- org.eclipse.ui.plugin
+Import-Package: org.eclipse.cdt.internal.ui.refactoring
 Export-Package: ch.hsr.eclipse.cdt.ui.tests
-Bundle-ClassPath: library/org.eclipse.test.performance_3.7.0.201011011512.jar,
- .
+Bundle-ClassPath: .
