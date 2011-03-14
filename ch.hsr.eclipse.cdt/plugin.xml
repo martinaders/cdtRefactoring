@@ -5,28 +5,17 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="org.eclipse.cdt.ui.category.refactoring"
-            id="ch.hsr.eclipse.cdt.command1"
+            id="ch.hsr.eclipse.cdt.toggleCommand"
             name="%refactoringToggleRefactoring.label">
-      </command>
-      <command
-            categoryId="org.eclipse.cdt.ui.category.refactoring"
-            id="ch.hsr.eclipse.cdt.command2"
-            name="%newImplementRefactoring.label">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="ch.hsr.eclipse.cdt.command1"
+            commandId="ch.hsr.eclipse.cdt.toggleCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="CTRL+SHIFT+V">
-      </key>
-       <key
-            commandId="ch.hsr.eclipse.cdt.command2"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="CTRL+SHIFT+Z">
+            sequence="SHIFT+ALT+K">
       </key>
    </extension>
    <extension
@@ -41,72 +30,14 @@
                label="%Source.menu.label"
                path="edit">
             <separator
-                  name="commentGroup">
-            </separator>
-            <separator
-                  name="editGroup">
-            </separator>
-            <separator
-                  name="importGroup">
-            </separator>
-            <separator
-                  name="generateGroup">
-            </separator>
-            <separator
                   name="codeGroup">
-            </separator>
-            <separator
-                  name="externalizeGroup">
-            </separator>
-            <separator
-                  name="convertGroup">
             </separator>
          </menu>
          <action
                class="ch.hsr.eclipse.cdt.ui.toggle.TogglingActionDelegate"
-               definitionId="ch.hsr.eclipse.cdt.command1"
+               definitionId="ch.hsr.eclipse.cdt.toggleCommand"
                id="ch.hsr.eclipse.cdt.action3"
                label="%refactoringToggleRefactoring.label"
-               menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
-               style="push">
-         </action>
-      </actionSet>
-            <actionSet
-            description="%CodingActionSet.description"
-            id="org.eclipse.cdt.ui.CodingActionSet"
-            label="%CodingActionSet.label"
-            visible="false">
-         <menu
-               id="org.eclipse.jdt.ui.source.menu"
-               label="%Source.menu.label"
-               path="edit">
-            <separator
-                  name="commentGroup">
-            </separator>
-            <separator
-                  name="editGroup">
-            </separator>
-            <separator
-                  name="importGroup">
-            </separator>
-            <separator
-                  name="generateGroup">
-            </separator>
-            <separator
-                  name="codeGroup">
-            </separator>
-            <separator
-                  name="externalizeGroup">
-            </separator>
-            <separator
-                  name="convertGroup">
-            </separator>
-         </menu>
-         <action
-               class="ch.hsr.eclipse.cdt.ui.implement.NewImplementActionDelegate"
-               definitionId="ch.hsr.eclipse.cdt.command2"
-               id="ch.hsr.eclipse.cdt.action4"
-               label="%newImplementRefactoring.label"
                menubarPath="org.eclipse.jdt.ui.source.menu/codeGroup"
                style="push">
          </action>
